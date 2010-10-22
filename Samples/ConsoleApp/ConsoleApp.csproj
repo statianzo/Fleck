@@ -8,8 +8,8 @@
     <ProjectGuid>{3D7680B4-0224-4F0C-B1F6-74FB7586EBDC}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ConsoleApp</RootNamespace>
-    <AssemblyName>ConsoleApp</AssemblyName>
+    <RootNamespace>Fleck.Samples.ConsoleApp</RootNamespace>
+    <AssemblyName>Fleck.Samples.ConsoleApp</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
