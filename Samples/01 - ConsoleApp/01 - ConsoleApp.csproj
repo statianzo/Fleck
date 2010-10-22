@@ -51,9 +51,9 @@
     <Content Include="client.html" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Nugget\Nugget.csproj">
+    <ProjectReference Include="..\..\src\Fleck\Fleck.csproj">
       <Project>{8B12D929-AFA9-4307-BEFF-2ED0F1070FEE}</Project>
-      <Name>Nugget</Name>
+      <Name>Fleck</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

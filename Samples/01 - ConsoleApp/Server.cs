@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Nugget;
+using Fleck;
 
 namespace ConsoleApp
 {
     class Server
     {
-        static void Main(string[] args)
+        static void Main()
         {
         	var allSockets = new List<WebSocketConnection>();
             var server = new WebSocketServer(8181, "null", "ws://localhost:8181");
