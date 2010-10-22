@@ -1,0 +1,8 @@
+<NUnitProject>
+  <Settings activeconfig="Debug" appbase="bin\Debug" />
+  <Config name="Debug" binpathtype="Auto">
+    <assembly path="Nugget.Tests.dll" />
+  </Config>
+  <Config name="Release" binpathtype="Auto" />
+</NUnitProject>
+
