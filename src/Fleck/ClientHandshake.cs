@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Web;
 
 namespace Fleck
 {
@@ -12,7 +11,7 @@ namespace Fleck
 		public string Key1 { get; set; }
 		public string Key2 { get; set; }
 		public ArraySegment<byte> ChallengeBytes { get; set; }
-		public HttpCookieCollection Cookies { get; set; }
+		public string Cookies { get; set; }
 		public string SubProtocol { get; set; }
 		public Dictionary<string, string> AdditionalFields { get; set; }
 

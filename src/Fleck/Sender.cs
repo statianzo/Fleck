@@ -17,8 +17,7 @@ namespace Fleck
 		{
 			if (Socket.Connected)
 			{
-				Socket.AsyncSend(DataFrame.Wrap(data),
-								 byteCount => Log.Debug(byteCount + " bytes send to " + Socket.RemoteEndPoint));
+				Socket.AsyncSend(DataFrame.Wrap(data),x => { });
 			}
 			else
 			{

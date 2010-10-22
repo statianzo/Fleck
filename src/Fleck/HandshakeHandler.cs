@@ -9,9 +9,6 @@ using System.Web;
 
 namespace Fleck
 {
-	/// <summary>
-	/// Handles the handshaking between the client and the host, when a new connection is created
-	/// </summary>
 	internal class HandshakeHandler
 	{
 		public HandshakeHandler(string origin, string location)
@@ -26,19 +23,11 @@ namespace Fleck
 		public Action<ClientHandshake> OnSuccess { get; set; }
 
 
-		/// <summary>
-		/// Shake hands with the connecting socket
-		/// </summary>
-		/// <param name="socket">The socket to send the handshake to</param>
-		/// <param name="callback">a callback function that is called when the send has completed</param>
 		public void Shake(Socket socket)
 		{
 			try
 			{
-				// create the state object, and save the relavent information.
-				var state = new HandShakeState();
-				state.socket = socket;
-				// receive the client handshake
+				var state = new HandShakeState {socket = socket};
 				state.socket.BeginReceive(state.buffer, 0, HandShakeState.BufferSize, 0, new AsyncCallback(DoShake), state);
 			}
 			catch (Exception e)
@@ -52,7 +41,6 @@ namespace Fleck
 			var state = (HandShakeState) ar.AsyncState;
 			int receivedByteCount = state.socket.EndReceive(ar);
 
-			// parse the client handshake and generate a response handshake
 			ClientHandshake = ParseClientHandshake(new ArraySegment<byte>(state.buffer, 0, receivedByteCount));
 
 			bool hasRequiredFields = (ClientHandshake.ChallengeBytes != null) &&
@@ -62,18 +50,13 @@ namespace Fleck
 			                         (ClientHandshake.Origin != null) &&
 			                         (ClientHandshake.ResourcePath != null);
 
-			// check if the information in the client handshake is valid
 			if (hasRequiredFields && "ws://" + ClientHandshake.Host == Location && ClientHandshake.Origin == Origin)
 			{
-				// generate a response for the client
 				ServerHandshake serverShake = GenerateResponseHandshake();
-				// send the handshake to the client
 				BeginSendServerHandshake(serverShake, state.socket);
 			}
 			else
 			{
-				// the client shake isn't valid
-				Log.Debug("invalid handshake received from " + state.socket.LocalEndPoint);
 				state.socket.Close();
 				return;
 			}
@@ -81,20 +64,15 @@ namespace Fleck
 
 		private ClientHandshake ParseClientHandshake(ArraySegment<byte> byteShake)
 		{
-			// the "grammar" of the handshake
 			string pattern = @"^(?<connect>[^\s]+)\s(?<path>[^\s]+)\sHTTP\/1\.1\r\n" + // request line
 			                 @"((?<field_name>[^:\r\n]+):\s(?<field_value>[^\r\n]+)\r\n)+";
-				// unordered set of fields (name-chars colon space any-chars cr lf)
 
-			// subtract the challenge bytes from the handshake
 			var handshake = new ClientHandshake();
 			var challenge = new ArraySegment<byte>(byteShake.Array, byteShake.Count - 8, 8); // -8 : eight byte challenge
 			handshake.ChallengeBytes = challenge;
 
-			// get the rest of the handshake
 			string utf8_handshake = Encoding.UTF8.GetString(byteShake.Array, 0, byteShake.Count - 8);
 
-			// match the handshake against the "grammar"
 			var regex = new Regex(pattern, RegexOptions.IgnoreCase);
 			Match match = regex.Match(utf8_handshake);
 			GroupCollection fields = match.Groups;
@@ -127,17 +105,7 @@ namespace Fleck
 						break;
 					case "cookie":
 						// create and fill a cookie collection from the data in the handshake
-						handshake.Cookies = new HttpCookieCollection();
-						string[] cookies = value.Split(';');
-						foreach (string item in cookies)
-						{
-							// the name if before the '=' char
-							string c_name = item.Remove(item.IndexOf('='));
-							// the value is after
-							string c_value = item.Substring(item.IndexOf('=') + 1);
-							// put the cookie in the collection (this also parses the sub-values and such)
-							handshake.Cookies.Add(new HttpCookie(c_name.TrimStart(), c_value));
-						}
+						handshake.Cookies = value;
 						break;
 					default:
 						// some field that we don't know about
