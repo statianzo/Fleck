@@ -51,6 +51,7 @@ namespace Fleck
 					}
 					else
 					{
+						_connection.OnClose();
 						Socket.Close();
 					}
 				});
