@@ -37,7 +37,7 @@ namespace Fleck
 
 			List<byte> bufferList = data.ToList();
 
-			bool endIsInThisBuffer = data.Contains(End); // 255 = end
+			bool endIsInThisBuffer = data.Contains(End);
 			if (endIsInThisBuffer)
 			{
 				end = bufferList.IndexOf(End);
