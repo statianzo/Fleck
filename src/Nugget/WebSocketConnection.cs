@@ -8,8 +8,8 @@ namespace Nugget
 		public WebSocketConnection(Socket socket)
 		{
 			Socket = socket;
-			Sender = new Sender(this);
-			Receiver = new Receiver(this);
+			_sender = new Sender(this);
+			_receiver = new Receiver(this);
 			OnOpen = () => { };
 			OnClose = () => { };
 			OnMessage = x => { };
@@ -18,21 +18,21 @@ namespace Nugget
 		public Socket Socket { get; set; }
 
 
-		private Sender Sender { get; set; }
-		private Receiver Receiver { get; set; }
+		private readonly Sender _sender;
+		private readonly Receiver _receiver;
 
 		public Action OnOpen { get; set; }
 		public Action OnClose { get; set; }
 		public Action<string> OnMessage { get; set; }
 
-		public void Send(string data)
+		public void Send(string message)
 		{
-			Sender.Send(data);
+			_sender.Send(message);
 		}
 
 		public void StartReceiving()
 		{
-			Receiver.Receive();
+			_receiver.Receive();
 		}
 	}
 }

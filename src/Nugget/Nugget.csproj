@@ -75,23 +75,15 @@
   <ItemGroup>
     <Compile Include="DataFrame.cs" />
     <Compile Include="HandshakeHandler.cs" />
-    <Compile Include="Handshakes.cs" />
-    <Compile Include="IReceivingWebSocket.cs" />
-    <Compile Include="IWebSocket.cs" />
+    <Compile Include="ClientHandshake.cs" />
     <Compile Include="Log.cs" />
-    <Compile Include="ISubProtocolModelFactory.cs" />
-    <Compile Include="SubProtocolModelFactoryStore.cs" />
-    <Compile Include="SubProtocolModelFactoryWrapper.cs" />
     <Compile Include="Receiver.cs" />
     <Compile Include="Sender.cs" />
-    <Compile Include="ASendingWebSocket.cs" />
+    <Compile Include="ServerHandshake.cs" />
     <Compile Include="SocketExtension.cs" />
-    <Compile Include="WebSocket.cs" />
-    <Compile Include="WebSocketFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WebSocketConnection.cs" />
     <Compile Include="WebSocketServer.cs" />
-    <Compile Include="WebSocketWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

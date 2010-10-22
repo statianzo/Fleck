@@ -3,12 +3,13 @@
 	<head>
 		<title>websocket client</title>
         <script type="text/javascript">
+        	var ws;
             var start = function () {
                 var inc = document.getElementById('incomming');
                 inc.innerHTML += "connecting to server ..<br/>";
                 
                 // create a new websocket and connect
-                var ws = new WebSocket('ws://localhost:8181/consoleappsample');
+                ws = new WebSocket('ws://localhost:8181/consoleappsample');
 
                 // when data is comming from the server, this metod is called
                 ws.onmessage = function (evt) {

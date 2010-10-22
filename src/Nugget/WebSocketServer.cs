@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Net;
 
@@ -7,9 +6,7 @@ namespace Nugget
 {
 	public class WebSocketServer : IDisposable
 	{
-		private readonly List<WebSocketConnection> Connections = new List<WebSocketConnection>();
-		private readonly SubProtocolModelFactoryStore ModelFactories = new SubProtocolModelFactoryStore();
-		private readonly WebSocketFactory SocketFactory = new WebSocketFactory();
+		private Action<WebSocketConnection> _config;
 
 		public WebSocketServer(int port, string origin, string location)
 		{
@@ -28,22 +25,7 @@ namespace Nugget
 			ListenerSocket.Dispose();
 		}
 
-		public void RegisterHandler<TSocket>(string path) where TSocket : IWebSocket
-		{
-			SocketFactory.Register<TSocket>(path);
-		}
-
-		public void RegisterHandler(Type handler, string path)
-		{
-			SocketFactory.Register(handler, path);
-		}
-
-		public void SetSubProtocolModelFactory<TModel>(ISubProtocolModelFactory<TModel> factory, string subprotocol)
-		{
-			ModelFactories.Store(factory, subprotocol);
-		}
-
-		public void Start()
+		public void Start(Action<WebSocketConnection> config)
 		{
 			ListenerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
 			var ipLocal = new IPEndPoint(IPAddress.Any, Port);
@@ -51,6 +33,7 @@ namespace Nugget
 			ListenerSocket.Listen(100);
 			Log.Info("Server stated on " + ListenerSocket.LocalEndPoint);
 			ListenForClients();
+			_config = config;
 		}
 
 		private void ListenForClients()
@@ -60,7 +43,7 @@ namespace Nugget
 
 		private void OnClientConnect(IAsyncResult ar)
 		{
-			Socket clientSocket = null;
+			Socket clientSocket;
 
 			try
 			{
@@ -77,36 +60,16 @@ namespace Nugget
 			{
 				OnSuccess = handshake =>
 					{
-						WebSocketConnection wsc = SocketFactory.Create(handshake.ResourcePath);
-						if (wsc != null)
-						{
-							wsc.Socket = clientSocket;
-
-							if (handshake.SubProtocol != null)
-							{
-								wsc.SetModelFactory(ModelFactories.Get(handshake.SubProtocol));
-							}
-
-							wsc.WebSocket.Connected(handshake);
-
-							wsc.StartReceiving();
-
-							Connections.Add(wsc);
-						}
+						var wsc = new WebSocketConnection(clientSocket);
+						_config(wsc);
+						wsc.OnOpen();
+						wsc.StartReceiving();
 					}
 			};
 
 			shaker.Shake(clientSocket);
 
 			ListenForClients();
-		}
-
-		public void SendToAll(string message)
-		{
-			foreach (WebSocketConnection c in Connections)
-			{
-				c.Send(message);
-			}
 		}
 	}
 }
