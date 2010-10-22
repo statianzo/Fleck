@@ -5,7 +5,6 @@ using System.Text;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using System.Security.Cryptography;
-using System.Web;
 
 namespace Fleck
 {
@@ -64,8 +63,8 @@ namespace Fleck
 
 		private ClientHandshake ParseClientHandshake(ArraySegment<byte> byteShake)
 		{
-			string pattern = @"^(?<connect>[^\s]+)\s(?<path>[^\s]+)\sHTTP\/1\.1\r\n" + // request line
-			                 @"((?<field_name>[^:\r\n]+):\s(?<field_value>[^\r\n]+)\r\n)+";
+			const string pattern = @"^(?<connect>[^\s]+)\s(?<path>[^\s]+)\sHTTP\/1\.1\r\n" + // request line
+			                       @"((?<field_name>[^:\r\n]+):\s(?<field_value>[^\r\n]+)\r\n)+";
 
 			var handshake = new ClientHandshake();
 			var challenge = new ArraySegment<byte>(byteShake.Array, byteShake.Count - 8, 8); // -8 : eight byte challenge
@@ -77,10 +76,8 @@ namespace Fleck
 			Match match = regex.Match(utf8_handshake);
 			GroupCollection fields = match.Groups;
 
-			// save the request path
 			handshake.ResourcePath = fields["path"].Value;
 
-			// run through every match and save them in the handshake object
 			for (int i = 0; i < fields["field_name"].Captures.Count; i++)
 			{
 				string name = fields["field_name"].Captures[i].ToString();
@@ -104,11 +101,9 @@ namespace Fleck
 						handshake.Host = value;
 						break;
 					case "cookie":
-						// create and fill a cookie collection from the data in the handshake
 						handshake.Cookies = value;
 						break;
 					default:
-						// some field that we don't know about
 						if (handshake.AdditionalFields == null)
 							handshake.AdditionalFields = new Dictionary<string, string>();
 						handshake.AdditionalFields[name] = value;
@@ -120,17 +115,18 @@ namespace Fleck
 
 		private ServerHandshake GenerateResponseHandshake()
 		{
-			var responseHandshake = new ServerHandshake();
-			responseHandshake.Location = "ws://" + ClientHandshake.Host + ClientHandshake.ResourcePath;
-			responseHandshake.Origin = ClientHandshake.Origin;
-			responseHandshake.SubProtocol = ClientHandshake.SubProtocol;
+			var responseHandshake = new ServerHandshake
+			{
+				Location = "ws://" + ClientHandshake.Host + ClientHandshake.ResourcePath,
+				Origin = ClientHandshake.Origin,
+				SubProtocol = ClientHandshake.SubProtocol
+			};
 
 			var challenge = new byte[8];
 			Array.Copy(ClientHandshake.ChallengeBytes.Array, ClientHandshake.ChallengeBytes.Offset, challenge, 0, 8);
 
-			byte[] bytes;
-			CalculateAnswerBytes(out bytes, ClientHandshake.Key1, ClientHandshake.Key2, ClientHandshake.ChallengeBytes);
-			responseHandshake.AnswerBytes = bytes;
+			responseHandshake.AnswerBytes =
+				CalculateAnswerBytes(ClientHandshake.Key1, ClientHandshake.Key2, ClientHandshake.ChallengeBytes);
 
 			return responseHandshake;
 		}
@@ -150,7 +146,6 @@ namespace Fleck
 			stringShake += "\r\n";
 
 
-			// generate a byte array representation of the handshake including the answer to the challenge
 			byte[] byteResponse = Encoding.ASCII.GetBytes(stringShake);
 			int byteResponseLength = byteResponse.Length;
 			Array.Resize(ref byteResponse, byteResponseLength + handshake.AnswerBytes.Length);
@@ -170,40 +165,31 @@ namespace Fleck
 			}
 		}
 
-		private void CalculateAnswerBytes(out byte[] answer, string key1, string key2, ArraySegment<byte> challenge)
+		private static byte[] CalculateAnswerBytes(string key1, string key2, ArraySegment<byte> challenge)
 		{
-			// the following code is to conform with the protocol
+			byte[] result1Bytes = ParseKey(key1);
+			byte[] result2Bytes = ParseKey(key2);
 
-			//  count the spaces
-			int spaces1 = key1.Count(x => x == ' ');
-			int spaces2 = key2.Count(x => x == ' ');
-
-			// concat the digits
-			var digits1 = new String(key1.Where(x => Char.IsDigit(x)).ToArray());
-			var digits2 = new String(key2.Where(x => Char.IsDigit(x)).ToArray());
-
-			// divide the digits with the number of spaces
-			var result1 = (Int32) (Int64.Parse(digits1)/spaces1);
-			var result2 = (Int32) (Int64.Parse(digits2)/spaces2);
-
-			// convert the results to 32 bit big endian byte arrays
-			byte[] result1bytes = BitConverter.GetBytes(result1);
-			byte[] result2bytes = BitConverter.GetBytes(result2);
-			if (BitConverter.IsLittleEndian)
-			{
-				Array.Reverse(result1bytes);
-				Array.Reverse(result2bytes);
-			}
-
-			// concat the two integers and the 8 challenge bytes from the client
 			var rawAnswer = new byte[16];
-			Array.Copy(result1bytes, 0, rawAnswer, 0, 4);
-			Array.Copy(result2bytes, 0, rawAnswer, 4, 4);
+			Array.Copy(result1Bytes, 0, rawAnswer, 0, 4);
+			Array.Copy(result2Bytes, 0, rawAnswer, 4, 4);
 			Array.Copy(challenge.Array, challenge.Offset, rawAnswer, 8, 8);
 
-			// compute the md5 hash
 			MD5 md5 = MD5.Create();
-			answer = md5.ComputeHash(rawAnswer);
+			return md5.ComputeHash(rawAnswer);
+		}
+
+		private static byte[] ParseKey(string key1)
+		{
+			int spaces = key1.Count(x => x == ' ');
+			var digits = new String(key1.Where(Char.IsDigit).ToArray());
+
+			var value = (Int32) (Int64.Parse(digits)/spaces);
+
+			byte[] result = BitConverter.GetBytes(value);
+			if (BitConverter.IsLittleEndian)
+				Array.Reverse(result);
+			return result;
 		}
 
 		#region Nested type: HandShakeState
