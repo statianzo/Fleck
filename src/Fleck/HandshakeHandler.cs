@@ -146,7 +146,7 @@ namespace Fleck
 			stringShake += "\r\n";
 
 
-			byte[] byteResponse = Encoding.ASCII.GetBytes(stringShake);
+			byte[] byteResponse = Encoding.UTF8.GetBytes(stringShake);
 			int byteResponseLength = byteResponse.Length;
 			Array.Resize(ref byteResponse, byteResponseLength + handshake.AnswerBytes.Length);
 			Array.Copy(handshake.AnswerBytes, 0, byteResponse, byteResponseLength, handshake.AnswerBytes.Length);
