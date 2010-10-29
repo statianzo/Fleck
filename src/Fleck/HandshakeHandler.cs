@@ -26,8 +26,13 @@ namespace Fleck
 		{
 			try
 			{
-				var state = new HandShakeState {socket = socket};
-				state.socket.BeginReceive(state.buffer, 0, HandShakeState.BufferSize, 0, new AsyncCallback(DoShake), state);
+				var state = new HandShakeState {Socket = socket};
+				state.Socket.BeginReceive(state.Buffer, 0, state.Buffer.Length, 0,
+				                          r =>
+				                          	{
+				                          		int received = socket.EndReceive(r);
+				                          		DoShake(state, received);
+				                          	}, null);
 			}
 			catch (Exception e)
 			{
@@ -35,33 +40,24 @@ namespace Fleck
 			}
 		}
 
-		private void DoShake(IAsyncResult ar)
+		private void DoShake(HandShakeState state, int receivedByteCount)
 		{
-			var state = (HandShakeState) ar.AsyncState;
-			int receivedByteCount = state.socket.EndReceive(ar);
+			ClientHandshake = ParseClientHandshake(new ArraySegment<byte>(state.Buffer, 0, receivedByteCount));
 
-			ClientHandshake = ParseClientHandshake(new ArraySegment<byte>(state.buffer, 0, receivedByteCount));
 
-			bool hasRequiredFields = (ClientHandshake.ChallengeBytes != null) &&
-			                         (ClientHandshake.Host != null) &&
-			                         (ClientHandshake.Key1 != null) &&
-			                         (ClientHandshake.Key2 != null) &&
-			                         (ClientHandshake.Origin != null) &&
-			                         (ClientHandshake.ResourcePath != null);
-
-			if (hasRequiredFields && "ws://" + ClientHandshake.Host == Location && ClientHandshake.Origin == Origin)
+			if (ClientHandshake.Validate(Origin, Location))
 			{
 				ServerHandshake serverShake = GenerateResponseHandshake();
-				BeginSendServerHandshake(serverShake, state.socket);
+				BeginSendServerHandshake(serverShake, state.Socket);
 			}
 			else
 			{
-				state.socket.Close();
+				state.Socket.Close();
 				return;
 			}
 		}
 
-		private ClientHandshake ParseClientHandshake(ArraySegment<byte> byteShake)
+		private static ClientHandshake ParseClientHandshake(ArraySegment<byte> byteShake)
 		{
 			const string pattern = @"^(?<connect>[^\s]+)\s(?<path>[^\s]+)\sHTTP\/1\.1\r\n" + // request line
 			                       @"((?<field_name>[^:\r\n]+):\s(?<field_value>[^\r\n]+)\r\n)+";
@@ -70,10 +66,10 @@ namespace Fleck
 			var challenge = new ArraySegment<byte>(byteShake.Array, byteShake.Count - 8, 8); // -8 : eight byte challenge
 			handshake.ChallengeBytes = challenge;
 
-			string utf8_handshake = Encoding.UTF8.GetString(byteShake.Array, 0, byteShake.Count - 8);
+			string utf8Handshake = Encoding.UTF8.GetString(byteShake.Array, 0, byteShake.Count - 8);
 
 			var regex = new Regex(pattern, RegexOptions.IgnoreCase);
-			Match match = regex.Match(utf8_handshake);
+			Match match = regex.Match(utf8Handshake);
 			GroupCollection fields = match.Groups;
 
 			handshake.ResourcePath = fields["path"].Value;
@@ -133,36 +129,26 @@ namespace Fleck
 
 		private void BeginSendServerHandshake(ServerHandshake handshake, Socket socket)
 		{
-			string stringShake = "HTTP/1.1 101 Web Socket Protocol Handshake\r\n" +
-			                     "Upgrade: WebSocket\r\n" +
-			                     "Connection: Upgrade\r\n" +
-			                     "Sec-WebSocket-Origin: " + handshake.Origin + "\r\n" +
-			                     "Sec-WebSocket-Location: " + handshake.Location + "\r\n";
-
-			if (handshake.SubProtocol != null)
-			{
-				stringShake += "Sec-WebSocket-Protocol: " + handshake.SubProtocol + "\r\n";
-			}
-			stringShake += "\r\n";
-
+			string stringShake = handshake.ToResponseString();
 
 			byte[] byteResponse = Encoding.UTF8.GetBytes(stringShake);
 			int byteResponseLength = byteResponse.Length;
 			Array.Resize(ref byteResponse, byteResponseLength + handshake.AnswerBytes.Length);
 			Array.Copy(handshake.AnswerBytes, 0, byteResponse, byteResponseLength, handshake.AnswerBytes.Length);
 
-			socket.BeginSend(byteResponse, 0, byteResponse.Length, 0, EndSendServerHandshake, socket);
+			socket.BeginSend(byteResponse, 0, byteResponse.Length, 0,
+			                 r =>
+			                 	{
+			                 		socket.EndSend(r);
+			                 		EndSendServerHandshake();
+			                 	}
+			                 , null);
 		}
 
-		private void EndSendServerHandshake(IAsyncResult ar)
+		private void EndSendServerHandshake()
 		{
-			var socket = (Socket) ar.AsyncState;
-			socket.EndSend(ar);
-
 			if (OnSuccess != null)
-			{
 				OnSuccess(ClientHandshake);
-			}
 		}
 
 		private static byte[] CalculateAnswerBytes(string key1, string key2, ArraySegment<byte> challenge)
@@ -179,10 +165,10 @@ namespace Fleck
 			return md5.ComputeHash(rawAnswer);
 		}
 
-		private static byte[] ParseKey(string key1)
+		private static byte[] ParseKey(string key)
 		{
-			int spaces = key1.Count(x => x == ' ');
-			var digits = new String(key1.Where(Char.IsDigit).ToArray());
+			int spaces = key.Count(x => x == ' ');
+			var digits = new String(key.Where(Char.IsDigit).ToArray());
 
 			var value = (Int32) (Int64.Parse(digits)/spaces);
 
@@ -192,15 +178,11 @@ namespace Fleck
 			return result;
 		}
 
-		#region Nested type: HandShakeState
-
 		private class HandShakeState
 		{
-			public const int BufferSize = 1024;
-			public readonly byte[] buffer = new byte[BufferSize];
-			public Socket socket;
+			private const int BufferSize = 1024;
+			public readonly byte[] Buffer = new byte[BufferSize];
+			public Socket Socket { get; set; }
 		}
-
-		#endregion
 	}
 }

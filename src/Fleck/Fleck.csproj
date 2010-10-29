@@ -67,7 +67,6 @@
     <Compile Include="Receiver.cs" />
     <Compile Include="Sender.cs" />
     <Compile Include="ServerHandshake.cs" />
-    <Compile Include="SocketExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WebSocketConnection.cs" />
     <Compile Include="WebSocketServer.cs" />

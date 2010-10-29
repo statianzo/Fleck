@@ -25,11 +25,16 @@ namespace Fleck
 			var buffer = new byte[BufferSize];
 
 			if (Socket == null || !Socket.Connected)
+			{
 				_connection.OnClose();
+				return;
+			}
 
-			Socket.AsyncReceive(buffer, frame, (sizeOfReceivedData, df) =>
+			Socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None,
+				r =>
 				{
-					var dataframe = (DataFrame) df;
+					int sizeOfReceivedData = Socket.EndReceive(r);
+					var dataframe = frame;
 
 					if (sizeOfReceivedData > 0)
 					{
@@ -39,7 +44,7 @@ namespace Fleck
 						{
 							string data = dataframe.ToString();
 
-								_connection.OnMessage(data);
+							_connection.OnMessage(data);
 
 
 							Receive();
@@ -54,7 +59,7 @@ namespace Fleck
 						_connection.OnClose();
 						Socket.Close();
 					}
-				});
+				}, null);
 		}
 	}
 }

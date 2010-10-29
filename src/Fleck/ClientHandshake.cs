@@ -44,5 +44,17 @@ namespace Fleck
 
 			return stringShake;
 		}
+
+		public bool Validate(string origin, string host)
+		{
+			bool hasRequiredFields = (Host != null) &&
+			                         (Key1 != null) &&
+			                         (Key2 != null) &&
+			                         (Origin != null) &&
+			                         (ResourcePath != null);
+
+			return hasRequiredFields && "ws://" + Host == host && (origin == null || origin == Origin);
+
+		}
 	}
 }

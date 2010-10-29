@@ -8,11 +8,15 @@ namespace Fleck
 	{
 		private Action<WebSocketConnection> _config;
 
-		public WebSocketServer(int port, string origin, string location)
+		public WebSocketServer(int port, string location)
 		{
 			Port = port;
-			Origin = origin;
 			Location = location;
+		}
+
+		public WebSocketServer(int port, string location, string origin):this(port,location)
+		{
+			Origin = origin;
 		}
 
 		public Socket ListenerSocket { get; private set; }
@@ -38,7 +42,7 @@ namespace Fleck
 
 		private void ListenForClients()
 		{
-			ListenerSocket.BeginAccept(new AsyncCallback(OnClientConnect), null);
+			ListenerSocket.BeginAccept(OnClientConnect, null);
 		}
 
 		private void OnClientConnect(IAsyncResult ar)
