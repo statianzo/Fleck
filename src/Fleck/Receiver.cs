@@ -26,7 +26,7 @@ namespace Fleck
 
 			if (Socket == null || !Socket.Connected)
 			{
-				_connection.OnClose();
+				_connection.Close();
 				return;
 			}
 
@@ -56,8 +56,7 @@ namespace Fleck
 					}
 					else
 					{
-						_connection.OnClose();
-						Socket.Close();
+						_connection.Close();
 					}
 				}, null);
 		}

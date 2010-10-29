@@ -34,5 +34,12 @@ namespace Fleck
 		{
 			_receiver.Receive();
 		}
+
+		public void Close()
+		{
+			if (!Socket.Connected) return;
+			OnClose();
+			Socket.Close();
+		}
 	}
 }

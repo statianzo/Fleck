@@ -14,7 +14,8 @@ namespace Fleck
 			Location = location;
 		}
 
-		public WebSocketServer(int port, string location, string origin):this(port,location)
+		public WebSocketServer(int port, string location, string origin)
+			: this(port, location)
 		{
 			Origin = origin;
 		}
@@ -58,6 +59,7 @@ namespace Fleck
 				Log.Error("Listener socket is closed");
 				return;
 			}
+			ListenForClients();
 
 
 			var shaker = new HandshakeHandler(Origin, Location)
@@ -73,7 +75,6 @@ namespace Fleck
 
 			shaker.Shake(clientSocket);
 
-			ListenForClients();
 		}
 	}
 }

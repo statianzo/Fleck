@@ -22,7 +22,10 @@ namespace Fleck.Samples.ConsoleApp
 							Console.WriteLine("Close!");
 							allSockets.Remove(socket);
 						};
-					socket.OnMessage = message => Console.WriteLine(message);
+					socket.OnMessage = message =>
+						{
+							Console.WriteLine(message);
+						};
 				});
 
             
