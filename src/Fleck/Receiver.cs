@@ -4,7 +4,7 @@ namespace Fleck
 {
 	internal class Receiver
 	{
-		public const int BufferSize = 256;
+		public const int BufferSize = 2;
 		private readonly WebSocketConnection _connection;
 
 		public Receiver(WebSocketConnection connection)
