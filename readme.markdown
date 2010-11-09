@@ -9,7 +9,7 @@ Example
 
 The following is an example that will echo to a client.
 
-      var server = new WebSocketServer(8181, "ws://localhost:8181");
+      var server = new WebSocketServer("ws://localhost:8181");
       server.Start(socket =>
         {
           socket.OnOpen = () => Console.WriteLine("Open!");

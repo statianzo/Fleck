@@ -8,6 +8,12 @@ namespace Fleck
 	{
 		private Action<WebSocketConnection> _config;
 
+		public WebSocketServer(string location)
+		{
+			var uri = new Uri(location);
+			Port = uri.Port > 0 ? uri.Port : 8181;
+			Location = location;
+		}
 		public WebSocketServer(int port, string location)
 		{
 			Port = port;
