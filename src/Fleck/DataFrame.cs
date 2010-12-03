@@ -10,12 +10,13 @@ namespace Fleck
 		public const byte End = 255;
 		public const byte Start = 0;
 
-		private readonly StringBuilder builder;
+		private readonly StringBuilder _builder;
+		private readonly List<byte> _buffer;
 
 		public DataFrame()
 		{
-			IsComplete = false;
-			builder = new StringBuilder();
+			_builder = new StringBuilder();
+			_buffer = new List<byte>();
 		}
 
 		public bool IsComplete { get; set; }
@@ -31,38 +32,23 @@ namespace Fleck
 			return wrappedBytes;
 		}
 
-		public void Append(byte[] data)
+		public void Append(byte data)
 		{
-			int start = 0, end = data.Length - 1;
-
-			List<byte> bufferList = data.ToList();
-
-			bool endIsInThisBuffer = data.Contains(End);
-			if (endIsInThisBuffer)
+			if(data == Start)
+				return;
+			if(data == End)
 			{
-				end = bufferList.IndexOf(End);
-				end--; // we dont want to include this byte
+				IsComplete = true;
+    			_builder.Append(Encoding.UTF8.GetString(_buffer.ToArray()));
+				return;
 			}
+			_buffer.Add(data);
 
-			bool startIsInThisBuffer = data.Contains(Start); // 0 = start
-			if (startIsInThisBuffer)
-			{
-				int zeroPos = bufferList.IndexOf(Start);
-				if (zeroPos < end) // we might be looking at one of the bytes in the end of the array that hasn't been set
-				{
-					start = zeroPos;
-					start++; // we dont want to include this byte
-				}
-			}
-
-			builder.Append(Encoding.UTF8.GetString(data, start, (end - start) + 1));
-
-			IsComplete = endIsInThisBuffer;
 		}
 
 		public override string ToString()
 		{
-			return builder != null ? builder.ToString() : "";
+			return _builder != null ? _builder.ToString() : "";
 		}
 	}
 }

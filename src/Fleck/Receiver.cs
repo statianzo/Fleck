@@ -1,15 +1,18 @@
-﻿using System.Net.Sockets;
+﻿using System.Collections.Generic;
+using System.Net.Sockets;
 
 namespace Fleck
 {
 	internal class Receiver
 	{
-		public const int BufferSize = 2;
+		private const int BufferSize = 16384;
 		private readonly WebSocketConnection _connection;
+		private readonly Queue<byte> _queue;
 
 		public Receiver(WebSocketConnection connection)
 		{
 			_connection = connection;
+			_queue = new Queue<byte>();
 		}
 
 		private Socket Socket
@@ -33,31 +36,28 @@ namespace Fleck
 			Socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None,
 				r =>
 				{
-					int sizeOfReceivedData = Socket.EndReceive(r);
+					int size = Socket.EndReceive(r);
 					var dataframe = frame;
 
-					if (sizeOfReceivedData > 0)
-					{
-						dataframe.Append(buffer);
-
-						if (dataframe.IsComplete)
-						{
-							string data = dataframe.ToString();
-
-							_connection.OnMessage(data);
-
-
-							Receive();
-						}
-						else
-						{
-							Receive(dataframe);
-						}
-					}
-					else
+					if (size <= 0)
 					{
 						_connection.Close();
+						return;
 					}
+
+					for (int i = 0; i < size; i++)
+						_queue.Enqueue(buffer[i]);
+
+					while (_queue.Count > 0)
+					{
+						dataframe.Append(_queue.Dequeue());
+						if (!dataframe.IsComplete) continue;
+
+						var data = dataframe.ToString();
+						_connection.OnMessage(data);
+						dataframe = new DataFrame();
+					}
+					Receive(dataframe);
 				}, null);
 		}
 	}
