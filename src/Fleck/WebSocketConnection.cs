@@ -37,7 +37,6 @@ namespace Fleck
 
 		public void Close()
 		{
-			if (!Socket.Connected) return;
 			OnClose();
 			Socket.Close();
 		}

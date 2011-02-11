@@ -33,32 +33,50 @@ namespace Fleck
 				return;
 			}
 
-			Socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None,
-				r =>
-				{
-					int size = Socket.EndReceive(r);
-					var dataframe = frame;
-
-					if (size <= 0)
+			try
+			{
+				Socket.BeginReceive(buffer, 0, buffer.Length, SocketFlags.None,
+					r =>
 					{
-						_connection.Close();
-						return;
-					}
+						try
+						{
+							int size = Socket.EndReceive(r);
+							var dataframe = frame;
 
-					for (int i = 0; i < size; i++)
-						_queue.Enqueue(buffer[i]);
+							if (size <= 0)
+							{
+								_connection.Close();
+								return;
+							}
 
-					while (_queue.Count > 0)
-					{
-						dataframe.Append(_queue.Dequeue());
-						if (!dataframe.IsComplete) continue;
+							for (int i = 0; i < size; i++)
+								_queue.Enqueue(buffer[i]);
 
-						var data = dataframe.ToString();
-						_connection.OnMessage(data);
-						dataframe = new DataFrame();
-					}
-					Receive(dataframe);
-				}, null);
+							while (_queue.Count > 0)
+							{
+								dataframe.Append(_queue.Dequeue());
+								if (!dataframe.IsComplete) continue;
+
+								var data = dataframe.ToString();
+								_connection.OnMessage(data);
+								dataframe = new DataFrame();
+							}
+							Receive(dataframe);
+
+						}
+						catch (SocketException e)
+						{
+
+							Log.Error(e.Message);
+							_connection.Close();
+						}
+					}, null);
+			}
+			catch (SocketException e)
+			{
+				Log.Error(e.Message);
+				_connection.Close();
+			}
 		}
 	}
 }

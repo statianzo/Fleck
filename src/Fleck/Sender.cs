@@ -17,11 +17,27 @@ namespace Fleck
 		{
 			if (!Socket.Connected) return;
 			var wrapped = DataFrame.Wrap(data);
-			Socket.BeginSend(wrapped, 0, wrapped.Length, SocketFlags.None, r =>
-				{
-					if (Socket.Connected)
-						Socket.EndSend(r);
-				}, null);
+			try
+			{
+				Socket.BeginSend(wrapped, 0, wrapped.Length, SocketFlags.None, r =>
+					{
+						try
+						{
+							if (Socket.Connected)
+								Socket.EndSend(r);
+						}
+						catch (SocketException e)
+						{
+							Log.Error(e.Message);
+							_connection.Close();
+						}
+					}, null);
+			}
+			catch (SocketException e)
+			{
+				Log.Error(e.Message);
+				_connection.Close();
+			}
 		}
 	}
 }
