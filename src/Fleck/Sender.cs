@@ -1,8 +1,10 @@
-﻿using System.Net.Sockets;
+﻿using System;
+using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace Fleck
 {
-	internal class Sender
+	public class Sender
 	{
 		private readonly WebSocketConnection _connection;
 
@@ -17,27 +19,15 @@ namespace Fleck
 		{
 			if (!Socket.Connected) return;
 			var wrapped = DataFrame.Wrap(data);
-			try
-			{
-				Socket.BeginSend(wrapped, 0, wrapped.Length, SocketFlags.None, r =>
+			var segment = new ArraySegment<byte>(wrapped);
+
+			Task<int>.Factory.FromAsync(Socket.BeginSend, Socket.EndSend, new[] {segment}, SocketFlags.None, null)
+				.ContinueWith(t =>
 					{
-						try
-						{
-							if (Socket.Connected)
-								Socket.EndSend(r);
-						}
-						catch (SocketException e)
-						{
-							Log.Error(e.Message);
-							_connection.Close();
-						}
-					}, null);
-			}
-			catch (SocketException e)
-			{
-				Log.Error(e.Message);
-				_connection.Close();
-			}
+						if (t.Exception == null) return;
+						Log.Error(t.Exception.Message);
+						_connection.Close();
+					}, TaskContinuationOptions.OnlyOnFaulted);
 		}
 	}
 }
