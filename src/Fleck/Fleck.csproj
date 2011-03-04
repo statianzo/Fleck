@@ -63,7 +63,8 @@
     <Compile Include="DataFrame.cs" />
     <Compile Include="HandshakeHandler.cs" />
     <Compile Include="ClientHandshake.cs" />
-    <Compile Include="Log.cs" />
+    <Compile Include="Interfaces\IWebSocketConnection.cs" />
+    <Compile Include="FleckLog.cs" />
     <Compile Include="Receiver.cs" />
     <Compile Include="Sender.cs" />
     <Compile Include="ServerHandshake.cs" />

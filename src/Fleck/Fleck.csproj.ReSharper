@@ -1,0 +1,5 @@
+<Configuration>
+  <NamespaceFolders>
+    <SkipFolder>8B12D929-AFA9-4307-BEFF-2ED0F1070FEE/d:Interfaces</SkipFolder>
+  </NamespaceFolders>
+</Configuration>

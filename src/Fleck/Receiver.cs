@@ -65,7 +65,7 @@ namespace Fleck
 				.ContinueWith(t =>
 					{
 						if (t.Exception == null) return;
-						Log.Error(t.Exception.Message);
+						FleckLog.Error(t.Exception.Message);
 						_connection.Close();
 					}, TaskContinuationOptions.OnlyOnFaulted);
 		}

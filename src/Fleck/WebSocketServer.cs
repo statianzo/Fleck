@@ -7,7 +7,7 @@ namespace Fleck
 {
 	public class WebSocketServer : IDisposable
 	{
-		private Action<WebSocketConnection> _config;
+		private Action<IWebSocketConnection> _config;
 
 		public WebSocketServer(string location)
 		{
@@ -37,13 +37,13 @@ namespace Fleck
 			((IDisposable)ListenerSocket).Dispose();
 		}
 
-		public void Start(Action<WebSocketConnection> config)
+		public void Start(Action<IWebSocketConnection> config)
 		{
 			ListenerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
 			var ipLocal = new IPEndPoint(IPAddress.Any, Port);
 			ListenerSocket.Bind(ipLocal);
 			ListenerSocket.Listen(100);
-			Log.Info("Server stated on " + ListenerSocket.LocalEndPoint);
+			FleckLog.Info("Server stated on " + ListenerSocket.LocalEndPoint);
 			ListenForClients();
 			_config = config;
 		}
@@ -52,7 +52,7 @@ namespace Fleck
 		{
 			Task<Socket>.Factory.FromAsync(ListenerSocket.BeginAccept, ListenerSocket.EndAccept, null)
 				.ContinueWith(OnClientConnect)
-				.ContinueWith(t => Log.Error("Listener socket is closed"), TaskContinuationOptions.OnlyOnFaulted);
+				.ContinueWith(t => FleckLog.Error("Listener socket is closed"), TaskContinuationOptions.OnlyOnFaulted);
 		}
 
 		private void OnClientConnect(Task<Socket> task)

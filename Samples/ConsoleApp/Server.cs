@@ -8,7 +8,7 @@ namespace Fleck.Samples.ConsoleApp
     {
         static void Main()
         {
-        	var allSockets = new List<WebSocketConnection>();
+        	var allSockets = new List<IWebSocketConnection>();
             var server = new WebSocketServer("ws://localhost:8181");
 			server.Start(socket =>
 				{

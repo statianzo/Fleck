@@ -3,7 +3,7 @@ using System.Net.Sockets;
 
 namespace Fleck
 {
-	public class WebSocketConnection
+	public class WebSocketConnection : IWebSocketConnection
 	{
 		public WebSocketConnection(Socket socket)
 		{
@@ -41,4 +41,5 @@ namespace Fleck
 			Socket.Close();
 		}
 	}
+
 }
