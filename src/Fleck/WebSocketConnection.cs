@@ -1,21 +1,20 @@
 ﻿using System;
-using System.Net.Sockets;
 
 namespace Fleck
 {
 	public class WebSocketConnection : IWebSocketConnection
 	{
-		public WebSocketConnection(Socket socket)
+		public WebSocketConnection(ISocket socket)
 		{
 			Socket = socket;
-			_sender = new Sender(this);
-			_receiver = new Receiver(this);
+			_sender = new Sender(socket, Close);
+			_receiver = new Receiver(socket, s => OnMessage(s), Close);
 			OnOpen = () => { };
 			OnClose = () => { };
 			OnMessage = x => { };
 		}
 
-		public Socket Socket { get; set; }
+		public ISocket Socket { get; set; }
 
 
 		private readonly Sender _sender;

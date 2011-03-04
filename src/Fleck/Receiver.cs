@@ -7,19 +7,23 @@ namespace Fleck
 {
 	public class Receiver
 	{
+		private readonly ISocket _socket;
+		private readonly Action<string> _messageAction;
+		private readonly Action _closeAction;
 		private const int BufferSize = 16384;
-		private readonly WebSocketConnection _connection;
 		private readonly Queue<byte> _queue;
 
-		public Receiver(WebSocketConnection connection)
+		public Receiver(ISocket socket, Action<string> messageAction, Action closeAction)
 		{
-			_connection = connection;
+			_socket = socket;
+			_messageAction = messageAction;
+			_closeAction = closeAction;
 			_queue = new Queue<byte>();
 		}
 
-		private Socket Socket
+		private ISocket Socket
 		{
-			get { return _connection.Socket; }
+			get { return _socket; }
 		}
 
 		public void Receive(DataFrame frame = null)
@@ -31,7 +35,7 @@ namespace Fleck
 
 			if (Socket == null || !Socket.Connected)
 			{
-				_connection.Close();
+				_closeAction();
 				return;
 			}
 			var segment = new ArraySegment<byte>(buffer);
@@ -44,7 +48,7 @@ namespace Fleck
 
 						if (size <= 0)
 						{
-							_connection.Close();
+							_closeAction();
 							return;
 						}
 
@@ -57,7 +61,7 @@ namespace Fleck
 							if (!dataframe.IsComplete) continue;
 
 							var data = dataframe.ToString();
-							_connection.OnMessage(data);
+							_messageAction(data);
 							dataframe = new DataFrame();
 						}
 						Receive(dataframe);
@@ -65,7 +69,7 @@ namespace Fleck
 				.ContinueWith(t =>
 					{
 						FleckLog.Error("Recieve failed", t.Exception);
-						_connection.Close();
+						_closeAction();
 					}, TaskContinuationOptions.OnlyOnFaulted);
 		}
 	}

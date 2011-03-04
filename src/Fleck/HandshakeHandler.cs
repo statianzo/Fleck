@@ -23,7 +23,7 @@ namespace Fleck
 		public Action<ClientHandshake> OnSuccess { get; set; }
 
 
-		public void Shake(Socket socket)
+		public void Shake(ISocket socket)
 		{
 			var state = new HandShakeState {Socket = socket};
 
@@ -122,7 +122,7 @@ namespace Fleck
 			return responseHandshake;
 		}
 
-		private void BeginSendServerHandshake(ServerHandshake handshake, Socket socket)
+		private void BeginSendServerHandshake(ServerHandshake handshake, ISocket socket)
 		{
 			string stringShake = handshake.ToResponseString();
 
@@ -175,7 +175,7 @@ namespace Fleck
 		{
 			private const int BufferSize = 1024;
 			public readonly byte[] Buffer = new byte[BufferSize];
-			public Socket Socket { get; set; }
+			public ISocket Socket { get; set; }
 		}
 	}
 }

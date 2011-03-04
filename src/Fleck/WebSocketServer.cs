@@ -27,7 +27,7 @@ namespace Fleck
 			Origin = origin;
 		}
 
-		public Socket ListenerSocket { get; private set; }
+		public ISocket ListenerSocket { get; private set; }
 		public string Location { get; private set; }
 		public int Port { get; private set; }
 		public string Origin { get; private set; }
@@ -39,25 +39,26 @@ namespace Fleck
 
 		public void Start(Action<IWebSocketConnection> config)
 		{
-			ListenerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
+			var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
+			ListenerSocket = new SocketWrapper(socket);
 			var ipLocal = new IPEndPoint(IPAddress.Any, Port);
 			ListenerSocket.Bind(ipLocal);
 			ListenerSocket.Listen(100);
-			FleckLog.Info("Server stated on " + ListenerSocket.LocalEndPoint);
+			FleckLog.Info("Server stated on " + ipLocal);
 			ListenForClients();
 			_config = config;
 		}
 
 		private void ListenForClients()
 		{
-			Task<Socket>.Factory.FromAsync(ListenerSocket.BeginAccept, ListenerSocket.EndAccept, null)
+			Task<ISocket>.Factory.FromAsync(ListenerSocket.BeginAccept, ListenerSocket.EndAccept, null)
 				.ContinueWith(OnClientConnect)
 				.ContinueWith(t => FleckLog.Error("Listener socket is closed", t.Exception), TaskContinuationOptions.OnlyOnFaulted);
 		}
 
-		private void OnClientConnect(Task<Socket> task)
+		private void OnClientConnect(Task<ISocket> task)
 		{
-			Socket clientSocket = task.Result;
+			ISocket clientSocket = task.Result;
 			ListenForClients();
 
 

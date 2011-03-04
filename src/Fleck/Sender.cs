@@ -6,14 +6,16 @@ namespace Fleck
 {
 	public class Sender
 	{
-		private readonly WebSocketConnection _connection;
+		private readonly ISocket _socket;
+		private readonly Action _closeAction;
 
-		public Sender(WebSocketConnection connection)
+		public Sender(ISocket socket, Action closeAction)
 		{
-			_connection = connection;
+			_socket = socket;
+			_closeAction = closeAction;
 		}
 
-		public Socket Socket { get { return _connection.Socket; } }
+		public ISocket Socket { get { return _socket; } }
 
 		public void Send(string data)
 		{
@@ -25,7 +27,7 @@ namespace Fleck
 				.ContinueWith(t =>
 					{
 						FleckLog.Error("Send failed", t.Exception);
-						_connection.Close();
+						_closeAction();
 					}, TaskContinuationOptions.OnlyOnFaulted);
 		}
 	}

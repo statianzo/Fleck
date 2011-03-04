@@ -63,12 +63,14 @@
     <Compile Include="DataFrame.cs" />
     <Compile Include="HandshakeHandler.cs" />
     <Compile Include="ClientHandshake.cs" />
+    <Compile Include="Interfaces\ISocket.cs" />
     <Compile Include="Interfaces\IWebSocketConnection.cs" />
     <Compile Include="FleckLog.cs" />
     <Compile Include="Receiver.cs" />
     <Compile Include="Sender.cs" />
     <Compile Include="ServerHandshake.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SocketWrapper.cs" />
     <Compile Include="WebSocketConnection.cs" />
     <Compile Include="WebSocketServer.cs" />
   </ItemGroup>
