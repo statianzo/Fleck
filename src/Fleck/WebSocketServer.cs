@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Sockets;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace Fleck
 {
@@ -49,22 +50,14 @@ namespace Fleck
 
 		private void ListenForClients()
 		{
-			ListenerSocket.BeginAccept(OnClientConnect, null);
+			Task<Socket>.Factory.FromAsync(ListenerSocket.BeginAccept, ListenerSocket.EndAccept, null)
+				.ContinueWith(OnClientConnect)
+				.ContinueWith(t => Log.Error("Listener socket is closed"), TaskContinuationOptions.OnlyOnFaulted);
 		}
 
-		private void OnClientConnect(IAsyncResult ar)
+		private void OnClientConnect(Task<Socket> task)
 		{
-			Socket clientSocket;
-
-			try
-			{
-				clientSocket = ListenerSocket.EndAccept(ar);
-			}
-			catch
-			{
-				Log.Error("Listener socket is closed");
-				return;
-			}
+			Socket clientSocket = task.Result;
 			ListenForClients();
 
 

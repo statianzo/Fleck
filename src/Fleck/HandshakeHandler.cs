@@ -5,10 +5,11 @@ using System.Text;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 namespace Fleck
 {
-	internal class HandshakeHandler
+	public class HandshakeHandler
 	{
 		public HandshakeHandler(string origin, string location)
 		{
@@ -24,20 +25,14 @@ namespace Fleck
 
 		public void Shake(Socket socket)
 		{
-			try
-			{
-				var state = new HandShakeState {Socket = socket};
-				state.Socket.BeginReceive(state.Buffer, 0, state.Buffer.Length, 0,
-				                          r =>
-				                          	{
-				                          		int received = socket.EndReceive(r);
-				                          		DoShake(state, received);
-				                          	}, null);
-			}
-			catch (Exception e)
-			{
-				Log.Error("Exception thrown from method Receive:\n" + e.Message);
-			}
+			var state = new HandShakeState {Socket = socket};
+
+			var segment = new ArraySegment<byte>(state.Buffer);
+
+			Task<int>.Factory.FromAsync(socket.BeginReceive, socket.EndReceive, new[] {segment}, SocketFlags.None, null)
+				.ContinueWith(t => DoShake(state, t.Result))
+				.ContinueWith(t => Log.Error("Exception thrown from method Receive:\n" + t.Exception.Message),
+				TaskContinuationOptions.OnlyOnFaulted);
 		}
 
 		private void DoShake(HandShakeState state, int receivedByteCount)
@@ -136,13 +131,11 @@ namespace Fleck
 			Array.Resize(ref byteResponse, byteResponseLength + handshake.AnswerBytes.Length);
 			Array.Copy(handshake.AnswerBytes, 0, byteResponse, byteResponseLength, handshake.AnswerBytes.Length);
 
-			socket.BeginSend(byteResponse, 0, byteResponse.Length, 0,
-			                 r =>
-			                 	{
-			                 		socket.EndSend(r);
-			                 		EndSendServerHandshake();
-			                 	}
-			                 , null);
+			var segment = new ArraySegment<byte>(byteResponse);
+
+			Task<int>.Factory.FromAsync(socket.BeginSend, socket.EndSend, new[] {segment}, SocketFlags.None, null)
+				.ContinueWith(t => EndSendServerHandshake())
+				.ContinueWith(t => Log.Error("Send handshake failed: " + t.Exception.Message), TaskContinuationOptions.OnlyOnFaulted);
 		}
 
 		private void EndSendServerHandshake()

@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace Fleck
 {
 	public class DataFrame
 	{
-		public const byte End = 255;
-		public const byte Start = 0;
+		private const byte End = 255;
+		private const byte Start = 0;
 
 		private readonly StringBuilder _builder;
 		private readonly List<byte> _buffer;
