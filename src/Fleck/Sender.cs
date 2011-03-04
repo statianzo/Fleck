@@ -24,8 +24,7 @@ namespace Fleck
 			Task<int>.Factory.FromAsync(Socket.BeginSend, Socket.EndSend, new[] {segment}, SocketFlags.None, null)
 				.ContinueWith(t =>
 					{
-						if (t.Exception == null) return;
-						FleckLog.Error(t.Exception.Message);
+						FleckLog.Error("Send failed", t.Exception);
 						_connection.Close();
 					}, TaskContinuationOptions.OnlyOnFaulted);
 		}

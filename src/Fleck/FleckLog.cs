@@ -22,22 +22,22 @@ namespace Fleck
 
 		public static void Warn(string message, Exception ex = null)
 		{
-			LogAction(LogLevel.Warn, message,ex);
+			LogAction(LogLevel.Warn, message, ex);
 		}
 
 		public static void Error(string message, Exception ex = null)
 		{
-			LogAction(LogLevel.Error, message,ex);
+			LogAction(LogLevel.Error, message, ex);
 		}
 
 		public static void Debug(string message, Exception ex = null)
 		{
-			LogAction(LogLevel.Debug, message,ex);
+			LogAction(LogLevel.Debug, message, ex);
 		}
 
 		public static void Info(string message, Exception ex = null)
 		{
-			LogAction(LogLevel.Info, message,ex);
+			LogAction(LogLevel.Info, message, ex);
 		}
 
 	}

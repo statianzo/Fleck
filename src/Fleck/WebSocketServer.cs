@@ -52,7 +52,7 @@ namespace Fleck
 		{
 			Task<Socket>.Factory.FromAsync(ListenerSocket.BeginAccept, ListenerSocket.EndAccept, null)
 				.ContinueWith(OnClientConnect)
-				.ContinueWith(t => FleckLog.Error("Listener socket is closed"), TaskContinuationOptions.OnlyOnFaulted);
+				.ContinueWith(t => FleckLog.Error("Listener socket is closed", t.Exception), TaskContinuationOptions.OnlyOnFaulted);
 		}
 
 		private void OnClientConnect(Task<Socket> task)

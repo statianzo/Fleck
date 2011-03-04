@@ -31,7 +31,7 @@ namespace Fleck
 
 			Task<int>.Factory.FromAsync(socket.BeginReceive, socket.EndReceive, new[] {segment}, SocketFlags.None, null)
 				.ContinueWith(t => DoShake(state, t.Result))
-				.ContinueWith(t => FleckLog.Error("Exception thrown from method Receive:\n" + t.Exception.Message),
+				.ContinueWith(t => FleckLog.Error("Failed to recieve handshake", t.Exception),
 				TaskContinuationOptions.OnlyOnFaulted);
 		}
 
@@ -135,7 +135,7 @@ namespace Fleck
 
 			Task<int>.Factory.FromAsync(socket.BeginSend, socket.EndSend, new[] {segment}, SocketFlags.None, null)
 				.ContinueWith(t => EndSendServerHandshake())
-				.ContinueWith(t => FleckLog.Error("Send handshake failed: " + t.Exception.Message), TaskContinuationOptions.OnlyOnFaulted);
+				.ContinueWith(t => FleckLog.Error("Send handshake failed", t.Exception), TaskContinuationOptions.OnlyOnFaulted);
 		}
 
 		private void EndSendServerHandshake()

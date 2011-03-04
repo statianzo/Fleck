@@ -64,8 +64,7 @@ namespace Fleck
 					}, TaskContinuationOptions.NotOnFaulted)
 				.ContinueWith(t =>
 					{
-						if (t.Exception == null) return;
-						FleckLog.Error(t.Exception.Message);
+						FleckLog.Error("Recieve failed", t.Exception);
 						_connection.Close();
 					}, TaskContinuationOptions.OnlyOnFaulted);
 		}
