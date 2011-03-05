@@ -40,5 +40,4 @@ namespace Fleck
 			Socket.Close();
 		}
 	}
-
 }
