@@ -35,7 +35,7 @@ namespace Fleck
 				TaskContinuationOptions.OnlyOnFaulted);
 		}
 
-		private void DoShake(HandShakeState state, int receivedByteCount)
+	    public void DoShake(HandShakeState state, int receivedByteCount)
 		{
 			ClientHandshake = ParseClientHandshake(new ArraySegment<byte>(state.Buffer, 0, receivedByteCount));
 
@@ -52,7 +52,7 @@ namespace Fleck
 			}
 		}
 
-		private static ClientHandshake ParseClientHandshake(ArraySegment<byte> byteShake)
+	    public static ClientHandshake ParseClientHandshake(ArraySegment<byte> byteShake)
 		{
 			const string pattern = @"^(?<connect>[^\s]+)\s(?<path>[^\s]+)\sHTTP\/1\.1\r\n" + // request line
 			                       @"((?<field_name>[^:\r\n]+):\s(?<field_value>[^\r\n]+)\r\n)+";
@@ -104,7 +104,7 @@ namespace Fleck
 			return handshake;
 		}
 
-		private ServerHandshake GenerateResponseHandshake()
+	    public ServerHandshake GenerateResponseHandshake()
 		{
 			var responseHandshake = new ServerHandshake
 			{
@@ -122,7 +122,7 @@ namespace Fleck
 			return responseHandshake;
 		}
 
-		private void BeginSendServerHandshake(ServerHandshake handshake, ISocket socket)
+	    public void BeginSendServerHandshake(ServerHandshake handshake, ISocket socket)
 		{
 			string stringShake = handshake.ToResponseString();
 
@@ -144,7 +144,7 @@ namespace Fleck
 				OnSuccess(ClientHandshake);
 		}
 
-		private static byte[] CalculateAnswerBytes(string key1, string key2, ArraySegment<byte> challenge)
+	    public static byte[] CalculateAnswerBytes(string key1, string key2, ArraySegment<byte> challenge)
 		{
 			byte[] result1Bytes = ParseKey(key1);
 			byte[] result2Bytes = ParseKey(key2);
@@ -158,7 +158,7 @@ namespace Fleck
 			return md5.ComputeHash(rawAnswer);
 		}
 
-		private static byte[] ParseKey(string key)
+	    public static byte[] ParseKey(string key)
 		{
 			int spaces = key.Count(x => x == ' ');
 			var digits = new String(key.Where(Char.IsDigit).ToArray());
@@ -171,7 +171,7 @@ namespace Fleck
 			return result;
 		}
 
-		private class HandShakeState
+	    public class HandShakeState
 		{
 			private const int BufferSize = 1024;
 			public readonly byte[] Buffer = new byte[BufferSize];

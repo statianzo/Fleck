@@ -47,7 +47,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HandshakeHandlerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReceiverTests.cs" />
+    <Compile Include="SenderTests.cs" />
     <Compile Include="WebSocketServerTests.cs" />
   </ItemGroup>
   <ItemGroup>

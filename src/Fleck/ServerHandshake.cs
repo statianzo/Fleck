@@ -12,7 +12,7 @@ namespace Fleck
 
 		public string ToResponseString()
 		{
-			string stringShake = "HTTP/1.1 101 Web Socket Protocol Handshake\r\n" +
+			string stringShake = "HTTP/1.1 101 WebSocket Protocol Handshake\r\n" +
 								 "Upgrade: WebSocket\r\n" +
 								 "Connection: Upgrade\r\n" +
 								 "Sec-WebSocket-Origin: " + Origin + "\r\n" +
