@@ -45,16 +45,21 @@ namespace Fleck
 			return stringShake;
 		}
 
-		public bool Validate(string origin, string host)
-		{
-			bool hasRequiredFields = (Host != null) &&
-			                         (Key1 != null) &&
-			                         (Key2 != null) &&
-			                         (Origin != null) &&
-			                         (ResourcePath != null);
+        public bool Validate(string origin, string host)
+        {
+            bool hasRequiredFields = (Host != null) &&
+                                     (Key1 != null) &&
+                                     (Key2 != null) &&
+                                     (Origin != null) &&
+                                     (ResourcePath != null);
+            var hostUri = "ws://" + Host;
 
-			return hasRequiredFields && new Uri("ws://" + Host) == new Uri(host) && (origin == null || origin == Origin);
 
-		}
-	}
+            return hasRequiredFields &&
+                   Uri.IsWellFormedUriString(hostUri, UriKind.RelativeOrAbsolute) &&
+                   new Uri(hostUri) == new Uri(host) &&
+                   (origin == null || origin == Origin);
+
+        }
+    }
 }
