@@ -53,7 +53,7 @@ namespace Fleck
 			                         (Origin != null) &&
 			                         (ResourcePath != null);
 
-			return hasRequiredFields && "ws://" + Host == host && (origin == null || origin == Origin);
+			return hasRequiredFields && new Uri("ws://" + Host) == new Uri(host) && (origin == null || origin == Origin);
 
 		}
 	}
