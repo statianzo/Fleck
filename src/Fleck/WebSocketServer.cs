@@ -50,13 +50,15 @@ namespace Fleck
 
 		private void ListenForClients()
 		{
-			Task<ISocket>.Factory.FromAsync(ListenerSocket.BeginAccept, ListenerSocket.EndAccept, null)
-				.ContinueWith(OnClientConnect)
-				.ContinueWith(t => FleckLog.Error("Listener socket is closed", t.Exception), TaskContinuationOptions.OnlyOnFaulted);
+			
+			var task = Task.Factory.FromAsync<ISocket>(ListenerSocket.BeginAccept, ListenerSocket.EndAccept, null);
+			task.ContinueWith(OnClientConnect, TaskContinuationOptions.NotOnFaulted);
+			task.ContinueWith(t => FleckLog.Error("Listener socket is closed", t.Exception), TaskContinuationOptions.OnlyOnFaulted);
 		}
 
 		private void OnClientConnect(Task<ISocket> task)
 		{
+			FleckLog.Debug("Client Connected");
 			ISocket clientSocket = task.Result;
 			ListenForClients();
 
@@ -65,6 +67,7 @@ namespace Fleck
 			{
 				OnSuccess = handshake =>
 					{
+						FleckLog.Debug("Handshake success");
 						var wsc = new WebSocketConnection(clientSocket);
 						_config(wsc);
 						wsc.OnOpen();

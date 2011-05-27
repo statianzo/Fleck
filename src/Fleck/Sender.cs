@@ -22,8 +22,9 @@ namespace Fleck
 			if (!Socket.Connected) return;
 			var wrapped = DataFrame.Wrap(data);
 			var segment = new ArraySegment<byte>(wrapped);
+			Func<AsyncCallback, object,IAsyncResult> begin = (cb, s) => Socket.BeginSend(new []{segment},SocketFlags.None,cb, s);
 
-			Task<int>.Factory.FromAsync(Socket.BeginSend, Socket.EndSend, new[] {segment}, SocketFlags.None, null)
+			Task.Factory.FromAsync<int>(begin, Socket.EndSend, null)
 				.ContinueWith(t =>
 					{
 						FleckLog.Error("Send failed", t.Exception);

@@ -39,8 +39,9 @@ namespace Fleck
                 return;
             }
             var segment = new ArraySegment<byte>(buffer);
+			Func<AsyncCallback, object,IAsyncResult> begin = (cb, s) => Socket.BeginReceive(new []{segment},SocketFlags.None,cb, s);
 
-            var task = Task<int>.Factory.FromAsync(Socket.BeginReceive, Socket.EndReceive, new[] { segment }, SocketFlags.None, null);
+            var task = Task.Factory.FromAsync<int>(begin, Socket.EndReceive, null);
             task.ContinueWith(t =>
                 {
                     int size = t.Result;

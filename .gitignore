@@ -6,4 +6,5 @@ _ReSharper.*
 *.resharper.user
 *.ReSharper.user
 *.suo
-
+*.userprefs
+test-results

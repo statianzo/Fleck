@@ -28,25 +28,30 @@ namespace Fleck
 			var state = new HandShakeState {Socket = socket};
 
 			var segment = new ArraySegment<byte>(state.Buffer);
+			
+			Func<AsyncCallback, object,IAsyncResult> begin = (cb, s) => socket.BeginReceive(new []{segment},SocketFlags.None,cb, s);
 
-			Task<int>.Factory.FromAsync(socket.BeginReceive, socket.EndReceive, new[] {segment}, SocketFlags.None, null)
-				.ContinueWith(t => DoShake(state, t.Result))
-				.ContinueWith(t => FleckLog.Error("Failed to recieve handshake", t.Exception),
+			var task = Task.Factory.FromAsync<int>(begin, socket.EndReceive, null);
+				task.ContinueWith(t => DoShake(state, t.Result), TaskContinuationOptions.NotOnFaulted);
+				task.ContinueWith(t => FleckLog.Error("Failed to recieve handshake", t.Exception),
 				TaskContinuationOptions.OnlyOnFaulted);
 		}
 
 	    public void DoShake(HandShakeState state, int receivedByteCount)
 		{
+			FleckLog.Debug("Starting Handshake");
 			ClientHandshake = ParseClientHandshake(new ArraySegment<byte>(state.Buffer, 0, receivedByteCount));
 
 
 			if (ClientHandshake.Validate(Origin, Location))
 			{
+				FleckLog.Debug("Client handshake validated");
 				ServerHandshake serverShake = GenerateResponseHandshake();
 				BeginSendServerHandshake(serverShake, state.Socket);
 			}
 			else
 			{
+				FleckLog.Debug("Client handshake failed to validate");
 				state.Socket.Close();
 				return;
 			}
@@ -124,6 +129,7 @@ namespace Fleck
 
 	    public void BeginSendServerHandshake(ServerHandshake handshake, ISocket socket)
 		{
+			FleckLog.Debug("Begin create server handshake");
 			string stringShake = handshake.ToResponseString();
 
 			byte[] byteResponse = Encoding.UTF8.GetBytes(stringShake);
@@ -132,14 +138,17 @@ namespace Fleck
 			Array.Copy(handshake.AnswerBytes, 0, byteResponse, byteResponseLength, handshake.AnswerBytes.Length);
 
 			var segment = new ArraySegment<byte>(byteResponse);
-
-			Task<int>.Factory.FromAsync(socket.BeginSend, socket.EndSend, new[] {segment}, SocketFlags.None, null)
-				.ContinueWith(t => EndSendServerHandshake())
-				.ContinueWith(t => FleckLog.Error("Send handshake failed", t.Exception), TaskContinuationOptions.OnlyOnFaulted);
+			
+			Func<AsyncCallback, object,IAsyncResult> begin = (cb, s) => socket.BeginSend(new []{segment},SocketFlags.None,cb, s);
+			FleckLog.Debug("Sending server handshake");
+			var task = Task.Factory.FromAsync<int>(begin, socket.EndSend, null);
+				task.ContinueWith(t => EndSendServerHandshake(), TaskContinuationOptions.NotOnFaulted);
+				task.ContinueWith(t => FleckLog.Error("Send handshake failed", t.Exception), TaskContinuationOptions.OnlyOnFaulted);
 		}
 
 		private void EndSendServerHandshake()
 		{
+			FleckLog.Debug("Ending server handshake");
 			if (OnSuccess != null)
 				OnSuccess(ClientHandshake);
 		}
