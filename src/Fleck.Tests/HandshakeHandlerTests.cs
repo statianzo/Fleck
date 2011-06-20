@@ -148,7 +148,7 @@ Sec-WebSocket-Protocol: sample
 
         public void Close()
         {
-            throw new NotImplementedException();
+            Console.WriteLine("Closed");
         }
 
         public IAsyncResult BeginSend(IList<ArraySegment<byte>> buffers, SocketFlags socketFlags, AsyncCallback callback, object state)
