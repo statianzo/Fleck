@@ -13,15 +13,18 @@ namespace Fleck.Tests
         private bool _wasClosed;
         private Mock<ISocket> _mockSocket;
         private Receiver _receiver;
-        private string _message;
+        private EventWaitHandle _closeHandle;
 
         [SetUp]
         public void Setup()
         {
-            _message = null;
             _wasClosed = false;
             _mockSocket = new Mock<ISocket>();
-            _receiver = new Receiver(_mockSocket.Object,s => _message = s, () => _wasClosed = true);
+            _closeHandle = new EventWaitHandle(false,EventResetMode.ManualReset);
+            _receiver = new Receiver(_mockSocket.Object,s => {}, () => {
+              _wasClosed = true;
+              _closeHandle.Set();
+            });
         }
 
         [Test]
@@ -52,7 +55,7 @@ namespace Fleck.Tests
                 .Throws<Exception>()
                 .Verifiable();
             _receiver.Receive();
-            Thread.Sleep(100);
+            _closeHandle.WaitOne();
             _mockSocket.Verify();
             Assert.IsTrue(_wasClosed);
         }

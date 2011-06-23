@@ -8,3 +8,5 @@ _ReSharper.*
 *.suo
 *.userprefs
 test-results
+*.pidb
+TestResult.xml
