@@ -13,13 +13,19 @@ namespace Fleck.Tests
         private bool _wasHit;
         private Mock<ISocket> _mockSocket;
         private Sender _sender;
+        private EventWaitHandle _closeHandle;
 
         [SetUp]
         public void Setup()
         {
             _wasHit = false;
             _mockSocket = new Mock<ISocket>();
-            _sender = new Sender(_mockSocket.Object, () => _wasHit = true);
+            _closeHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
+            _sender = new Sender(_mockSocket.Object, () => 
+            {
+              _wasHit = true;
+              _closeHandle.Set();
+            });
         }
 
         [Test]
@@ -60,7 +66,7 @@ namespace Fleck.Tests
                 .Throws<Exception>()
                 .Verifiable();
             _sender.Send("Data!");
-            Thread.Sleep(100);
+            _closeHandle.WaitOne();
             _mockSocket.Verify();
             Assert.IsTrue(_wasHit);
         }
