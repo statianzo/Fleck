@@ -11,12 +11,14 @@ namespace Fleck
 {
 	public class HandshakeHandler
 	{
-		public HandshakeHandler(string origin, string location)
+		public HandshakeHandler(string origin, string location, string scheme)
 		{
 			Origin = origin;
 			Location = location;
+      Scheme = scheme;
 		}
 
+    public string Scheme { get; set; }
 		public string Origin { get; set; }
 		public string Location { get; set; }
 		public ClientHandshake ClientHandshake { get; set; }
@@ -43,7 +45,7 @@ namespace Fleck
 			ClientHandshake = ParseClientHandshake(new ArraySegment<byte>(state.Buffer, 0, receivedByteCount));
 
 
-			if (ClientHandshake.Validate(Origin, Location))
+			if (ClientHandshake.Validate(Origin, Location, Scheme))
 			{
 				FleckLog.Debug("Client handshake validated");
 				ServerHandshake serverShake = GenerateResponseHandshake();
@@ -113,7 +115,7 @@ namespace Fleck
 		{
 			var responseHandshake = new ServerHandshake
 			{
-				Location = "ws://" + ClientHandshake.Host + ClientHandshake.ResourcePath,
+				Location = string.Format("{0}://{1}{2}", Scheme, ClientHandshake.Host, ClientHandshake.ResourcePath),
 				Origin = ClientHandshake.Origin,
 				SubProtocol = ClientHandshake.SubProtocol
 			};

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Fleck
 {
@@ -24,5 +25,6 @@ namespace Fleck
 		int EndSend(IAsyncResult asyncResult);
 		void Bind(EndPoint ipLocal);
 		void Listen(int backlog);
+    void Authenticate(X509Certificate2 certificate, Action callback, Action<Exception> error);
 	}
 }
