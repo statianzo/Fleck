@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
 using System.Security.Cryptography.X509Certificates;
@@ -118,26 +119,25 @@ Sec-WebSocket-Protocol: sample
             get { throw new NotImplementedException(); }
         }
 
-        public IAsyncResult BeginReceive(IList<ArraySegment<byte>> buffers, SocketFlags socketFlags, AsyncCallback callback, object state)
-        {
-            Encoding.UTF8.GetBytes(_request).CopyTo(buffers[0].Array, 0);
-            var result = new Mock<IAsyncResult>();
-            result.Setup(r => r.AsyncState).Returns(state);
-            callback(result.Object);
-            return result.Object;
-        }
-
-        public int EndReceive(IAsyncResult asyncResult)
-        {
-            return Encoding.UTF8.GetBytes(_request).Length;
-        }
-
-        public IAsyncResult BeginAccept(AsyncCallback callback, object state)
+        public Task<ISocket> Accept(Action<ISocket> callback, Action<Exception> error)
         {
             throw new NotImplementedException();
         }
 
-        public ISocket EndAccept(IAsyncResult asyncResult)
+        public Task Send(byte[] buffer, Action callback, Action<Exception> error)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<int> Receive(byte[] buffer, Action<int> callback, Action<Exception> error)
+        {
+            var bytes = Encoding.UTF8.GetBytes(_request);
+            bytes.CopyTo(buffer, 0);
+            callback(bytes.Length);
+            return new Task<int>(() => bytes.Length);
+        }
+
+        Task ISocket.Authenticate(X509Certificate2 certificate, Action callback, Action<Exception> error)
         {
             throw new NotImplementedException();
         }
@@ -150,16 +150,6 @@ Sec-WebSocket-Protocol: sample
         public void Close()
         {
             Console.WriteLine("Closed");
-        }
-
-        public IAsyncResult BeginSend(IList<ArraySegment<byte>> buffers, SocketFlags socketFlags, AsyncCallback callback, object state)
-        {
-            throw new NotImplementedException();
-        }
-
-        public int EndSend(IAsyncResult asyncResult)
-        {
-            throw new NotImplementedException();
         }
 
         public void Bind(EndPoint ipLocal)

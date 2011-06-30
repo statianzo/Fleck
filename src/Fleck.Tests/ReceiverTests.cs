@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
 
@@ -32,7 +33,7 @@ namespace Fleck.Tests
         {
             _mockSocket.Setup(s => s.Connected).Returns(false);
             _receiver.Receive();
-            _mockSocket.Verify(s => s.BeginReceive(It.IsAny<IList<ArraySegment<byte>>>(),It.IsAny<SocketFlags>(),It.IsAny<AsyncCallback>(),It.IsAny<object>()),Times.Never());
+            _mockSocket.Verify(s => s.Receive(It.IsAny<byte[]>(),It.IsAny<Action<int>>(),It.IsAny<Action<Exception>>()), Times.Never());
             Assert.IsTrue(_wasClosed);
         }
 
@@ -41,26 +42,16 @@ namespace Fleck.Tests
         {
             _mockSocket.Setup(s => s.Connected).Returns(true);
             _receiver.Receive();
-            _mockSocket.Setup(s => s.BeginReceive(It.IsAny<IList<ArraySegment<byte>>>(),It.IsAny<SocketFlags>(),It.IsAny<AsyncCallback>(),It.IsAny<object>()))
-                .Returns<IList<ArraySegment<byte>>, SocketFlags, AsyncCallback, object>((seg, flag, call, obj) =>
+            _mockSocket.Setup(s => s.Receive(It.IsAny<byte[]>(),It.IsAny<Action<int>>(),It.IsAny<Action<Exception>>()))
+                .Returns<byte[], Action<int>, Action<Exception>>((buffer, cb, error) =>
                     {
-                        var result = new Mock<IAsyncResult>();
-                        result.Setup(r => r.AsyncState).Returns(obj);
-                        result.Setup(r => r.IsCompleted).Returns(true);
-                        call(result.Object);
-                        return result.Object;
+                        error(new Exception());
+                        return new Task<int>(() => 0);
                     });
-            _mockSocket
-                .Setup(s => s.EndReceive(It.IsAny<IAsyncResult>()))
-                .Throws<Exception>()
-                .Verifiable();
             _receiver.Receive();
             _closeHandle.WaitOne();
             _mockSocket.Verify();
             Assert.IsTrue(_wasClosed);
         }
-
-
-        
     }
 }

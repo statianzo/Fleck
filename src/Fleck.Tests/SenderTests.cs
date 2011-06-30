@@ -1,7 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
 
@@ -33,7 +32,7 @@ namespace Fleck.Tests
         {
             _mockSocket.Setup(s => s.Connected).Returns(false);
             _sender.Send("Data!");
-            _mockSocket.Verify(s => s.BeginSend(It.IsAny<IList<ArraySegment<byte>>>(),It.IsAny<SocketFlags>(),It.IsAny<AsyncCallback>(),It.IsAny<object>()),Times.Never());
+            _mockSocket.Verify(s => s.Send(It.IsAny<byte[]>(), It.IsAny<Action>(), It.IsAny<Action<Exception>>()),Times.Never());
             Assert.IsFalse(_wasHit);
         }
 
@@ -42,7 +41,7 @@ namespace Fleck.Tests
         {
             _mockSocket.Setup(s => s.Connected).Returns(true);
             _sender.Send("Data!");
-            _mockSocket.Verify(s => s.BeginSend(It.IsAny<IList<ArraySegment<byte>>>(),It.IsAny<SocketFlags>(),It.IsAny<AsyncCallback>(),It.IsAny<object>()),Times.Once());
+            _mockSocket.Verify(s => s.Send(It.IsAny<byte[]>(), It.IsAny<Action>(), It.IsAny<Action<Exception>>()),Times.Once());
             Assert.IsFalse(_wasHit);
         }
         
@@ -51,20 +50,13 @@ namespace Fleck.Tests
         {
             _mockSocket.Setup(
                 s =>
-                s.BeginSend(It.IsAny<IList<ArraySegment<byte>>>(), It.IsAny<SocketFlags>(), It.IsAny<AsyncCallback>(),
-                            It.IsAny<object>()))
-                .Returns<IList<ArraySegment<byte>>, SocketFlags, AsyncCallback, object>((seg, flag, call, obj) =>
+                s.Send(It.IsAny<byte[]>(), It.IsAny<Action>(), It.IsAny<Action<Exception>>()))
+                .Returns<byte[], Action, Action<Exception>>((buffer, cb, error) =>
                     {
-                        var result = new Mock<IAsyncResult>();
-                        result.Setup(r => r.AsyncState).Returns(obj);
-                        call(result.Object);
-                        return result.Object;
+                        error(new Exception());
+                        return new Task(() => { });
                     });
             _mockSocket.Setup(s => s.Connected).Returns(true);
-            _mockSocket
-                .Setup(s => s.EndSend(It.IsAny<IAsyncResult>()))
-                .Throws<Exception>()
-                .Verifiable();
             _sender.Send("Data!");
             _closeHandle.WaitOne();
             _mockSocket.Verify();

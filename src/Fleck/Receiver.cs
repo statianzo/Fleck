@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Sockets;
-using System.Threading.Tasks;
 
 namespace Fleck
 {
     public class Receiver
     {
-        private readonly ISocket _socket;
-        private readonly Action<string> _messageAction;
-        private readonly Action _closeAction;
         private const int BufferSize = 16384;
+        private readonly Action _closeAction;
+        private readonly Action<string> _messageAction;
         private readonly Queue<byte> _queue;
+        private readonly ISocket _socket;
 
         public Receiver(ISocket socket, Action<string> messageAction, Action closeAction)
         {
@@ -38,40 +36,38 @@ namespace Fleck
                 _closeAction();
                 return;
             }
-            var segment = new ArraySegment<byte>(buffer);
-			Func<AsyncCallback, object,IAsyncResult> begin = (cb, s) => Socket.BeginReceive(new []{segment},SocketFlags.None,cb, s);
 
-            var task = Task.Factory.FromAsync<int>(begin, Socket.EndReceive, null);
-            task.ContinueWith(t =>
-                {
-                    int size = t.Result;
-                    var dataframe = frame;
+            Socket
+                .Receive(buffer,
+                         size =>
+                         {
+                             DataFrame dataframe = frame;
 
-                    if (size <= 0)
-                    {
-                        _closeAction();
-                        return;
-                    }
+                             if (size <= 0)
+                             {
+                                 _closeAction();
+                                 return;
+                             }
 
-                    for (int i = 0; i < size; i++)
-                        _queue.Enqueue(buffer[i]);
+                             for (int i = 0; i < size; i++)
+                                 _queue.Enqueue(buffer[i]);
 
-                    while (_queue.Count > 0)
-                    {
-                        dataframe.Append(_queue.Dequeue());
-                        if (!dataframe.IsComplete) continue;
+                             while (_queue.Count > 0)
+                             {
+                                 dataframe.Append(_queue.Dequeue());
+                                 if (!dataframe.IsComplete) continue;
 
-                        var data = dataframe.ToString();
-                        _messageAction(data);
-                        dataframe = new DataFrame();
-                    }
-                    Receive(dataframe);
-                }, TaskContinuationOptions.NotOnFaulted);
-            task.ContinueWith(t =>
-                {
-                    FleckLog.Error("Recieve failed", t.Exception);
-                    _closeAction();
-                }, TaskContinuationOptions.OnlyOnFaulted);
+                                 string data = dataframe.ToString();
+                                 _messageAction(data);
+                                 dataframe = new DataFrame();
+                             }
+                             Receive(dataframe);
+                         },
+                         e =>
+                         {
+                             FleckLog.Error("Recieve failed", e);
+                             _closeAction();
+                         });
         }
     }
 }
