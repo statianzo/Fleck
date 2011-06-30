@@ -38,7 +38,7 @@ namespace Fleck
 
         public void Dispose()
         {
-            ((IDisposable) ListenerSocket).Dispose();
+            ListenerSocket.Close();
         }
 
         public void Start(Action<IWebSocketConnection> config)
