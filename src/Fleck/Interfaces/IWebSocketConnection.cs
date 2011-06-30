@@ -8,6 +8,6 @@ namespace Fleck
 		Action OnClose { get; set; }
 		Action<string> OnMessage { get; set; }
 		void Send(string message);
-	    void Close();
+		void Close();
 	}
 }
