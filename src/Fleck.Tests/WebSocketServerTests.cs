@@ -29,5 +29,28 @@ namespace Fleck.Tests
 			socketMock.Verify(s => s.Bind(It.Is<IPEndPoint>(i => i.Port == 8000)));
 			socketMock.Verify(s => s.BeginAccept(It.IsAny<AsyncCallback>(), It.IsAny<object>()));
 		}
+   
+   [Test]
+   public void ShouldBeSecureWithWssAndCertificate()
+   {
+     var server = new WebSocketServer("wss://secureplace.com:8000");
+     server.Certificate = "MyCert.cer";
+     Assert.IsTrue(server.IsSecure);
+   } 
+   
+   [Test]
+   public void ShouldNotBeSecureWithWssAndNoCertificate()
+   {
+     var server = new WebSocketServer("wss://secureplace.com:8000");
+     Assert.IsFalse(server.IsSecure);
+   } 
+   
+   [Test]
+   public void ShouldNotBeSecureWithoutWssAndCertificate()
+   {
+     var server = new WebSocketServer("ws://secureplace.com:8000");
+     server.Certificate = "MyCert.cer";
+     Assert.IsFalse(server.IsSecure);
+   } 
 	}
 }

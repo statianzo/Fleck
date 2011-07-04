@@ -15,7 +15,7 @@
             clientHandshake.ResourcePath = "BBB";
 
             clientHandshake.Host = "localhost:8181";
-            Assert.IsTrue(clientHandshake.Validate(null, "ws://localhost:8181/"));
+            Assert.IsTrue(clientHandshake.Validate(null, "ws://localhost:8181/", "ws"));
         }
 
         [Test]
@@ -28,7 +28,7 @@
             clientHandshake.ResourcePath = "BBB";
 
             clientHandshake.Host = "$%%$%NoT^^^A)()(()VALID--==!!URI&&&@@#$#~~~";
-            Assert.IsFalse(clientHandshake.Validate(null, "ws://localhost:8181/"));
+            Assert.IsFalse(clientHandshake.Validate(null, "ws://localhost:8181/", "ws"));
         }
 
         [Test]
@@ -41,7 +41,7 @@
             clientHandshake.ResourcePath = "BBB";
 
             clientHandshake.Host = null;
-            Assert.IsFalse(clientHandshake.Validate(null, "ws://localhost:8181/"));
+            Assert.IsFalse(clientHandshake.Validate(null, "ws://localhost:8181/", "ws"));
         }
     }
 }

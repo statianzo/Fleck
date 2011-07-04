@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using Moq;
 using NUnit.Framework;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Fleck.Tests
 {
@@ -44,7 +45,7 @@ Sec-WebSocket-Protocol: sample
         [SetUp]
         public void Setup()
         {
-            _handler = new HandshakeHandler(null, "ws://fleck-test.com");
+            _handler = new HandshakeHandler(null, "ws://fleck-test.com", "ws");
         }
 
         [Test]
@@ -169,6 +170,11 @@ Sec-WebSocket-Protocol: sample
         public void Listen(int backlog)
         {
             throw new NotImplementedException();
+        }
+
+        public void Authenticate (X509Certificate2 certificate, Action callback, Action<Exception> error)
+        {
+          throw new NotImplementedException ();
         }
     }
 }

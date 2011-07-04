@@ -45,15 +45,17 @@ namespace Fleck
 			return stringShake;
 		}
 
-        public bool Validate(string origin, string host)
+        public bool Validate(string origin, string host, string scheme)
         {
             bool hasRequiredFields = (Host != null) &&
                                      (Key1 != null) &&
                                      (Key2 != null) &&
                                      (Origin != null) &&
                                      (ResourcePath != null);
-            var hostUri = "ws://" + Host;
-
+                                     
+            var hostUri = string.Format("{0}://{1}", scheme, Host);
+            
+            FleckLog.Debug(string.Format("Client host {0}", Host));
 
             return hasRequiredFields &&
                    Uri.IsWellFormedUriString(hostUri, UriKind.RelativeOrAbsolute) &&
