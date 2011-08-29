@@ -28,16 +28,16 @@ namespace Fleck.Tests
     }
     
         const string body =
-@"GET /demo HTTP/1.1
-Host: example.com
-Connection: Upgrade
-Sec-WebSocket-Key2: 12998 5 Y3 1  .P00
-Sec-WebSocket-Protocol: sample
-Upgrade: WebSocket
-Sec-WebSocket-Key1: 4 @1  46546xW%0l 1 5
-Origin: http://example.com
-
-^n:ds[4U";
+"GET /demo HTTP/1.1\r\n" +
+"Host: example.com\r\n" +
+"Connection: Upgrade\r\n" +
+"Sec-WebSocket-Key2: 12998 5 Y3 1  .P00\r\n" +
+"Sec-WebSocket-Protocol: sample\r\n" +
+"Upgrade: WebSocket\r\n" +
+"Sec-WebSocket-Key1: 4 @1  46546xW%0l 1 5\r\n" +
+"Origin: http://example.com\r\n" +
+"\r\n" +
+"^n:ds[4U";
     
     [Test]
     public void ShouldReadResourceLine()
