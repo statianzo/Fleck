@@ -11,6 +11,8 @@ namespace Fleck
 
     public string Path { get; set; }
     
+    public string Body { get; set; }
+    
     public IDictionary<string,string> Headers {
       get {
         return headers;
