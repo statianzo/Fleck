@@ -56,6 +56,35 @@ Global
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = Samples\ConsoleApp\ConsoleApp.csproj
+		Policies = $0
+		$0.TextStylePolicy = $1
+		$1.FileWidth = 120
+		$1.NoTabsAfterNonTabs = True
+		$1.EolMarker = Windows
+		$1.inheritsSet = VisualStudio
+		$1.inheritsScope = text/plain
+		$1.scope = text/x-csharp
+		$0.CSharpFormattingPolicy = $2
+		$2.BeforeMethodDeclarationParentheses = False
+		$2.BeforeMethodCallParentheses = False
+		$2.BeforeConstructorDeclarationParentheses = False
+		$2.BeforeIndexerDeclarationBracket = False
+		$2.BeforeDelegateDeclarationParentheses = False
+		$2.AfterDelegateDeclarationParameterComma = True
+		$2.NewParentheses = False
+		$2.SpacesBeforeBrackets = False
+		$2.inheritsSet = Mono
+		$2.inheritsScope = text/x-csharp
+		$2.scope = text/x-csharp
+		$0.DotNetNamingPolicy = $3
+		$3.DirectoryNamespaceAssociation = PrefixedHierarchical
+		$3.ResourceNamePolicy = FileFormatDefault
+		$0.TextStylePolicy = $4
+		$4.FileWidth = 120
+		$4.TabWidth = 4
+		$4.inheritsSet = Mono
+		$4.inheritsScope = text/plain
+		$4.scope = text/plain
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

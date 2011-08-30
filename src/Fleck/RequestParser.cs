@@ -1,10 +1,11 @@
 using System;
 using System.Text;
 using System.Text.RegularExpressions;
+using Fleck.Interfaces;
 
 namespace Fleck
 {
-  public class RequestParser
+  public class RequestParser : IRequestParser
   {
     const string pattern = @"^(?<method>[^\s]+)\s(?<path>[^\s]+)\sHTTP\/1\.1\r\n" + // request line
                            @"((?<field_name>[^:\r\n]+):\s(?<field_value>[^\r\n]+)\r\n)+" + //headers

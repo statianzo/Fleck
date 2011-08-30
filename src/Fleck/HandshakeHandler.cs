@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Security.Cryptography;
+using Fleck.Interfaces;
 
 namespace Fleck
 {
@@ -14,6 +15,7 @@ namespace Fleck
             Origin = origin;
             Location = location;
             Scheme = scheme;
+            RequestParser = new RequestParser();
         }
 
         public string Scheme { get; set; }
@@ -21,7 +23,7 @@ namespace Fleck
         public string Location { get; set; }
         public ClientHandshake ClientHandshake { get; set; }
         public Action<ClientHandshake> OnSuccess { get; set; }
-
+        public IRequestParser RequestParser { get; set; }
 
         public void Shake(ISocket socket)
         {

@@ -10,7 +10,6 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Fleck</RootNamespace>
     <AssemblyName>Fleck</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -54,8 +53,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Core">
-    </Reference>
+    <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataFrame.cs" />
@@ -73,6 +71,8 @@
     <Compile Include="WebSocketServer.cs" />
     <Compile Include="WebsocketHttpRequest.cs" />
     <Compile Include="RequestParser.cs" />
+    <Compile Include="Interfaces\IRequestParser.cs" />
+    <Compile Include="Interfaces\IResponseBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

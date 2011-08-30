@@ -10,7 +10,6 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Fleck.Tests</RootNamespace>
     <AssemblyName>Fleck.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -41,8 +40,7 @@
     <Reference Include="Moq, Version=4.0.10827.0, Culture=neutral, PublicKeyToken=69f491c39445e920">
       <HintPath>..\..\libs\TestingLibs\Moq.dll</HintPath>
     </Reference>
-    <Reference Include="nunit.framework, Version=2.5.5.10112, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="nunit.framework">
       <HintPath>..\..\libs\TestingLibs\nunit.framework.dll</HintPath>
     </Reference>
   </ItemGroup>
