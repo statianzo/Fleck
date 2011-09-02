@@ -14,15 +14,15 @@ namespace Fleck
                            
     private static readonly Regex _regex = new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
                            
-    public bool IsComplete(ArraySegment<byte> bytes)
+    public bool IsComplete(byte[] bytes)
     {
-      var requestString = Encoding.UTF8.GetString(bytes.Array, bytes.Offset, bytes.Count);
+      var requestString = Encoding.UTF8.GetString(bytes);
       return _regex.IsMatch(requestString);
     }
     
-    public WebSocketHttpRequest Parse(ArraySegment<byte> bytes)
+    public WebSocketHttpRequest Parse(byte[] bytes)
     {
-      var body = Encoding.UTF8.GetString(bytes.Array, bytes.Offset, bytes.Count);
+      var body = Encoding.UTF8.GetString(bytes);
       Match match = _regex.Match(body);
       
       var request = new WebSocketHttpRequest{

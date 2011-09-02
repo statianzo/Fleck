@@ -16,6 +16,7 @@ namespace Fleck
             Location = location;
             Scheme = scheme;
             RequestParser = new RequestParser();
+            ResponseBuilderFactory = new ResponseBuilderFactory();
         }
 
         public string Scheme { get; set; }
@@ -24,105 +25,43 @@ namespace Fleck
         public ClientHandshake ClientHandshake { get; set; }
         public Action<ClientHandshake> OnSuccess { get; set; }
         public IRequestParser RequestParser { get; set; }
+        public IResponseBuilderFactory ResponseBuilderFactory { get; set; }
 
-        public void Shake(ISocket socket)
+        public void Shake(ISocket socket, HandShakeState state = null)
         {
-            var state = new HandShakeState { Socket = socket };
+            state = state ?? new HandShakeState { Socket = socket };
 
             socket.Receive(state.Buffer,
                            r => DoShake(state, r),
-                           e => FleckLog.Error("Failed to recieve handshake", e));
+                           e => FleckLog.Error("Failed to recieve handshake", e),
+                           state.ByteCount);
         }
 
         public void DoShake(HandShakeState state, int receivedByteCount)
         {
-            FleckLog.Debug("Starting Handshake");
-            ClientHandshake = ParseClientHandshake(new ArraySegment<byte>(state.Buffer, 0, receivedByteCount));
-
-
-            if (ClientHandshake.Validate(Origin, Location, Scheme))
+            FleckLog.Debug("Recieving Request");
+            
+            if (receivedByteCount == 0)
             {
-                FleckLog.Debug("Client handshake validated");
-                ServerHandshake serverShake = GenerateResponseHandshake();
-                BeginSendServerHandshake(serverShake, state.Socket);
-            }
-            else
-            {
-                FleckLog.Debug("Client handshake failed to validate");
+                FleckLog.Info("No bytes recieved. Connection closed.");
                 state.Socket.Close();
                 return;
             }
-        }
-
-        public static ClientHandshake ParseClientHandshake(ArraySegment<byte> byteShake)
-        {
-            const string pattern = @"^(?<connect>[^\s]+)\s(?<path>[^\s]+)\sHTTP\/1\.1\r\n" + // request line
-                                   @"((?<field_name>[^:\r\n]+):\s(?<field_value>[^\r\n]+)\r\n)+";
-
-            var handshake = new ClientHandshake();
-            var challenge = new ArraySegment<byte>(byteShake.Array, byteShake.Count - 8, 8); // -8 : eight byte challenge
-            handshake.ChallengeBytes = challenge;
-
-            string utf8Handshake = Encoding.UTF8.GetString(byteShake.Array, 0, byteShake.Count - 8);
-
-            var regex = new Regex(pattern, RegexOptions.IgnoreCase);
-            Match match = regex.Match(utf8Handshake);
-            GroupCollection fields = match.Groups;
-
-            handshake.ResourcePath = fields["path"].Value;
-
-            for (int i = 0; i < fields["field_name"].Captures.Count; i++)
+            
+            if (!RequestParser.IsComplete(state.Buffer))
             {
-                string name = fields["field_name"].Captures[i].ToString();
-                string value = fields["field_value"].Captures[i].ToString();
-
-                switch (name.ToLower())
-                {
-                    case "sec-websocket-key1":
-                        handshake.Key1 = value;
-                        break;
-                    case "sec-websocket-key2":
-                        handshake.Key2 = value;
-                        break;
-                    case "sec-websocket-protocol":
-                        handshake.SubProtocol = value;
-                        break;
-                    case "origin":
-                        handshake.Origin = value;
-                        break;
-                    case "host":
-                        handshake.Host = value;
-                        break;
-                    case "cookie":
-                        handshake.Cookies = value;
-                        break;
-                    default:
-                        if (handshake.AdditionalFields == null)
-                            handshake.AdditionalFields = new Dictionary<string, string>();
-                        handshake.AdditionalFields[name] = value;
-                        break;
-                }
+               FleckLog.Debug("Request Incomplete. Requesting more.");
+               Shake(state.Socket, state);
+               return;
             }
-            return handshake;
+            
+            var request = RequestParser.Parse(state.Buffer);
+            var builder = ResponseBuilderFactory.Resolve(request);
+            var response = builder.Build(request);
+
         }
 
-        public ServerHandshake GenerateResponseHandshake()
-        {
-            var responseHandshake = new ServerHandshake
-            {
-                Location = string.Format("{0}://{1}{2}", Scheme, ClientHandshake.Host, ClientHandshake.ResourcePath),
-                Origin = ClientHandshake.Origin,
-                SubProtocol = ClientHandshake.SubProtocol
-            };
-
-            var challenge = new byte[8];
-            Array.Copy(ClientHandshake.ChallengeBytes.Array, ClientHandshake.ChallengeBytes.Offset, challenge, 0, 8);
-
-            responseHandshake.AnswerBytes =
-                CalculateAnswerBytes(ClientHandshake.Key1, ClientHandshake.Key2, ClientHandshake.ChallengeBytes);
-
-            return responseHandshake;
-        }
+       
 
         public void BeginSendServerHandshake(ServerHandshake handshake, ISocket socket)
         {
@@ -180,6 +119,7 @@ namespace Fleck
             private const int BufferSize = 1024;
             public readonly byte[] Buffer = new byte[BufferSize];
             public ISocket Socket { get; set; }
+            public int ByteCount { get; set; }
         }
     }
 }

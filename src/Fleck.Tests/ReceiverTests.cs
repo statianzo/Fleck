@@ -33,7 +33,7 @@ namespace Fleck.Tests
         {
             _mockSocket.Setup(s => s.Connected).Returns(false);
             _receiver.Receive();
-            _mockSocket.Verify(s => s.Receive(It.IsAny<byte[]>(),It.IsAny<Action<int>>(),It.IsAny<Action<Exception>>()), Times.Never());
+            _mockSocket.Verify(s => s.Receive(It.IsAny<byte[]>(),It.IsAny<Action<int>>(),It.IsAny<Action<Exception>>(), 0), Times.Never());
             Assert.IsTrue(_wasClosed);
         }
 
@@ -42,7 +42,7 @@ namespace Fleck.Tests
         {
             _mockSocket.Setup(s => s.Connected).Returns(true);
             _receiver.Receive();
-            _mockSocket.Setup(s => s.Receive(It.IsAny<byte[]>(),It.IsAny<Action<int>>(),It.IsAny<Action<Exception>>()))
+            _mockSocket.Setup(s => s.Receive(It.IsAny<byte[]>(),It.IsAny<Action<int>>(),It.IsAny<Action<Exception>>(), 0))
                 .Returns<byte[], Action<int>, Action<Exception>>((buffer, cb, error) =>
                     {
                         error(new Exception());

@@ -4,8 +4,8 @@ namespace Fleck.Interfaces
 {
   public interface IRequestParser
   {
-    bool IsComplete(ArraySegment<byte> bytes);
-    WebSocketHttpRequest Parse(ArraySegment<byte> bytes);
+    bool IsComplete(byte[] bytes);
+    WebSocketHttpRequest Parse(byte[] bytes);
   }
 }
 

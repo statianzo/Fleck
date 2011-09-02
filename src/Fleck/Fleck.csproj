@@ -73,6 +73,9 @@
     <Compile Include="RequestParser.cs" />
     <Compile Include="Interfaces\IRequestParser.cs" />
     <Compile Include="Interfaces\IResponseBuilder.cs" />
+    <Compile Include="ResponseBuilderFactory.cs" />
+    <Compile Include="Interfaces\IResponseBuilderFactory.cs" />
+    <Compile Include="RequestBuilders\Draft76ResponseBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -99,4 +102,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <Folder Include="RequestBuilders\" />
+  </ItemGroup>
 </Project>

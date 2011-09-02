@@ -54,52 +54,6 @@ Sec-WebSocket-Protocol: sample
         }
 
 
-        [Test]
-        public void ShouldParseClientHandshake()
-        {
-            var requestBytes = Encoding.UTF8.GetBytes(ExampleRequest);
-            var requestSegment = new ArraySegment<byte>(requestBytes);
-            var client = HandshakeHandler.ParseClientHandshake(requestSegment);
-
-            Assert.AreEqual(Key1, client.Key1);
-            Assert.AreEqual(Key2, client.Key2);
-            Assert.AreEqual("http://example.com", client.Origin);
-            Assert.AreEqual("example.com", client.Host);
-            var clientChallenge = client.ChallengeBytes.Array.Skip(client.ChallengeBytes.Offset).Take(client.ChallengeBytes.Count).ToArray();
-            var clientChallengeString = Encoding.UTF8.GetString(clientChallenge);
-            Assert.AreEqual(Challenge, clientChallengeString);
-        }
-
-        [Test]
-        public void ShouldGenerateServerHandshake()
-        {
-            var requestBytes = Encoding.UTF8.GetBytes(ExampleRequest);
-            var requestSegment = new ArraySegment<byte>(requestBytes);
-            var client = HandshakeHandler.ParseClientHandshake(requestSegment);
-            _handler.ClientHandshake = client;
-            var server = _handler.GenerateResponseHandshake();
-
-            Assert.IsTrue(server.Location.Contains(client.Host));
-            var answer = Encoding.UTF8.GetString(server.AnswerBytes);
-            Assert.AreEqual(ExpectedAnswer,answer);
-
-            Assert.AreEqual(ExampleResponse,server.ToResponseString() + answer);
-
-        }
-
-        [Test]
-        public void ShouldCalculateAnswerBytes()
-        {
-            var challengeBytes = Encoding.UTF8.GetBytes(Challenge);
-            var challengeSegment = new ArraySegment<byte>(challengeBytes);
-            var answerBytes = HandshakeHandler.CalculateAnswerBytes(Key1, Key2, challengeSegment);
-
-            Assert.AreEqual(16, answerBytes.Length);
-
-            var answer = Encoding.UTF8.GetString(answerBytes);
-
-            Assert.AreEqual(ExpectedAnswer, answer);
-        }
     }
 
     public class FakeSocket : ISocket
@@ -126,7 +80,7 @@ Sec-WebSocket-Protocol: sample
             throw new NotImplementedException();
         }
 
-        public Task<int> Receive(byte[] buffer, Action<int> callback, Action<Exception> error)
+        public Task<int> Receive(byte[] buffer, Action<int> callback, Action<Exception> error, int offset)
         {
             var bytes = Encoding.UTF8.GetBytes(_request);
             bytes.CopyTo(buffer, 0);

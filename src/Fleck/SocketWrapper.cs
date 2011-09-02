@@ -55,10 +55,10 @@ namespace Fleck
             get { return _socket.Connected; }
         }
 
-        public Task<int> Receive(byte[] buffer, Action<int> callback, Action<Exception> error)
+        public Task<int> Receive(byte[] buffer, Action<int> callback, Action<Exception> error, int offset = 0)
         {
             Func<AsyncCallback, object, IAsyncResult> begin =
-                (cb, s) => _stream.BeginRead(buffer, 0, buffer.Length, cb, s);
+                (cb, s) => _stream.BeginRead(buffer, offset, buffer.Length, cb, s);
 
             Task<int> task = Task.Factory.FromAsync<int>(begin, _stream.EndRead, null);
             task.ContinueWith(t => callback(t.Result), TaskContinuationOptions.NotOnFaulted);

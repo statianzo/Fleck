@@ -11,7 +11,7 @@ namespace Fleck
 
         Task<ISocket> Accept(Action<ISocket> callback, Action<Exception> error);
         Task Send(byte[] buffer, Action callback, Action<Exception> error);
-        Task<int> Receive(byte[] buffer, Action<int> callback, Action<Exception> error);
+        Task<int> Receive(byte[] buffer, Action<int> callback, Action<Exception> error, int offset = 0);
         Task Authenticate(X509Certificate2 certificate, Action callback, Action<Exception> error);
 
         void Dispose();

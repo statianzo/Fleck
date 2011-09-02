@@ -20,8 +20,7 @@ namespace Fleck.Tests
     [Test]
     public void ShouldReturnRequest()
     {
-      var bytes = new ArraySegment<byte>(new byte[0], 0, 0);
-      WebSocketHttpRequest request = _parser.Parse(bytes);
+      WebSocketHttpRequest request = _parser.Parse(new byte[0]);
       
       Assert.IsNotNull(request);
     }
@@ -29,7 +28,7 @@ namespace Fleck.Tests
     [Test]
     public void ShouldReadResourceLine()
     {
-      WebSocketHttpRequest request = _parser.Parse(ValidRequestArraySegment());
+      WebSocketHttpRequest request = _parser.Parse(ValidRequestArray());
       
       Assert.AreEqual("GET", request.Method);
       Assert.AreEqual("/demo", request.Path);
@@ -38,7 +37,7 @@ namespace Fleck.Tests
     [Test]
     public void ShouldReadHeaders()
     {
-      WebSocketHttpRequest request = _parser.Parse(ValidRequestArraySegment());
+      WebSocketHttpRequest request = _parser.Parse(ValidRequestArray());
       
       Assert.AreEqual("example.com", request.Headers["Host"]);
       Assert.AreEqual("Upgrade", request.Headers["Connection"]);
@@ -49,7 +48,7 @@ namespace Fleck.Tests
     [Test]
     public void ShouldReadBody()
     {
-      WebSocketHttpRequest request = _parser.Parse(ValidRequestArraySegment());
+      WebSocketHttpRequest request = _parser.Parse(ValidRequestArray());
       
       Assert.AreEqual("^n:ds[4U", request.Body);
     }
@@ -58,7 +57,7 @@ namespace Fleck.Tests
     [Test]
     public void ValidRequestShouldBeComplete()
     {
-      Assert.True(_parser.IsComplete(ValidRequestArraySegment()));
+      Assert.True(_parser.IsComplete(ValidRequestArray()));
     }
     
     [Test]
@@ -75,7 +74,7 @@ namespace Fleck.Tests
         "Origin: http://example.com\r\n" +
         "\r\n" +
         "";
-      var bytes = RequestArraySegment(noBodyRequest);
+      var bytes = RequestArray(noBodyRequest);
       
       Assert.True(_parser.IsComplete(bytes));
     }
@@ -83,8 +82,7 @@ namespace Fleck.Tests
     [Test]
     public void EmptyRequestShouldNotBeComplete()
     {
-      var bytes = new ArraySegment<byte>(new byte[0], 0, 0);
-      Assert.False(_parser.IsComplete(bytes));
+      Assert.False(_parser.IsComplete(new byte[0]));
     }
     
     [Test]
@@ -94,7 +92,7 @@ namespace Fleck.Tests
         "GET /zing HTTP/1.1\r\n" +
         "\r\n" +
         "";
-      var bytes = RequestArraySegment(noHeadersNoBodyRequest);
+      var bytes = RequestArray(noHeadersNoBodyRequest);
       
       Assert.False(_parser.IsComplete(bytes));
     }
@@ -110,20 +108,19 @@ namespace Fleck.Tests
         "Sec-WebSocket-Protocol: sample\r\n" +
         "Upgrade: WebSocket\r\n" +
         "Sec-WebSoc"; //Cut off
-      var bytes = RequestArraySegment(partialHeaderRequest);
+      var bytes = RequestArray(partialHeaderRequest);
       
       Assert.False(_parser.IsComplete(bytes));
     }
     
-    public ArraySegment<byte> ValidRequestArraySegment()
+    public byte[] ValidRequestArray()
     {
-      return RequestArraySegment(validRequest);
+      return RequestArray(validRequest);
     }
     
-    public ArraySegment<byte> RequestArraySegment(string request)
+    public byte[] RequestArray(string request)
     {
-      var bodyBytes = Encoding.UTF8.GetBytes(request);
-      return new ArraySegment<byte>(bodyBytes);
+      return Encoding.UTF8.GetBytes(request);
     }
     
     const string validRequest =
