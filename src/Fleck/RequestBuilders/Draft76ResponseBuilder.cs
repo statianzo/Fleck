@@ -23,7 +23,7 @@ namespace Fleck.RequestBuilders
 
         public bool CanHandle(WebSocketHttpRequest request)
         {
-            return request.Headers.ContainsKey("sec-websocket-key1") && request.Headers.ContainsKey("sec-websocket-key2");
+            return request.Headers.ContainsKey("Sec-WebSocket-Key1") && request.Headers.ContainsKey("Sec-WebSocket-Key2");
         }
 
         public byte[] Build(WebSocketHttpRequest request)

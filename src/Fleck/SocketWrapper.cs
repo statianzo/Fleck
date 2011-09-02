@@ -55,7 +55,7 @@ namespace Fleck
             get { return _socket.Connected; }
         }
 
-        public Task<int> Receive(byte[] buffer, Action<int> callback, Action<Exception> error, int offset = 0)
+        public Task<int> Receive(byte[] buffer, Action<int> callback, Action<Exception> error, int offset)
         {
             Func<AsyncCallback, object, IAsyncResult> begin =
                 (cb, s) => _stream.BeginRead(buffer, offset, buffer.Length, cb, s);

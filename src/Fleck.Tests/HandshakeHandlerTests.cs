@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using System.Security.Cryptography.X509Certificates;
+using Fleck.Interfaces;
+using Moq;
 
 namespace Fleck.Tests
 {
@@ -43,7 +45,8 @@ Sec-WebSocket-Protocol: sample
         [SetUp]
         public void Setup()
         {
-            _handler = new HandshakeHandler(null, "ws://fleck-test.com", "ws");
+            var mockFactory = new Mock<IResponseBuilderFactory>();
+            _handler = new HandshakeHandler(mockFactory.Object);
         }
 
         [Test]

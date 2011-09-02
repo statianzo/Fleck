@@ -43,7 +43,7 @@ namespace Fleck.Tests
             _mockSocket.Setup(s => s.Connected).Returns(true);
             _receiver.Receive();
             _mockSocket.Setup(s => s.Receive(It.IsAny<byte[]>(),It.IsAny<Action<int>>(),It.IsAny<Action<Exception>>(), 0))
-                .Returns<byte[], Action<int>, Action<Exception>>((buffer, cb, error) =>
+                .Returns<byte[], Action<int>, Action<Exception>, int>((buffer, cb, error, offset) =>
                     {
                         error(new Exception());
                         return new Task<int>(() => 0);

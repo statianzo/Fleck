@@ -10,18 +10,12 @@ namespace Fleck
 {
     public class HandshakeHandler
     {
-        public HandshakeHandler(string origin, string location, string scheme)
+        public HandshakeHandler(IResponseBuilderFactory factory)
         {
-            Origin = origin;
-            Location = location;
-            Scheme = scheme;
             RequestParser = new RequestParser();
-            ResponseBuilderFactory = new ResponseBuilderFactory();
+            ResponseBuilderFactory = factory;
         }
 
-        public string Scheme { get; set; }
-        public string Origin { get; set; }
-        public string Location { get; set; }
         public ClientHandshake ClientHandshake { get; set; }
         public Action<ClientHandshake> OnSuccess { get; set; }
         public IRequestParser RequestParser { get; set; }
@@ -57,29 +51,22 @@ namespace Fleck
             
             var request = RequestParser.Parse(state.Buffer);
             var builder = ResponseBuilderFactory.Resolve(request);
+            if (builder == null)
+            {
+               FleckLog.Info("Incompatible request.");
+               state.Socket.Close();
+               return;
+            }
+            
             var response = builder.Build(request);
 
-        }
-
-       
-
-        public void BeginSendServerHandshake(ServerHandshake handshake, ISocket socket)
-        {
-            FleckLog.Debug("Begin create server handshake");
-            string stringShake = handshake.ToResponseString();
-
-            byte[] byteResponse = Encoding.UTF8.GetBytes(stringShake);
-            int byteResponseLength = byteResponse.Length;
-            Array.Resize(ref byteResponse, byteResponseLength + handshake.AnswerBytes.Length);
-            Array.Copy(handshake.AnswerBytes, 0, byteResponse, byteResponseLength, handshake.AnswerBytes.Length);
-
-
             FleckLog.Debug("Sending server handshake");
-            socket.Send(byteResponse,
+            state.Socket.Send(response,
                         EndSendServerHandshake,
                         e => FleckLog.Error("Send handshake failed", e));
         }
 
+       
         private void EndSendServerHandshake()
         {
             FleckLog.Debug("Ending server handshake");
