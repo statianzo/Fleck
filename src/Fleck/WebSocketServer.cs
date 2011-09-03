@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using Fleck.Interfaces;
-using Fleck.RequestBuilders;
+using Fleck.ResponseBuilders;
 
 namespace Fleck
 {

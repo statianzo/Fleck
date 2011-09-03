@@ -75,7 +75,7 @@
     <Compile Include="Interfaces\IResponseBuilder.cs" />
     <Compile Include="ResponseBuilderFactory.cs" />
     <Compile Include="Interfaces\IResponseBuilderFactory.cs" />
-    <Compile Include="RequestBuilders\Draft76ResponseBuilder.cs" />
+    <Compile Include="ResponseBuilders\Draft76ResponseBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -103,6 +103,6 @@
   </Target>
   -->
   <ItemGroup>
-    <Folder Include="RequestBuilders\" />
+    <Folder Include="ResponseBuilders\" />
   </ItemGroup>
 </Project>

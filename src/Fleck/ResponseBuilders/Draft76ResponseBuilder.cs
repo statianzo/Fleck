@@ -6,7 +6,7 @@ using Fleck.Interfaces;
 using System.Security.Cryptography;
 using System.Linq;
 
-namespace Fleck.RequestBuilders
+namespace Fleck.ResponseBuilders
 {
     public class Draft76ResponseBuilder : IResponseBuilder
     {

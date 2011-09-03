@@ -1,7 +1,7 @@
 using System;
 using NUnit.Framework;
 using System.Text;
-using Fleck.RequestBuilders;
+using Fleck.ResponseBuilders;
 using System.Linq;
 
 namespace Fleck.Tests
