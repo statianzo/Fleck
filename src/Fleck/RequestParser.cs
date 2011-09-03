@@ -28,7 +28,8 @@ namespace Fleck
       var request = new WebSocketHttpRequest{
         Method = match.Groups["method"].Value,
         Path = match.Groups["path"].Value,
-        Body = match.Groups["body"].Value
+        Body = match.Groups["body"].Value,
+        Bytes = bytes
       };
       
       var fields = match.Groups["field_name"].Captures;

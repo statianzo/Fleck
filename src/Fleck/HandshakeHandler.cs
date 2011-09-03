@@ -35,6 +35,7 @@ namespace Fleck
         {
             FleckLog.Debug("Recieving Request");
             
+            state.ByteCount += receivedByteCount;
             if (receivedByteCount == 0)
             {
                 FleckLog.Info("No bytes recieved. Connection closed.");
@@ -49,7 +50,9 @@ namespace Fleck
                return;
             }
             
-            var request = RequestParser.Parse(state.Buffer);
+            var buffer = state.Buffer;
+            Array.Resize(ref buffer, state.ByteCount);
+            var request = RequestParser.Parse(buffer);
             var builder = ResponseBuilderFactory.Resolve(request);
             if (builder == null)
             {

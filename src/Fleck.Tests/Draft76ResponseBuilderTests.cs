@@ -54,7 +54,8 @@ Sec-WebSocket-Protocol: sample
                     {"Connection","Upgrade"},
                     {"Origin","http://example.com"},
                 },
-                Body = Challenge
+                Body = Challenge,
+                Bytes = Encoding.UTF8.GetBytes(ExampleRequest)
             };
             var client = Draft76ResponseBuilder.ParseClientHandshake(request);
 
@@ -81,7 +82,8 @@ Sec-WebSocket-Protocol: sample
                     {"Origin","http://example.com"},
                 },
                 Body = Challenge,
-                Path = "/demo"
+                Path = "/demo",
+                Bytes = Encoding.UTF8.GetBytes(ExampleRequest)
             };
             var client = Draft76ResponseBuilder.ParseClientHandshake(request);
             var server = _builder.GenerateResponseHandshake(client);

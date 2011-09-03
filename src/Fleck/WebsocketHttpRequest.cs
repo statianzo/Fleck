@@ -13,6 +13,8 @@ namespace Fleck
     
     public string Body { get; set; }
     
+    public byte[] Bytes { get; set; }
+    
     public IDictionary<string,string> Headers {
       get {
         return headers;

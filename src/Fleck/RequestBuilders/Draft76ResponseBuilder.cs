@@ -56,10 +56,10 @@ namespace Fleck.RequestBuilders
                 request.Headers.TryGetValue(key, out result);
                 return result;
             };
-            var bodyBytes = Encoding.UTF8.GetBytes(request.Body);
+            var challenge = request.Bytes.Skip(request.Bytes.Length - 8).ToArray();
             var handshake = new ClientHandshake
             {
-                ChallengeBytes = new ArraySegment<byte>(bodyBytes),
+                ChallengeBytes = new ArraySegment<byte>(challenge),
                 Key1 = getHeader("Sec-WebSocket-Key1"),
                 Key2 = getHeader("Sec-WebSocket-Key2"),
                 SubProtocol = getHeader("Sec-WebSocket-Protocol"),
