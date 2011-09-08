@@ -77,14 +77,14 @@ namespace Fleck
 
         public void Dispose()
         {
-            _stream.Dispose();
-            _socket.Dispose();
+            if (_stream != null) _stream.Dispose();
+            if (_socket != null) _socket.Dispose();
         }
 
         public void Close()
         {
-            _stream.Close();
-            _socket.Close();
+            if (_stream != null) _stream.Close();
+            if (_socket != null) _socket.Close();
         }
 
         public int EndSend(IAsyncResult asyncResult)
