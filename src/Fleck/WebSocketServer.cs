@@ -30,6 +30,7 @@ namespace Fleck
         
         private void RegisterResponseBuilders()
         {
+            ResponseBuilderFactory.Register(new Hybi14ResponseBuilder());
             ResponseBuilderFactory.Register(new Draft76ResponseBuilder(Location, _scheme, Origin));
         }
 
