@@ -59,6 +59,7 @@
     <Compile Include="DataFrame.cs" />
     <Compile Include="HandshakeHandler.cs" />
     <Compile Include="ClientHandshake.cs" />
+    <Compile Include="Hybi14DataFrame.cs" />
     <Compile Include="Interfaces\ISocket.cs" />
     <Compile Include="Interfaces\IWebSocketConnection.cs" />
     <Compile Include="FleckLog.cs" />
