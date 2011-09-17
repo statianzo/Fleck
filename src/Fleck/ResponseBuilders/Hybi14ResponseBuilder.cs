@@ -21,16 +21,13 @@ namespace Fleck.ResponseBuilders
         {
             var builder = new StringBuilder();
 
-            builder.AppendLine("HTTP/1.1 101 Switching Protocols");
-            builder.AppendLine("Upgrade: websocket");
-            builder.AppendLine("Connection: Upgrade");
-            var headers = new Dictionary<string, string>();
-            headers["Upgrade"] = "websocket";
-            headers["Connection"] = "Upgrade";
+            builder.Append("HTTP/1.1 101 Switching Protocols\r\n");
+            builder.Append("Upgrade: websocket\r\n");
+            builder.Append("Connection: Upgrade\r\n");
 
             var responseKey =  CreateResponseKey(request.Headers["Sec-WebSocket-Key"]);
-            builder.AppendLine("Sec-WebSocket-Accept: " + responseKey);
-            builder.AppendLine();
+            builder.AppendFormat("Sec-WebSocket-Accept: {0}\r\n", responseKey);
+            builder.Append("\r\n");
 
             return Encoding.ASCII.GetBytes(builder.ToString());
         }
