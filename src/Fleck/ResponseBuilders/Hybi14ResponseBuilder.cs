@@ -19,6 +19,8 @@ namespace Fleck.ResponseBuilders
 
         public byte[] Build(WebSocketHttpRequest request)
         {
+            FleckLog.Debug("Building Hybi-14 Response");
+            
             var builder = new StringBuilder();
 
             builder.Append("HTTP/1.1 101 Switching Protocols\r\n");
@@ -40,6 +42,16 @@ namespace Fleck.ResponseBuilders
             var bytes = sha1.ComputeHash(Encoding.ASCII.GetBytes(combined));
 
             return Convert.ToBase64String(bytes);
+        }
+        
+        public ISender CreateSender(ISocket socket)
+        {
+            return new Hybi14Sender(socket);
+        }
+        
+        public IReceiver CreateReceiver(ISocket socket)
+        {
+            return new Hybi14Receiver(socket);
         }
     }
 }

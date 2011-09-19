@@ -28,6 +28,8 @@ namespace Fleck.ResponseBuilders
 
         public byte[] Build(WebSocketHttpRequest request)
         {
+            FleckLog.Debug("Building Draft76 Response");
+            
             var clientHandshake = ParseClientHandshake(request);
             
             if (clientHandshake.Validate(_origin, _location, _scheme)) {
@@ -116,6 +118,17 @@ namespace Fleck.ResponseBuilders
                 Array.Reverse(result);
             return result;
         }
+        
+        public ISender CreateSender(ISocket socket) 
+        {
+            return new Sender(socket);
+        }
+        
+        public IReceiver CreateReceiver(ISocket socket)
+        {
+            return new Receiver(socket);
+        }
+        
     }
 }
 

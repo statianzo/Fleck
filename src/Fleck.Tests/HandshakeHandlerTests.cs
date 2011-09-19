@@ -7,6 +7,7 @@ using NUnit.Framework;
 using System.Security.Cryptography.X509Certificates;
 using Fleck.Interfaces;
 using Moq;
+using System.IO;
 
 namespace Fleck.Tests
 {
@@ -120,5 +121,7 @@ Sec-WebSocket-Protocol: sample
         {
           throw new NotImplementedException ();
         }
+        
+        public Stream Stream {get {throw new NotImplementedException(); }}
     }
 }

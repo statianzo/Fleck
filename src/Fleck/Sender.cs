@@ -1,31 +1,32 @@
 ﻿using System;
+using Fleck.Interfaces;
 
 namespace Fleck
 {
-    public class Sender
+    public class Sender : ISender
     {
         private readonly ISocket _socket;
-        private readonly Action _closeAction;
+        
+        public event Action OnError = delegate {};
 
-        public Sender(ISocket socket, Action closeAction)
+        public Sender(ISocket socket)
         {
             _socket = socket;
-            _closeAction = closeAction;
         }
 
         public ISocket Socket { get { return _socket; } }
 
-        public void Send(string data)
+        public void SendText(string data)
         {
             if (!Socket.Connected) return;
             var wrapped = DataFrame.Wrap(data);
 
             _socket.Send(wrapped,
-                         () => FleckLog.Debug("Send succeeded"),
+                         () => FleckLog.Debug("Draft76 Send Succeeded"),
                          e =>
                          {
-                             FleckLog.Error("Send failed", e);
-                             _closeAction();
+                             FleckLog.Error("Draft76 Send Failed", e);
+                             OnError();
                          });
         }
     }

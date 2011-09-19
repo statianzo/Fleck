@@ -79,6 +79,10 @@
     <Compile Include="Interfaces\IResponseBuilderFactory.cs" />
     <Compile Include="ResponseBuilders\Draft76ResponseBuilder.cs" />
     <Compile Include="Hybi14DataFrameStreamReader.cs" />
+    <Compile Include="Interfaces\ISender.cs" />
+    <Compile Include="Interfaces\IReceiver.cs" />
+    <Compile Include="Hybi14Receiver.cs" />
+    <Compile Include="Hybi14Sender.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

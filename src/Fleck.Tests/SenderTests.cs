@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
+using Fleck.Interfaces;
 
 namespace Fleck.Tests
 {
@@ -20,18 +21,19 @@ namespace Fleck.Tests
             _wasHit = false;
             _mockSocket = new Mock<ISocket>();
             _closeHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
-            _sender = new Sender(_mockSocket.Object, () => 
+            _sender = new Sender(_mockSocket.Object);
+            _sender.OnError += () => 
             {
               _wasHit = true;
               _closeHandle.Set();
-            });
+            };
         }
 
         [Test]
         public void DoesNotSendWhenSocketNotConnected()
         {
             _mockSocket.Setup(s => s.Connected).Returns(false);
-            _sender.Send("Data!");
+            _sender.SendText("Data!");
             _mockSocket.Verify(s => s.Send(It.IsAny<byte[]>(), It.IsAny<Action>(), It.IsAny<Action<Exception>>()),Times.Never());
             Assert.IsFalse(_wasHit);
         }
@@ -40,7 +42,7 @@ namespace Fleck.Tests
         public void SendsWhenSocketConnected()
         {
             _mockSocket.Setup(s => s.Connected).Returns(true);
-            _sender.Send("Data!");
+            _sender.SendText("Data!");
             _mockSocket.Verify(s => s.Send(It.IsAny<byte[]>(), It.IsAny<Action>(), It.IsAny<Action<Exception>>()),Times.Once());
             Assert.IsFalse(_wasHit);
         }
@@ -57,7 +59,7 @@ namespace Fleck.Tests
                         return new Task(() => { });
                     });
             _mockSocket.Setup(s => s.Connected).Returns(true);
-            _sender.Send("Data!");
+            _sender.SendText("Data!");
             _closeHandle.WaitOne();
             _mockSocket.Verify();
             Assert.IsTrue(_wasHit);

@@ -6,6 +6,8 @@ namespace Fleck.Interfaces
     {
         bool CanHandle(WebSocketHttpRequest request);
         byte[] Build(WebSocketHttpRequest request);
+        ISender CreateSender(ISocket socket);
+        IReceiver CreateReceiver(ISocket socket);
     }
 }
 

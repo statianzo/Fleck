@@ -8,6 +8,7 @@ namespace Fleck.Samples.ConsoleApp
     {
         static void Main()
         {
+            FleckLog.Level = LogLevel.Debug;
             var allSockets = new List<IWebSocketConnection>();
             var server = new WebSocketServer("ws://localhost:8181");
             server.Start(socket =>

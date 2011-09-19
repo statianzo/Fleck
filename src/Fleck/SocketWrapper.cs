@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using Fleck.Interfaces;
 
 namespace Fleck
 {
@@ -53,6 +54,11 @@ namespace Fleck
         public bool Connected
         {
             get { return _socket.Connected; }
+        }
+        
+        public Stream Stream
+        {
+            get { return _stream; }
         }
 
         public Task<int> Receive(byte[] buffer, Action<int> callback, Action<Exception> error, int offset)

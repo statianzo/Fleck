@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using Fleck.Interfaces;
 
 namespace Fleck
 {
-    public class Receiver
+    public class Receiver : IReceiver
     {
+        public event Action OnError = delegate { };
+        public event Action<string> OnMessage;
+        
         private const int BufferSize = 16384;
-        private readonly Action _closeAction;
-        private readonly Action<string> _messageAction;
         private readonly Queue<byte> _queue;
         private readonly ISocket _socket;
 
-        public Receiver(ISocket socket, Action<string> messageAction, Action closeAction)
+        public Receiver(ISocket socket)
         {
             _socket = socket;
-            _messageAction = messageAction;
-            _closeAction = closeAction;
             _queue = new Queue<byte>();
         }
 
@@ -23,17 +23,19 @@ namespace Fleck
         {
             get { return _socket; }
         }
-
-        public void Receive(DataFrame frame = null)
+        
+        public void Receive()
         {
-            if (frame == null)
-                frame = new DataFrame();
+            Receive(new DataFrame());
+        }
 
+        public void Receive(DataFrame frame)
+        {
             var buffer = new byte[BufferSize];
 
             if (Socket == null || !Socket.Connected)
             {
-                _closeAction();
+                OnError();
                 return;
             }
 
@@ -45,8 +47,8 @@ namespace Fleck
 
                              if (size <= 0)
                              {
-                                 _closeAction();
-                                 return;
+                                OnError();
+                                return;
                              }
 
                              for (int i = 0; i < size; i++)
@@ -58,7 +60,9 @@ namespace Fleck
                                  if (!dataframe.IsComplete) continue;
 
                                  string data = dataframe.ToString();
-                                 _messageAction(data);
+                                 var copy = OnMessage;
+                                 if(copy != null)
+                                     copy(data);
                                  dataframe = new DataFrame();
                              }
                              Receive(dataframe);
@@ -66,7 +70,7 @@ namespace Fleck
                          e =>
                          {
                              FleckLog.Error("Recieve failed", e);
-                             _closeAction();
+                             OnError();
                          });
         }
     }

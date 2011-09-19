@@ -16,8 +16,7 @@ namespace Fleck
             ResponseBuilderFactory = factory;
         }
 
-        public ClientHandshake ClientHandshake { get; set; }
-        public Action<ClientHandshake> OnSuccess { get; set; }
+        public Action<ISender, IReceiver> OnSuccess { get; set; }
         public IRequestParser RequestParser { get; set; }
         public IResponseBuilderFactory ResponseBuilderFactory { get; set; }
 
@@ -64,44 +63,19 @@ namespace Fleck
             var response = builder.Build(request);
 
             FleckLog.Debug("Sending server handshake");
-            state.Socket.Send(response,
-                        EndSendServerHandshake,
-                        e => FleckLog.Error("Send handshake failed", e));
+            state.Socket.Send(response, () => {
+               EndSendServerHandshake(builder, state.Socket);
+            },e => FleckLog.Error("Send handshake failed", e));
         }
 
        
-        private void EndSendServerHandshake()
+        private void EndSendServerHandshake(IResponseBuilder builder, ISocket socket)
         {
             FleckLog.Debug("Ending server handshake");
             if (OnSuccess != null)
-                OnSuccess(ClientHandshake);
-        }
-
-        public static byte[] CalculateAnswerBytes(string key1, string key2, ArraySegment<byte> challenge)
-        {
-            byte[] result1Bytes = ParseKey(key1);
-            byte[] result2Bytes = ParseKey(key2);
-
-            var rawAnswer = new byte[16];
-            Array.Copy(result1Bytes, 0, rawAnswer, 0, 4);
-            Array.Copy(result2Bytes, 0, rawAnswer, 4, 4);
-            Array.Copy(challenge.Array, challenge.Offset, rawAnswer, 8, 8);
-
-            MD5 md5 = MD5.Create();
-            return md5.ComputeHash(rawAnswer);
-        }
-
-        public static byte[] ParseKey(string key)
-        {
-            int spaces = key.Count(x => x == ' ');
-            var digits = new String(key.Where(Char.IsDigit).ToArray());
-
-            var value = (Int32)(Int64.Parse(digits) / spaces);
-
-            byte[] result = BitConverter.GetBytes(value);
-            if (BitConverter.IsLittleEndian)
-                Array.Reverse(result);
-            return result;
+            {
+                OnSuccess(builder.CreateSender(socket), builder.CreateReceiver(socket));
+            }
         }
 
         public class HandShakeState

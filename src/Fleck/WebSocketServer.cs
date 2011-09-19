@@ -83,10 +83,10 @@ namespace Fleck
 
             var shaker = new HandshakeHandler(ResponseBuilderFactory)
                              {
-                                 OnSuccess = handshake =>
+                                 OnSuccess = (sender, receiver) =>
                                  {
                                      FleckLog.Debug("Handshake success");
-                                     var wsc = new WebSocketConnection(clientSocket);
+                                     var wsc = new WebSocketConnection(clientSocket, sender, receiver);
                                      _config(wsc);
                                      wsc.OnOpen();
                                      wsc.StartReceiving();

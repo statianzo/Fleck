@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
+using Fleck.Interfaces;
 
 namespace Fleck.Tests
 {
@@ -22,10 +23,12 @@ namespace Fleck.Tests
             _wasClosed = false;
             _mockSocket = new Mock<ISocket>();
             _closeHandle = new EventWaitHandle(false,EventResetMode.ManualReset);
-            _receiver = new Receiver(_mockSocket.Object,s => {}, () => {
+            _receiver = new Receiver(_mockSocket.Object);
+            
+            _receiver.OnError += () => {
               _wasClosed = true;
               _closeHandle.Set();
-            });
+            };
         }
 
         [Test]

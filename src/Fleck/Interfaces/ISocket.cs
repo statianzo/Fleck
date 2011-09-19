@@ -2,12 +2,14 @@ using System;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using System.IO;
 
-namespace Fleck
+namespace Fleck.Interfaces
 {
     public interface ISocket
     {
         bool Connected { get; }
+        Stream Stream { get; }
 
         Task<ISocket> Accept(Action<ISocket> callback, Action<Exception> error);
         Task Send(byte[] buffer, Action callback, Action<Exception> error);
