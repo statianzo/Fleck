@@ -35,6 +35,8 @@ namespace Fleck
             if (IsMasked)
             {
                 var keyBytes = BitConverter.GetBytes(MaskKey);
+                if (BitConverter.IsLittleEndian)
+                    Array.Reverse(keyBytes);
                 memoryStream.Write(keyBytes, 0, keyBytes.Length);
                 payload = TransformBytes(Payload, MaskKey);
             }
@@ -53,14 +55,16 @@ namespace Fleck
             {
                 payloadLengthBytes.Add(127);
                 var lengthBytes = BitConverter.GetBytes(PayloadLength);
-                Array.Reverse(lengthBytes);
+                if (BitConverter.IsLittleEndian)
+                    Array.Reverse(lengthBytes);
                 payloadLengthBytes.AddRange(lengthBytes);
             }
             else if (PayloadLength > 125)
             {
                 payloadLengthBytes.Add(126);
                 var lengthBytes = BitConverter.GetBytes((UInt16)PayloadLength);
-                Array.Reverse(lengthBytes);
+                if (BitConverter.IsLittleEndian)
+                    Array.Reverse(lengthBytes);
                 payloadLengthBytes.AddRange(lengthBytes);
             }
             else

@@ -71,6 +71,8 @@ namespace Fleck
                 if (frame.IsMasked)
                 {
                     var maskBytes = buffer.Take(4).ToArray();
+                    if (BitConverter.IsLittleEndian)
+                        Array.Reverse(maskBytes);
                     frame.MaskKey = BitConverter.ToInt32(maskBytes, 0);
                     payload = Hybi14DataFrame.TransformBytes(buffer.Skip(4).Take(t.Result - 4).ToArray(), frame.MaskKey);
                 }
