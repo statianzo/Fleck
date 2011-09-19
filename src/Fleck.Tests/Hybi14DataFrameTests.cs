@@ -45,6 +45,22 @@ namespace Fleck.Tests
             
             Assert.AreEqual(expected, actual.ToArray());
         }
+        
+        [Test]
+        public void ShouldTransformBytesInBothDirections()
+        {
+            const string original = "Whoa";
+            const int key = 1343834;
+            
+            var bytes = Encoding.UTF8.GetBytes(original);
+            
+            var transformed = Hybi14DataFrame.TransformBytes(bytes, key);
+            var result = Hybi14DataFrame.TransformBytes(transformed, key);
+            
+            var decoded = Encoding.UTF8.GetString(result);
+            
+            Assert.AreEqual(original, decoded);
+        }
     }
 }
 

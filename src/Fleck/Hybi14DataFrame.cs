@@ -27,11 +27,19 @@ namespace Fleck
             memoryStream.WriteByte(op);
             
              
-             var payloadLengthBytes = GetLengthBytes();
+            var payloadLengthBytes = GetLengthBytes();
              
             memoryStream.Write(payloadLengthBytes, 0, payloadLengthBytes.Length);
             
-            memoryStream.Write(Payload, 0, Payload.Length);
+            var payload = Payload;
+            if (IsMasked)
+            {
+                var keyBytes = BitConverter.GetBytes(MaskKey);
+                memoryStream.Write(keyBytes, 0, keyBytes.Length);
+                payload = TransformBytes(Payload, MaskKey);
+            }
+            
+            memoryStream.Write(payload, 0, Payload.Length);
             
             return memoryStream.ToArray();
             
@@ -63,6 +71,21 @@ namespace Fleck
             payloadLengthBytes[0] += (byte)(IsMasked ? 128 : 0);
             
             return payloadLengthBytes.ToArray();
+        }
+        
+        public static byte[] TransformBytes(byte[] bytes, int mask)
+        {
+            var output = new byte[bytes.Length];
+            var maskBytes = BitConverter.GetBytes(mask);
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(maskBytes);
+            
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                output[i] = (byte)(bytes[i] ^ maskBytes[i % 4]);
+            }
+            
+            return output;
         }
     }
 
