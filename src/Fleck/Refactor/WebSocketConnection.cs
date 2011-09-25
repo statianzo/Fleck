@@ -8,13 +8,15 @@ namespace Fleck
 
     public interface IHandler
     {
-        void Run();
+        byte[] CreateHandshake();
         void Recieve(IEnumerable<byte> data);
+        byte[] FrameText(string text);
+        byte[] FrameClose(int code);
     }
 
     public interface IHandlerFactory 
     {
-        IHandler BuildHandler(byte[] data, Action<int> close);
+        IHandler BuildHandler(byte[] data, Action<string> onMessage);
     }
     
     public class RecievingWebSocketConnection : IWebSocketConnection
@@ -26,6 +28,7 @@ namespace Fleck
             OnClose = () => { };
             OnMessage = x => { };
             OnError = x => { };
+            _handlerFactory = handlerFactory;
         }
 
         public ISocket Socket { get; set; }
@@ -40,6 +43,11 @@ namespace Fleck
 
         public void Send(string message)
         {
+            if (_handler == null)
+                throw new WebSocketException("Cannot send before handshake");
+                
+            var bytes = _handler.FrameText(message);
+            SendBytes(bytes);
         }
 
         public void StartReceiving()
@@ -69,12 +77,26 @@ namespace Fleck
             });
         }
         
+        private void SendBytes(byte[] bytes, Action callback = null)
+        {
+            Socket.Send(bytes, () => {
+                FleckLog.Debug("Sent " + bytes.Length + " bytes");
+                if (callback != null)
+                    callback();
+            },
+            e => {
+                FleckLog.Info("Failed to send. Disconnecting.", e);
+                CloseSocket();
+            });
+        }
+        
         private void CreateHandler(IList<byte> data)
         {
-            _handler = _handlerFactory.BuildHandler(data.ToArray(), Close);
+            _handler = _handlerFactory.BuildHandler(data.ToArray(), OnMessage);
             if (_handler == null)
                 return;
-            _handler.Run();
+            var handshake = _handler.CreateHandshake();
+            SendBytes(handshake, OnOpen);
         }
 
         public void Close()
@@ -84,6 +106,20 @@ namespace Fleck
         
         public void Close(int code)
         {
+            if (_handler == null)
+               CloseSocket();
+               
+            var bytes = _handler.FrameClose(code);
+            if (bytes.Length == 0)
+                CloseSocket();
+            else
+                SendBytes(bytes, CloseSocket);
+        }
+        
+        private void CloseSocket() 
+        {
+            Socket.Close();
+            Socket.Dispose();
         }
     }
 }

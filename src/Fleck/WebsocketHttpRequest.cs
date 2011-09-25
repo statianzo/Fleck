@@ -15,6 +15,14 @@ namespace Fleck
     
     public byte[] Bytes { get; set; }
     
+    public string this[string name]
+    {
+        get {
+                string value;
+                return headers.TryGetValue(name, out value) ? value : default(string);
+            }
+    }
+    
     public IDictionary<string,string> Headers {
       get {
         return headers;

@@ -12,7 +12,7 @@ namespace Fleck
         
         public IRequestParser RequestParser { get; set; }
 
-        public IHandler BuildHandler(byte[] data, Action<int> close)
+        public IHandler BuildHandler(byte[] data, Action<string> onMessage)
         {
             if (!RequestParser.IsComplete(data))
                 return null;
@@ -49,12 +49,22 @@ namespace Fleck
         
         public class FakeHandler : IHandler 
         {
-            public void Run()
+            public byte[] CreateHandshake()
             {
                 throw new NotImplementedException();
             }
 
             public void Recieve(System.Collections.Generic.IEnumerable<byte> data)
+            {
+                throw new NotImplementedException();
+            }
+            
+            public byte[] FrameText(string text)
+            {
+                throw new NotImplementedException();
+            }
+            
+            public byte[] FrameClose(int code)
             {
                 throw new NotImplementedException();
             }
