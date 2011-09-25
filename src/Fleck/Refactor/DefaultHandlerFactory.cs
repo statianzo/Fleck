@@ -5,9 +5,11 @@ namespace Fleck
 {
     public class DefaultHandlerFactory : IHandlerFactory
     {
-        public DefaultHandlerFactory()
+        private string _scheme;
+        public DefaultHandlerFactory(string scheme)
         {
             RequestParser = new RequestParser();
+            _scheme = scheme;
         }
         
         public IRequestParser RequestParser { get; set; }
@@ -17,14 +19,14 @@ namespace Fleck
             if (!RequestParser.IsComplete(data))
                 return null;
             
-            var request = RequestParser.Parse(data);
+            var request = RequestParser.Parse(data, _scheme);
             
             var version = GetVersion(request);
             
             switch (version)
             {
                 case "76":
-                    return new FakeHandler();
+                    return Draft76Handler.Create(request, onMessage);
                 case "8":
                     return new FakeHandler();
             }

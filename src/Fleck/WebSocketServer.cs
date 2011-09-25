@@ -81,17 +81,10 @@ namespace Fleck
             FleckLog.Debug("Client Connected");
             ListenForClients();
 
-            var shaker = new HandshakeHandler(ResponseBuilderFactory)
-                             {
-                                 OnSuccess = (sender, receiver) =>
-                                 {
-                                     FleckLog.Debug("Handshake success");
-                                     var wsc = new WebSocketConnection(clientSocket, sender, receiver);
-                                     _config(wsc);
-                                     wsc.OnOpen();
-                                     wsc.StartReceiving();
-                                 }
-                             };
+            
+            var connection = new RecievingWebSocketConnection(clientSocket, new DefaultHandlerFactory(_scheme));
+            _config(connection);
+
 
             if (IsSecure)
             {
@@ -100,13 +93,12 @@ namespace Fleck
                     .Authenticate(_x509Certificate,
                                   () =>
                                   {
-                                      FleckLog.Debug("Authentication Successful");
-                                      shaker.Shake(clientSocket);
+                                    connection.StartReceiving();
                                   }, e => FleckLog.Warn("Failed to Authenticate", e));
             }
             else
             {
-                shaker.Shake(clientSocket);
+                connection.StartReceiving();
             }
         }
     }

@@ -13,6 +13,8 @@ namespace Fleck
     
     public string Body { get; set; }
     
+    public string Scheme { get; set; }
+    
     public byte[] Bytes { get; set; }
     
     public string this[string name]

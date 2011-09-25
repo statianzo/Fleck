@@ -60,6 +60,11 @@ namespace Fleck
         private void Read(List<byte> data, byte[] buffer)
         {
             Socket.Receive(buffer, r => {
+                if (r <= 0)
+                {
+                    CloseSocket();
+                    return;
+                }
                 var readBytes = buffer.Take(r);
                 if (_handler != null)
                 {
@@ -71,9 +76,10 @@ namespace Fleck
                     CreateHandler(data);
                 }
                 
+                Read(data, buffer);
             },
             e => {
-                
+               FleckLog.Error("Error while reading", e);
             });
         }
         
@@ -118,6 +124,7 @@ namespace Fleck
         
         private void CloseSocket() 
         {
+            OnClose();
             Socket.Close();
             Socket.Dispose();
         }

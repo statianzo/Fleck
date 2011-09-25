@@ -15,7 +15,7 @@ namespace Fleck.Tests
         public void Setup()
         {
             _mockRepository = new MockRepository(MockBehavior.Default);
-            _factory = new DefaultHandlerFactory();
+            _factory = new DefaultHandlerFactory("");
         }
         
         [TearDown]

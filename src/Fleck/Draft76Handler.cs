@@ -18,7 +18,8 @@ namespace Fleck
             return new ComposableHandler
             {
                 Frame = Draft76Handler.FrameText,
-                Handshake = () => Draft76Handler.Handshake(request)
+                Handshake = () => Draft76Handler.Handshake(request),
+                RecieveData = data => RecieveData(onMessage, data)
             };
         }
         
@@ -36,7 +37,7 @@ namespace Fleck
                 if (endIndex > MaxSize)
                     throw new WebSocketException("Frame too large");
                 
-                var bytes = data.Skip(1).Take(endIndex - 2).ToArray();
+                var bytes = data.Skip(1).Take(endIndex - 1).ToArray();
                 
                 data.RemoveRange(0, endIndex + 1);
                 
@@ -66,7 +67,7 @@ namespace Fleck
             builder.Append("Upgrade: WebSocket\r\n");
             builder.Append("Connection: Upgrade\r\n");
             builder.AppendFormat("Sec-WebSocket-Origin: {0}\r\n",  request["Origin"]);
-            builder.AppendFormat("Sec-WebSocket-Location: {0}\r\n", request["Location"]);
+            builder.AppendFormat("Sec-WebSocket-Location: {0}://{1}{2}\r\n", request.Scheme, request["Host"], request.Path);
 
             if (request.Headers.ContainsKey("Sec-WebSocket-Protocol"))
                 builder.AppendFormat("Sec-WebSocket-Protocol: {0}", request["Sec-WebSocket-Protocol"]);

@@ -6,6 +6,7 @@ namespace Fleck.Interfaces
   {
     bool IsComplete(byte[] bytes);
     WebSocketHttpRequest Parse(byte[] bytes);
+    WebSocketHttpRequest Parse(byte[] bytes, string scheme);
   }
 }
 

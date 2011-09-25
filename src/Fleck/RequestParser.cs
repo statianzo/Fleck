@@ -22,6 +22,11 @@ namespace Fleck
     
     public WebSocketHttpRequest Parse(byte[] bytes)
     {
+        return Parse(bytes, "ws");
+    }
+    
+    public WebSocketHttpRequest Parse(byte[] bytes, string scheme)
+    {
       var body = Encoding.UTF8.GetString(bytes);
       Match match = _regex.Match(body);
       
@@ -29,7 +34,8 @@ namespace Fleck
         Method = match.Groups["method"].Value,
         Path = match.Groups["path"].Value,
         Body = match.Groups["body"].Value,
-        Bytes = bytes
+        Bytes = bytes,
+        Scheme = scheme
       };
       
       var fields = match.Groups["field_name"].Captures;
