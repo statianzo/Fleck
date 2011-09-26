@@ -88,6 +88,8 @@
     <Compile Include="Refactor\WebSocketException.cs" />
     <Compile Include="Refactor\HandshakeException.cs" />
     <Compile Include="Draft76Handler.cs" />
+    <Compile Include="Refactor\Hybi13Handler.cs" />
+    <Compile Include="Refactor\IntExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

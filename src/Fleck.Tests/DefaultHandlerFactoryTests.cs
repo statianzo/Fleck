@@ -35,7 +35,7 @@ namespace Fleck.Tests
             
             _factory.RequestParser = parser.Object;
             
-            var handler = _factory.BuildHandler(new byte[0], x => {});
+            var handler = _factory.BuildHandler(new byte[0], x => {}, () => {});
             
             Assert.IsNull(handler);
         }
@@ -54,7 +54,7 @@ namespace Fleck.Tests
             
             _factory.RequestParser = parser.Object;
             
-            var handler = _factory.BuildHandler(new byte[0], x => {});
+            var handler = _factory.BuildHandler(new byte[0], x => {}, () => {});
             
             Assert.IsNotNull(handler);
         }
@@ -73,7 +73,7 @@ namespace Fleck.Tests
             
             _factory.RequestParser = parser.Object;
             
-            Assert.Throws<WebSocketException>(() => _factory.BuildHandler(new byte[0], x => {}));
+            Assert.Throws<WebSocketException>(() => _factory.BuildHandler(new byte[0], x => {}, () => {}));
             
         }
     }

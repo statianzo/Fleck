@@ -14,7 +14,7 @@ namespace Fleck
         
         public IRequestParser RequestParser { get; set; }
 
-        public IHandler BuildHandler(byte[] data, Action<string> onMessage)
+        public IHandler BuildHandler(byte[] data, Action<string> onMessage, Action onClose)
         {
             if (!RequestParser.IsComplete(data))
                 return null;
@@ -28,7 +28,7 @@ namespace Fleck
                 case "76":
                     return Draft76Handler.Create(request, onMessage);
                 case "8":
-                    return new FakeHandler();
+                    return Hybi13Handler.Create(request, onMessage, onClose);
             }
             
             throw new WebSocketException("Unsupported Request");

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Fleck.Samples.ConsoleApp
 {
@@ -29,6 +30,7 @@ namespace Fleck.Samples.ConsoleApp
                         };
                 });
 
+            Thread.Sleep(-1);
 
             var input = Console.ReadLine();
             while (input != "exit")

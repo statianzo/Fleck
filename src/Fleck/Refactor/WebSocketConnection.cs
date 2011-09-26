@@ -16,7 +16,7 @@ namespace Fleck
 
     public interface IHandlerFactory 
     {
-        IHandler BuildHandler(byte[] data, Action<string> onMessage);
+        IHandler BuildHandler(byte[] data, Action<string> onMessage, Action onClose);
     }
     
     public class RecievingWebSocketConnection : IWebSocketConnection
@@ -52,8 +52,8 @@ namespace Fleck
 
         public void StartReceiving()
         {
-            var data = new List<byte>(1024*16);
-            var buffer = new byte[1024*16];
+            var data = new List<byte>(1024*4);
+            var buffer = new byte[1024*4];
             Read(data, buffer);
         }
         
@@ -62,9 +62,11 @@ namespace Fleck
             Socket.Receive(buffer, r => {
                 if (r <= 0)
                 {
+                    FleckLog.Debug("0 bytes read. Closing.");
                     CloseSocket();
                     return;
                 }
+                FleckLog.Debug(r + " bytes read");
                 var readBytes = buffer.Take(r);
                 if (_handler != null)
                 {
@@ -98,7 +100,7 @@ namespace Fleck
         
         private void CreateHandler(IList<byte> data)
         {
-            _handler = _handlerFactory.BuildHandler(data.ToArray(), OnMessage);
+            _handler = _handlerFactory.BuildHandler(data.ToArray(), OnMessage, CloseSocket);
             if (_handler == null)
                 return;
             var handshake = _handler.CreateHandshake();
