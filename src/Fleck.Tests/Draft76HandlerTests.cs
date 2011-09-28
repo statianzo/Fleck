@@ -1,19 +1,13 @@
 using System;
 using NUnit.Framework;
 using System.Text;
-using Fleck.ResponseBuilders;
 using System.Linq;
 
 namespace Fleck.Tests
 {
     [TestFixtureAttribute]
-    public class Draft76ResponseBuilderTests
+    public class Draft76HandlerTests
     {
-        Draft76ResponseBuilder _builder;
-        public Draft76ResponseBuilderTests()
-        {
-            _builder = new Draft76ResponseBuilder("example.com/demo", "ws", null);
-        }
         
         private const string ExampleRequest =
 @"GET /demo HTTP/1.1
@@ -43,32 +37,6 @@ Sec-WebSocket-Protocol: sample
         const string ExpectedAnswer = "8jKS'y:G*Co,Wxa-";
         
         [Test]
-        public void ShouldParseClientHandshake()
-        {
-            var request = new WebSocketHttpRequest
-            {
-                Headers = {
-                    {"Sec-WebSocket-Key1",Key1},
-                    {"Sec-WebSocket-Key2",Key2},
-                    {"Host","example.com"},
-                    {"Connection","Upgrade"},
-                    {"Origin","http://example.com"},
-                },
-                Body = Challenge,
-                Bytes = Encoding.UTF8.GetBytes(ExampleRequest)
-            };
-            var client = Draft76ResponseBuilder.ParseClientHandshake(request);
-
-            Assert.AreEqual(Key1, client.Key1);
-            Assert.AreEqual(Key2, client.Key2);
-            Assert.AreEqual(request.Headers["Origin"], client.Origin);
-            Assert.AreEqual(request.Headers["Host"], client.Host);
-            var clientChallenge = client.ChallengeBytes.Array.Skip(client.ChallengeBytes.Offset).Take(client.ChallengeBytes.Count).ToArray();
-            var clientChallengeString = Encoding.UTF8.GetString(clientChallenge);
-            Assert.AreEqual(Challenge, clientChallengeString);
-        }
-
-        [Test]
         public void ShouldGenerateServerHandshake()
         {
             var request = new WebSocketHttpRequest
@@ -82,17 +50,14 @@ Sec-WebSocket-Protocol: sample
                     {"Origin","http://example.com"},
                 },
                 Body = Challenge,
+                Scheme = "ws",
                 Path = "/demo",
                 Bytes = Encoding.UTF8.GetBytes(ExampleRequest)
             };
-            var client = Draft76ResponseBuilder.ParseClientHandshake(request);
-            var server = _builder.GenerateResponseHandshake(client);
+            var responseBytes = Draft76Handler.Handshake(request);
+            var response = Encoding.ASCII.GetString(responseBytes);
 
-            Assert.IsTrue(server.Location.Contains(client.Host));
-            var answer = Encoding.UTF8.GetString(server.AnswerBytes);
-            Assert.AreEqual(ExpectedAnswer,answer);
-
-            Assert.AreEqual(ExampleResponse,server.ToResponseString() + answer);
+            Assert.AreEqual(ExampleResponse, response);
 
         }
 
@@ -101,7 +66,7 @@ Sec-WebSocket-Protocol: sample
         {
             var challengeBytes = Encoding.UTF8.GetBytes(Challenge);
             var challengeSegment = new ArraySegment<byte>(challengeBytes);
-            var answerBytes = Draft76ResponseBuilder.CalculateAnswerBytes(Key1, Key2, challengeSegment);
+            var answerBytes = Draft76Handler.CalculateAnswerBytes(Key1, Key2, challengeSegment);
 
             Assert.AreEqual(16, answerBytes.Length);
 

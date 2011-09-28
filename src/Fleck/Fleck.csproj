@@ -56,40 +56,27 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataFrame.cs" />
-    <Compile Include="HandshakeHandler.cs" />
-    <Compile Include="ClientHandshake.cs" />
-    <Compile Include="Hybi14DataFrame.cs" />
     <Compile Include="Interfaces\ISocket.cs" />
     <Compile Include="Interfaces\IWebSocketConnection.cs" />
     <Compile Include="FleckLog.cs" />
-    <Compile Include="Receiver.cs" />
-    <Compile Include="ResponseBuilders\Hybi14ResponseBuilder.cs" />
-    <Compile Include="Sender.cs" />
-    <Compile Include="ServerHandshake.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SocketWrapper.cs" />
-    <Compile Include="WebSocketConnection.cs" />
     <Compile Include="WebSocketServer.cs" />
     <Compile Include="WebsocketHttpRequest.cs" />
     <Compile Include="RequestParser.cs" />
     <Compile Include="Interfaces\IRequestParser.cs" />
-    <Compile Include="Interfaces\IResponseBuilder.cs" />
-    <Compile Include="ResponseBuilderFactory.cs" />
-    <Compile Include="Interfaces\IResponseBuilderFactory.cs" />
-    <Compile Include="ResponseBuilders\Draft76ResponseBuilder.cs" />
-    <Compile Include="Hybi14DataFrameStreamReader.cs" />
-    <Compile Include="Interfaces\ISender.cs" />
-    <Compile Include="Interfaces\IReceiver.cs" />
-    <Compile Include="Hybi14Receiver.cs" />
-    <Compile Include="Hybi14Sender.cs" />
-    <Compile Include="Refactor\WebSocketConnection.cs" />
-    <Compile Include="Refactor\DefaultHandlerFactory.cs" />
-    <Compile Include="Refactor\WebSocketException.cs" />
-    <Compile Include="Refactor\HandshakeException.cs" />
     <Compile Include="Draft76Handler.cs" />
-    <Compile Include="Refactor\Hybi13Handler.cs" />
-    <Compile Include="Refactor\IntExtensions.cs" />
+    <Compile Include="DefaultHandlerFactory.cs" />
+    <Compile Include="Hybi13Handler.cs" />
+    <Compile Include="WebSocketConnection.cs" />
+    <Compile Include="WebSocketException.cs" />
+    <Compile Include="IntExtensions.cs" />
+    <Compile Include="HandshakeException.cs" />
+    <Compile Include="ComposableHandler.cs" />
+    <Compile Include="FrameType.cs" />
+    <Compile Include="ReadState.cs" />
+    <Compile Include="Interfaces\IHandler.cs" />
+    <Compile Include="Interfaces\IHandlerFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -117,7 +104,4 @@
   </Target>
   -->
   <ItemGroup />
-  <ItemGroup>
-    <Folder Include="Refactor\" />
-  </ItemGroup>
 </Project>

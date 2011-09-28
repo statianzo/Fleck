@@ -48,30 +48,6 @@ namespace Fleck
             
             return "75";
         }
-        
-        public class FakeHandler : IHandler 
-        {
-            public byte[] CreateHandshake()
-            {
-                throw new NotImplementedException();
-            }
-
-            public void Recieve(System.Collections.Generic.IEnumerable<byte> data)
-            {
-                throw new NotImplementedException();
-            }
-            
-            public byte[] FrameText(string text)
-            {
-                throw new NotImplementedException();
-            }
-            
-            public byte[] FrameClose(int code)
-            {
-                throw new NotImplementedException();
-            }
-        }
     }
-    
 }
 

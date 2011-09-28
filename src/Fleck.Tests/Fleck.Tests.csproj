@@ -45,19 +45,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClientHandshakeTest.cs" />
-    <Compile Include="HandshakeHandlerTests.cs" />
-    <Compile Include="Hybi14ResponseBuilderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReceiverTests.cs" />
-    <Compile Include="SenderTests.cs" />
     <Compile Include="WebSocketServerTests.cs" />
     <Compile Include="RequestParserTests.cs" />
-    <Compile Include="ResponseBuilderFactoryTests.cs" />
-    <Compile Include="Draft76ResponseBuilderTests.cs" />
     <Compile Include="Hybi14DataFrameTests.cs" />
-    <Compile Include="Hybi14DataFrameStreamReaderTests.cs" />
     <Compile Include="DefaultHandlerFactoryTests.cs" />
+    <Compile Include="Draft76HandlerTests.cs" />
+    <Compile Include="Hybi14HandlerTests.cs" />
+    <Compile Include="Hybi14DataFrame.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Fleck\Fleck.csproj">

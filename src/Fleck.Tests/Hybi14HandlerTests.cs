@@ -1,36 +1,11 @@
 ﻿using System.Text;
-using Fleck.ResponseBuilders;
 using NUnit.Framework;
 
 namespace Fleck.Tests
 {
     [TestFixture]
-    public class Hybi14ResponseBuilderTests
+    public class Hybi14HandlerTests
     {
-        private Hybi14ResponseBuilder _builder;
-
-        [SetUp]
-        public void Setup()
-        {
-            _builder = new Hybi14ResponseBuilder();
-        }
-
-        [Test]
-        public void ShouldHandleSocketVersion13And8()
-        {
-            var request = new WebSocketHttpRequest {
-                                  Headers = {{"Sec-WebSocket-Version", "13"}}
-                              };
-
-            Assert.True(_builder.CanHandle(request));
-
-            request = new WebSocketHttpRequest {
-                                  Headers = {{"Sec-WebSocket-Version", "8"}}
-                              };
-
-            Assert.True(_builder.CanHandle(request));
-
-        }
 
         [Test]
         public void ShouldCreateAnswerGuid()
@@ -38,7 +13,7 @@ namespace Fleck.Tests
             const string exampleRequestKey = "dGhlIHNhbXBsZSBub25jZQ==";
             const string expectedResult = "s3pPLMBiTxaQ9kYGzzhZRbK+xOo=";
 
-            var actual = _builder.CreateResponseKey(exampleRequestKey);
+            var actual = Hybi13Handler.CreateResponseKey(exampleRequestKey);
 
             Assert.AreEqual(expectedResult, actual);
         }
@@ -64,7 +39,7 @@ namespace Fleck.Tests
                                   Bytes = Encoding.ASCII.GetBytes(ExampleRequest)
                               };
 
-            var result = _builder.Build(request);
+            var result = Hybi13Handler.BuildHandshake(request);
 
             Assert.AreEqual(ExampleResponse, Encoding.ASCII.GetString(result));
         }

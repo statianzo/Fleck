@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.Text;
 using System.Security.Cryptography;
 using System.Linq;
+using Fleck.Interfaces;
 
 namespace Fleck
 {
     public class Draft76Handler
     {
-    
-        const byte End = 255;
-        const byte Start = 0;
-        const int MaxSize = 1024 * 1024 * 5;
+        private const byte End = 255;
+        private const byte Start = 0;
+        private const int MaxSize = 1024 * 1024 * 5;
+        private static readonly MD5 Md5 = MD5.Create();
         
         public static IHandler Create(WebSocketHttpRequest request, Action<string> onMessage)
         {
@@ -70,7 +71,7 @@ namespace Fleck
             builder.AppendFormat("Sec-WebSocket-Location: {0}://{1}{2}\r\n", request.Scheme, request["Host"], request.Path);
 
             if (request.Headers.ContainsKey("Sec-WebSocket-Protocol"))
-                builder.AppendFormat("Sec-WebSocket-Protocol: {0}", request["Sec-WebSocket-Protocol"]);
+                builder.AppendFormat("Sec-WebSocket-Protocol: {0}\r\n", request["Sec-WebSocket-Protocol"]);
                 
             builder.Append("\r\n");
             
@@ -88,9 +89,6 @@ namespace Fleck
             return byteResponse;
         }
         
-        
-        private static readonly MD5 Md5 = MD5.Create();
-        
         public static byte[] CalculateAnswerBytes(string key1, string key2, ArraySegment<byte> challenge)
         {
             byte[] result1Bytes = ParseKey(key1);
@@ -104,7 +102,7 @@ namespace Fleck
             return Md5.ComputeHash(rawAnswer);
         }
 
-        public static byte[] ParseKey(string key)
+        private static byte[] ParseKey(string key)
         {
             int spaces = key.Count(x => x == ' ');
             var digits = new String(key.Where(Char.IsDigit).ToArray());
@@ -115,38 +113,6 @@ namespace Fleck
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(result);
             return result;
-        }
-    }
-    
-    public class ComposableHandler : IHandler
-    {
-        public Func<byte[]> Handshake = () => new byte[0];
-        public Func<string, byte[]> Frame = x => new byte[0];
-        public Action<List<byte>> RecieveData = delegate { };
-        public Func<int, byte[]> Close = i => new byte[0];
-        
-        private List<byte> _data = new List<byte>();
-
-        public byte[] CreateHandshake()
-        {
-            return Handshake();
-        }
-
-        public void Recieve(IEnumerable<byte> data)
-        {
-            _data.AddRange(data);
-            
-            RecieveData(_data);
-        }
-        
-        public byte[] FrameText(string text)
-        {
-            return Frame(text);
-        }
-        
-        public byte[] FrameClose(int code)
-        {
-            return Close(code);
         }
     }
 }

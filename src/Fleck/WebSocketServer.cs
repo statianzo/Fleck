@@ -1,9 +1,8 @@
-﻿using System;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using Fleck.Interfaces;
-using Fleck.ResponseBuilders;
 
 namespace Fleck
 {
@@ -25,21 +24,13 @@ namespace Fleck
             _scheme = uri.Scheme;
             var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
             ListenerSocket = new SocketWrapper(socket);
-            ResponseBuilderFactory = new ResponseBuilderFactory();
         }
         
-        private void RegisterResponseBuilders()
-        {
-            ResponseBuilderFactory.Register(new Hybi14ResponseBuilder());
-            ResponseBuilderFactory.Register(new Draft76ResponseBuilder(Location, _scheme, Origin));
-        }
-
         public ISocket ListenerSocket { get; set; }
         public string Location { get; private set; }
         public int Port { get; private set; }
         public string Origin { get; set; }
         public string Certificate { get; set; }
-        public IResponseBuilderFactory ResponseBuilderFactory { get; set; }
 
         public bool IsSecure
         {
@@ -66,7 +57,6 @@ namespace Fleck
                 }
                 _x509Certificate = new X509Certificate2(Certificate);
             }
-            RegisterResponseBuilders();
             ListenForClients();
             _config = config;
         }
@@ -82,7 +72,7 @@ namespace Fleck
             ListenForClients();
 
             
-            var connection = new RecievingWebSocketConnection(clientSocket, new DefaultHandlerFactory(_scheme));
+            var connection = new WebSocketConnection(clientSocket, new DefaultHandlerFactory(_scheme));
             _config(connection);
 
 

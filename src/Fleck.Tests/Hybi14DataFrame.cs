@@ -3,13 +3,14 @@ using System.Collections;
 using System.Collections.Specialized;
 using System;
 using System.Collections.Generic;
-namespace Fleck
+
+namespace Fleck.Tests
 {
     public struct Hybi14DataFrame
     {
         public bool IsFinal { get; set; }
 
-        public Opcode Opcode { get; set; }
+        public FrameType FrameType { get; set; }
 
         public bool IsMasked { get; set; }
 
@@ -22,7 +23,7 @@ namespace Fleck
         public byte[] ToBytes()
         {
             var memoryStream = new MemoryStream();
-            byte op = (byte)((byte)Opcode + (IsFinal ? 128 : 0));
+            byte op = (byte)((byte)FrameType + (IsFinal ? 128 : 0));
             
             memoryStream.WriteByte(op);
             
@@ -91,15 +92,5 @@ namespace Fleck
             
             return output;
         }
-    }
-
-    public enum Opcode : byte
-    {
-        Continuation,
-        Text,
-        Binary,
-        Close = 8,
-        Ping = 9,
-        Pong = 10,
     }
 }

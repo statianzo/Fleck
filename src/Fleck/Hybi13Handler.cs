@@ -4,24 +4,10 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
+using Fleck.Interfaces;
 
 namespace Fleck
 {
-    public class ReadState
-    {
-        public ReadState()
-        {
-            Data = new List<byte>();
-        }
-        public List<byte> Data { get; private set; }
-        public Opcode Opcode { get; set; }
-        public void Clear()
-        {
-            Data.Clear();
-            Opcode = ((Opcode)-1);
-        }
-    }
-    
     public class Hybi13Handler
     {
         public static IHandler Create(WebSocketHttpRequest request, Action<string> onMessage, Action onClose)
@@ -30,16 +16,16 @@ namespace Fleck
             return new ComposableHandler
             {
                 Handshake = () => Hybi13Handler.BuildHandshake(request),
-                Frame = s => Hybi13Handler.FrameData(Encoding.UTF8.GetBytes(s), Opcode.Text),
-                Close = i => Hybi13Handler.FrameData(i.ToBigEndianBytes<ushort>(), Opcode.Close),
+                Frame = s => Hybi13Handler.FrameData(Encoding.UTF8.GetBytes(s), FrameType.Text),
+                Close = i => Hybi13Handler.FrameData(i.ToBigEndianBytes<ushort>(), FrameType.Close),
                 RecieveData = d => Hybi13Handler.ReceiveData(d, readState, (op, data) => Hybi13Handler.ProcessFrame(op, data, onMessage, onClose))
             };
         }
         
-        public static byte[] FrameData(byte[] payload, Opcode opcode)
+        public static byte[] FrameData(byte[] payload, FrameType frameType)
         {
             var memoryStream = new MemoryStream();
-            byte op = (byte)((byte)opcode + 128);
+            byte op = (byte)((byte)frameType + 128);
             
             memoryStream.WriteByte(op);
             
@@ -60,13 +46,13 @@ namespace Fleck
             return memoryStream.ToArray();
         }
         
-        public static void ReceiveData(List<byte> data, ReadState readState, Action<Opcode, byte[]> processFrame)
+        public static void ReceiveData(List<byte> data, ReadState readState, Action<FrameType, byte[]> processFrame)
         {
             
             while (data.Count >= 2)
             {
                 var isFinal = (data[0] & 128) != 0;
-                var opcode = (Opcode)(data[0] & 15);
+                var frameType = (FrameType)(data[0] & 15);
                 var isMasked = (data[1] & 128) != 0;
                 var length = (data[1] & 127);
                 
@@ -115,33 +101,33 @@ namespace Fleck
                 readState.Data.AddRange(payload);
                 data.RemoveRange(0, index + payloadLength);
                 
-                if (opcode != Opcode.Continuation)
-                    readState.Opcode = opcode;
+                if (frameType != FrameType.Continuation)
+                    readState.FrameType = frameType;
                 
                 if (isFinal)
                 {
                     var stateData = readState.Data.ToArray();
-                    var stateOpcode = readState.Opcode;
+                    var stateFrameType = readState.FrameType;
                     readState.Clear();
                     
-                    processFrame(stateOpcode, stateData);
+                    processFrame(stateFrameType, stateData);
                 }
             }
         }
         
-        public static void ProcessFrame(Opcode opcode, byte[] data, Action<string> onMessage, Action onClose)
+        public static void ProcessFrame(FrameType frameType, byte[] data, Action<string> onMessage, Action onClose)
         {
-            switch (opcode)
+            switch (frameType)
             {
-            case Opcode.Close:
+            case FrameType.Close:
                 onClose();
                 break;
-            case Opcode.Binary:
-            case Opcode.Text:
+            case FrameType.Binary:
+            case FrameType.Text:
                 onMessage(Encoding.UTF8.GetString(data));
                 break;
             default:
-                FleckLog.Debug("Recieved unhandled " + opcode);
+                FleckLog.Debug("Recieved unhandled " + frameType);
                 break;
             }
         }

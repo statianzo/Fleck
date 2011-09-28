@@ -16,7 +16,7 @@ namespace Fleck.Tests
             {
                 IsFinal = true,
                 IsMasked = false,
-                Opcode = Opcode.Text,
+                FrameType = FrameType.Text,
                 Payload = Encoding.UTF8.GetBytes("Hello")
             };
             
@@ -34,7 +34,7 @@ namespace Fleck.Tests
             {
                 IsFinal = true,
                 IsMasked = false,
-                Opcode = Opcode.Text,
+                FrameType = FrameType.Text,
                 Payload = Encoding.UTF8.GetBytes(new string('x', 140))
             };
             
