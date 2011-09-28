@@ -49,8 +49,8 @@ namespace Fleck.Tests
                 .Returns(true)
                 .Verifiable();
                 
-            parser.Setup(x => x.Parse(It.IsAny<byte[]>()))
-                .Returns(new WebSocketHttpRequest {Headers = {{"Valid", "Request"}}});
+            parser.Setup(x => x.Parse(It.IsAny<byte[]>(), It.IsAny<string>()))
+                .Returns(new WebSocketHttpRequest {Headers = {{"Sec-WebSocket-Key1", "BLAH"}}});
             
             _factory.RequestParser = parser.Object;
             
@@ -68,7 +68,7 @@ namespace Fleck.Tests
                 .Returns(true)
                 .Verifiable();
             
-            parser.Setup(x => x.Parse(It.IsAny<byte[]>()))
+            parser.Setup(x => x.Parse(It.IsAny<byte[]>(), It.IsAny<string>()))
                 .Returns(new WebSocketHttpRequest {Headers = {{"Bad", "Request"}}});
             
             _factory.RequestParser = parser.Object;
