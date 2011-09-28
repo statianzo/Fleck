@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Fleck")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("C# Websocket Server")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Fleck")]
-[assembly: AssemblyCopyright("")]
+[assembly: AssemblyCopyright("Copyright © 2011 Jason Staten")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
