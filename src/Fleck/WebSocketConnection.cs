@@ -21,6 +21,7 @@ namespace Fleck
 
         private readonly IHandlerFactory _handlerFactory;
         private IHandler _handler;
+        private bool _closed;
 
         public Action OnOpen { get; set; }
         public Action OnClose { get; set; }
@@ -45,7 +46,8 @@ namespace Fleck
         
         private void Read(List<byte> data, byte[] buffer)
         {
-        
+            if (_closed)
+                return;
             Socket.Receive(buffer, r => {
                 if (r <= 0)
                 {
@@ -114,6 +116,7 @@ namespace Fleck
         private void CloseSocket() 
         {
             OnClose();
+            _closed = true;
             Socket.Close();
             Socket.Dispose();
         }
