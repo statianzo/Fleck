@@ -22,6 +22,7 @@ namespace Fleck
         private readonly IHandlerFactory _handlerFactory;
         private IHandler _handler;
         private bool _closed;
+        private const int ReadSize = 1024 * 4;
 
         public Action OnOpen { get; set; }
         public Action OnClose { get; set; }
@@ -39,8 +40,8 @@ namespace Fleck
 
         public void StartReceiving()
         {
-            var data = new List<byte>(1024*4);
-            var buffer = new byte[1024*4];
+            var data = new List<byte>(ReadSize);
+            var buffer = new byte[ReadSize];
             Read(data, buffer);
         }
         
@@ -70,7 +71,21 @@ namespace Fleck
                 Read(data, buffer);
             },
             e => {
-               FleckLog.Error("Error while reading", e);
+                OnError(e);
+                if (e is HandshakeException)
+                {
+                    FleckLog.Debug("Error while reading", e);
+                }
+                else if (e is WebSocketException)
+                {
+                    FleckLog.Debug("Error while reading", e);
+                    Close(WebSocketStatusCodes.ProtocolError);
+                }
+                else
+                {
+                    FleckLog.Error("Application Error", e);
+                    Close(WebSocketStatusCodes.ApplicationError);
+                }
             });
         }
         

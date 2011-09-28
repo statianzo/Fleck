@@ -77,6 +77,7 @@
     <Compile Include="ReadState.cs" />
     <Compile Include="Interfaces\IHandler.cs" />
     <Compile Include="Interfaces\IHandlerFactory.cs" />
+    <Compile Include="WebSocketStatusCodes.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
