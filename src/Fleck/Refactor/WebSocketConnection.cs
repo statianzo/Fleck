@@ -59,6 +59,7 @@ namespace Fleck
         
         private void Read(List<byte> data, byte[] buffer)
         {
+        
             Socket.Receive(buffer, r => {
                 if (r <= 0)
                 {

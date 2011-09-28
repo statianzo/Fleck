@@ -35,7 +35,8 @@ namespace Fleck
                 (cb, s) => ssl.BeginAuthenticateAsServer(certificate, false, SslProtocols.Tls, false, cb, s);
                 
             Task task = Task.Factory.FromAsync(begin, ssl.EndAuthenticateAsServer, null);
-            task.ContinueWith(t => callback(), TaskContinuationOptions.NotOnFaulted);
+            task.ContinueWith(t => callback(), TaskContinuationOptions.NotOnFaulted)
+                .ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
             task.ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
 
             return task;
@@ -67,7 +68,8 @@ namespace Fleck
                 (cb, s) => _stream.BeginRead(buffer, offset, buffer.Length, cb, s);
 
             Task<int> task = Task.Factory.FromAsync<int>(begin, _stream.EndRead, null);
-            task.ContinueWith(t => callback(t.Result), TaskContinuationOptions.NotOnFaulted);
+            task.ContinueWith(t => callback(t.Result), TaskContinuationOptions.NotOnFaulted)
+                .ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
             task.ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
             return task;
         }
@@ -76,7 +78,8 @@ namespace Fleck
         {
             Func<IAsyncResult, ISocket> end = r => new SocketWrapper(_socket.EndAccept(r));
             var task = Task.Factory.FromAsync(_socket.BeginAccept, end, null);
-            task.ContinueWith(t => callback(t.Result), TaskContinuationOptions.NotOnFaulted);
+            task.ContinueWith(t => callback(t.Result), TaskContinuationOptions.NotOnFaulted)
+                .ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
             task.ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
             return task;
         }
@@ -105,7 +108,8 @@ namespace Fleck
                 (cb, s) => _stream.BeginWrite(buffer, 0, buffer.Length, cb, s);
 
             Task task = Task.Factory.FromAsync(begin, _stream.EndWrite, null);
-            task.ContinueWith(t => callback(), TaskContinuationOptions.NotOnFaulted);
+            task.ContinueWith(t => callback(), TaskContinuationOptions.NotOnFaulted)
+                .ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
             task.ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
             return task;
         }
