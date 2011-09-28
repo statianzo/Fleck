@@ -63,7 +63,7 @@ namespace Fleck
         public static void ReceiveData(List<byte> data, ReadState readState, Action<Opcode, byte[]> processFrame)
         {
             
-            while (data.Count > 0)
+            while (data.Count >= 2)
             {
                 var isFinal = (data[0] & 128) != 0;
                 var opcode = (Opcode)(data[0] & 15);
@@ -94,7 +94,6 @@ namespace Fleck
                 {
                     payloadLength = length;
                 }
-                
                 
                 if (data.Count < index + 4) 
                     return; //Not complete
