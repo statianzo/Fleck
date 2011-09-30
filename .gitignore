@@ -10,3 +10,7 @@ _ReSharper.*
 test-results
 *.pidb
 TestResult.xml
+artifacts
+src/CommonAssemblyInfo.cs
+*.dotCover
+*mm_cache.bin
