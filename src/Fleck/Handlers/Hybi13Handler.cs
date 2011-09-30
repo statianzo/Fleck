@@ -1,14 +1,14 @@
 using System;
-using System.Text;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using Fleck.Interfaces;
 
-namespace Fleck
+namespace Fleck.Handlers
 {
-    public class Hybi13Handler
+    public static class Hybi13Handler
     {
         public static IHandler Create(WebSocketHttpRequest request, Action<string> onMessage, Action onClose)
         {
@@ -58,6 +58,9 @@ namespace Fleck
                 
                 if (!isMasked)
                     throw new WebSocketException("Client data must be masked");
+
+                if (frameType == FrameType.Continuation && !readState.FrameType.HasValue)
+                    throw new WebSocketException("Unexpected continuation frame received");
                 
                 var index = 2;
                 int payloadLength;
@@ -66,14 +69,14 @@ namespace Fleck
                 {
                     if (data.Count < index + 8)
                         return; //Not complete
-                    payloadLength = (int)BitConverter.ToUInt64(data.Skip(index).Take(8).ToArray(), 0);
+                    payloadLength = data.Skip(index).Take(8).ToArray().ToLittleEndianInt();
                     index += 8;
                 }
                 else if (length == 126)
                 {
                     if (data.Count < index + 2)
                         return; //Not complete
-                    payloadLength = BitConverter.ToUInt16(data.Skip(index).Take(2).ToArray(), 0);
+                    payloadLength = data.Skip(index).Take(2).ToArray().ToLittleEndianInt();
                     index += 2;
                 }
                 else
@@ -104,13 +107,13 @@ namespace Fleck
                 if (frameType != FrameType.Continuation)
                     readState.FrameType = frameType;
                 
-                if (isFinal)
+                if (isFinal && readState.FrameType.HasValue)
                 {
                     var stateData = readState.Data.ToArray();
                     var stateFrameType = readState.FrameType;
                     readState.Clear();
                     
-                    processFrame(stateFrameType, stateData);
+                    processFrame(stateFrameType.Value, stateData);
                 }
             }
         }

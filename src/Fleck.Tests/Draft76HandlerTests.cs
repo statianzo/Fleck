@@ -1,14 +1,29 @@
 using System;
-using NUnit.Framework;
+using System.ComponentModel;
+using Fleck.Handlers;
+using Fleck.Interfaces;
 using System.Text;
-using System.Linq;
+using NUnit.Framework;
 
 namespace Fleck.Tests
 {
     [TestFixtureAttribute]
     public class Draft76HandlerTests
     {
-        
+
+        private IHandler _handler;
+        private WebSocketHttpRequest _request;
+        private Action<string> _onMessage;
+
+        [SetUp]
+        public void Setup()
+        {
+            _request = new WebSocketHttpRequest();
+            _onMessage = delegate { };
+
+            _handler = Draft76Handler.Create(_request, s => _onMessage(s));
+        }
+
         private const string ExampleRequest =
 @"GET /demo HTTP/1.1
 Host: example.com
@@ -35,26 +50,23 @@ Sec-WebSocket-Protocol: sample
         const string Key2 = "12998 5 Y3 1  .P00";
         const string Challenge = "^n:ds[4U";
         const string ExpectedAnswer = "8jKS'y:G*Co,Wxa-";
-        
+
         [Test]
         public void ShouldGenerateServerHandshake()
         {
-            var request = new WebSocketHttpRequest
-            {
-                Headers = {
-                    {"Sec-WebSocket-Key1",Key1},
-                    {"Sec-WebSocket-Key2",Key2},
-                    {"Host","example.com"},
-                    {"Connection","Upgrade"},
-                    {"Sec-WebSocket-Protocol", "sample"},
-                    {"Origin","http://example.com"},
-                },
-                Body = Challenge,
-                Scheme = "ws",
-                Path = "/demo",
-                Bytes = Encoding.UTF8.GetBytes(ExampleRequest)
-            };
-            var responseBytes = Draft76Handler.Handshake(request);
+            _request.Headers["Sec-WebSocket-Key1"] = Key1;
+            _request.Headers["Sec-WebSocket-Key2"] = Key2;
+            _request.Headers["Host"] = "example.com";
+            _request.Headers["Connection"] = "Upgrade";
+            _request.Headers["Sec-WebSocket-Protocol"] = "sample";
+            _request.Headers["Origin"] = "http://example.com";
+            _request.Body = Challenge;
+            _request.Scheme = "ws";
+            _request.Path = "/demo";
+            _request.Bytes = Encoding.UTF8.GetBytes(ExampleRequest);
+
+            var responseBytes = _handler.CreateHandshake();
+
             var response = Encoding.ASCII.GetString(responseBytes);
 
             Assert.AreEqual(ExampleResponse, response);
@@ -62,17 +74,74 @@ Sec-WebSocket-Protocol: sample
         }
 
         [Test]
-        public void ShouldCalculateAnswerBytes()
+        public void ShouldFrameText()
         {
-            var challengeBytes = Encoding.UTF8.GetBytes(Challenge);
-            var challengeSegment = new ArraySegment<byte>(challengeBytes);
-            var answerBytes = Draft76Handler.CalculateAnswerBytes(Key1, Key2, challengeSegment);
+            //StartByte "Hello" EndByte
+            var expected = new byte[]{ 0, 72, 101, 108, 108, 111, 255 };
 
-            Assert.AreEqual(16, answerBytes.Length);
+            var result = _handler.FrameText("Hello");
 
-            var answer = Encoding.UTF8.GetString(answerBytes);
+            Assert.AreEqual(expected, result);
+        }
 
-            Assert.AreEqual(ExpectedAnswer, answer);
+        [Test]
+        public void ShouldCallOnMessageOnCompleteFrame()
+        {
+            const string expected = "Once upon a time...";
+            var bytes = new System.Collections.Generic.List<byte>();
+            bytes.Add(0);
+            bytes.AddRange(Encoding.UTF8.GetBytes(expected));
+            bytes.Add(255);
+
+            string result = null;
+            _onMessage = s => result = s;
+
+            _handler.Recieve(bytes);
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void ShouldNotCallOnMessageOnIncompleteFrame()
+        {
+            const string expected = "Once up";
+            var bytes = new System.Collections.Generic.List<byte>();
+            bytes.Add(0);
+            bytes.AddRange(Encoding.UTF8.GetBytes(expected));
+
+            bool hit = false;
+            _onMessage = s => hit = true;
+
+            _handler.Recieve(bytes);
+            Assert.IsFalse(hit);
+        }
+
+        [Test]
+        public void ShouldCallOnMessageAfterSplitFrame()
+        {
+            const string part1 = "Writing tests";
+            const string part2 = " is good for your health";
+            const string expected = part1 + part2;
+
+            var bytes = new System.Collections.Generic.List<byte>();
+            bytes.Add(0);
+            bytes.AddRange(Encoding.UTF8.GetBytes(part1));
+
+            var bytes2 = new System.Collections.Generic.List<byte>();
+            bytes.AddRange(Encoding.UTF8.GetBytes(part2));
+            bytes.Add(255);
+
+            string result = null;
+            _onMessage = s => result = s;
+
+            _handler.Recieve(bytes);
+            _handler.Recieve(bytes2);
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void ShouldThrowOnInvalidFirstFrame()
+        {
+            Assert.Catch<WebSocketException>(() =>_handler.Recieve(new byte[] {87}));
         }
     }
 }

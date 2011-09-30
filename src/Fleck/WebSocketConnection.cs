@@ -20,7 +20,7 @@ namespace Fleck
         public ISocket Socket { get; set; }
 
         private readonly IHandlerFactory _handlerFactory;
-        private IHandler _handler;
+        public IHandler Handler { get; set; }
         private bool _closed;
         private const int ReadSize = 1024 * 4;
 
@@ -31,10 +31,16 @@ namespace Fleck
 
         public void Send(string message)
         {
-            if (_handler == null)
+            if (Handler == null)
                 throw new WebSocketException("Cannot send before handshake");
-                
-            var bytes = _handler.FrameText(message);
+
+            if (_closed || !Socket.Connected)
+            {
+                FleckLog.Warn("Data sent after close. Ignoring.");
+                return;
+            }
+
+            var bytes = Handler.FrameText(message);
             SendBytes(bytes);
         }
 
@@ -44,12 +50,13 @@ namespace Fleck
             var buffer = new byte[ReadSize];
             Read(data, buffer);
         }
-        
+
         private void Read(List<byte> data, byte[] buffer)
         {
-            if (_closed)
+            if (_closed || !Socket.Connected)
                 return;
-            Socket.Receive(buffer, r => {
+            Socket.Receive(buffer, r =>
+            {
                 if (r <= 0)
                 {
                     FleckLog.Debug("0 bytes read. Closing.");
@@ -58,19 +65,20 @@ namespace Fleck
                 }
                 FleckLog.Debug(r + " bytes read");
                 var readBytes = buffer.Take(r);
-                if (_handler != null)
+                if (Handler != null)
                 {
-                    _handler.Recieve(readBytes);
+                    Handler.Recieve(readBytes);
                 }
                 else
                 {
                     data.AddRange(readBytes);
                     CreateHandler(data);
                 }
-                
+
                 Read(data, buffer);
             },
-            e => {
+            e =>
+            {
                 OnError(e);
                 if (e is HandshakeException)
                 {
@@ -88,26 +96,28 @@ namespace Fleck
                 }
             });
         }
-        
+
         private void SendBytes(byte[] bytes, Action callback = null)
         {
-            Socket.Send(bytes, () => {
+            Socket.Send(bytes, () =>
+            {
                 FleckLog.Debug("Sent " + bytes.Length + " bytes");
                 if (callback != null)
                     callback();
             },
-            e => {
+            e =>
+            {
                 FleckLog.Info("Failed to send. Disconnecting.", e);
                 CloseSocket();
             });
         }
-        
-        private void CreateHandler(IList<byte> data)
+
+        private void CreateHandler(IEnumerable<byte> data)
         {
-            _handler = _handlerFactory.BuildHandler(data.ToArray(), OnMessage, CloseSocket);
-            if (_handler == null)
+            Handler = _handlerFactory.BuildHandler(data.ToArray(), OnMessage, CloseSocket);
+            if (Handler == null)
                 return;
-            var handshake = _handler.CreateHandshake();
+            var handshake = Handler.CreateHandshake();
             SendBytes(handshake, OnOpen);
         }
 
@@ -115,20 +125,23 @@ namespace Fleck
         {
             Close(1000);
         }
-        
+
         public void Close(int code)
         {
-            if (_handler == null)
-               CloseSocket();
-               
-            var bytes = _handler.FrameClose(code);
+            if (Handler == null)
+            {
+                CloseSocket();
+                return;
+            }
+
+            var bytes = Handler.FrameClose(code);
             if (bytes.Length == 0)
                 CloseSocket();
             else
                 SendBytes(bytes, CloseSocket);
         }
-        
-        private void CloseSocket() 
+
+        private void CloseSocket()
         {
             OnClose();
             _closed = true;

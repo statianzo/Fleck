@@ -10,11 +10,11 @@ namespace Fleck
             Data = new List<byte>();
         }
         public List<byte> Data { get; private set; }
-        public FrameType FrameType { get; set; }
+        public FrameType? FrameType { get; set; }
         public void Clear()
         {
             Data.Clear();
-            FrameType = ((FrameType)-1);
+            FrameType = null;
         }
     }
 }

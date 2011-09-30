@@ -81,10 +81,8 @@ namespace Fleck
                 FleckLog.Debug("Authenticating Secure Connection");
                 clientSocket
                     .Authenticate(_x509Certificate,
-                                  () =>
-                                  {
-                                    connection.StartReceiving();
-                                  }, e => FleckLog.Warn("Failed to Authenticate", e));
+                                  connection.StartReceiving,
+                                  e => FleckLog.Warn("Failed to Authenticate", e));
             }
             else
             {

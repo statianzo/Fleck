@@ -1,4 +1,5 @@
 using System;
+using Fleck.Handlers;
 using Fleck.Interfaces;
 
 namespace Fleck
@@ -27,6 +28,8 @@ namespace Fleck
             {
                 case "76":
                     return Draft76Handler.Create(request, onMessage);
+                case "7":
+                    return Hybi13Handler.Create(request, onMessage, onClose);
                 case "8":
                     return Hybi13Handler.Create(request, onMessage, onClose);
             }

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Fleck.Interfaces;
 
-namespace Fleck
+namespace Fleck.Handlers
 {
     public class ComposableHandler : IHandler
     {

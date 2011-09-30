@@ -22,6 +22,20 @@ namespace Fleck
                 Array.Reverse(bytes);
             return bytes;
         }
+
+        public static int ToLittleEndianInt(this byte[] source)
+        {
+            if(BitConverter.IsLittleEndian)
+                Array.Reverse(source);
+
+            if(source.Length == 2)
+                return BitConverter.ToUInt16(source, 0);
+
+            if(source.Length == 8)
+                return (int)BitConverter.ToUInt64(source, 0);
+
+            throw new ArgumentException("Unsupported Size");
+        }
     }
 }
 

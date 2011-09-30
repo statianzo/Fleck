@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Security.Cryptography;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using Fleck.Interfaces;
 
-namespace Fleck
+namespace Fleck.Handlers
 {
-    public class Draft76Handler
+    public static class Draft76Handler
     {
         private const byte End = 255;
         private const byte Start = 0;

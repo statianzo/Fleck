@@ -1,6 +1,4 @@
-using System;
 using NUnit.Framework;
-using Fleck.Tests;
 using System.Text;
 
 namespace Fleck.Tests
