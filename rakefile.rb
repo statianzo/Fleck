@@ -62,6 +62,9 @@ task :clean do
 	FileUtils.rm_r(Dir.glob(File.join(buildDir, '*')), :force=>true) if exists?(buildDir)
 	FileUtils.rm_r(Dir.glob(buildDir), :force=>true) if exists?(buildDir)
 	Dir.mkdir buildDir unless exists?(buildDir)
+	
+	FileUtils.rm_r(Dir.glob(File.join(RESULTS_DIR, '*')), :force=>true) if exists?(RESULTS_DIR)
+	FileUtils.rm_r(Dir.glob(RESULTS_DIR), :force=>true) if exists?(RESULTS_DIR)
 	Dir.mkdir RESULTS_DIR unless exists?(RESULTS_DIR)
 end
 
