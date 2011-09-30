@@ -9,7 +9,7 @@ class NUnitRunner
 		@compilePlatform = paths.fetch(:platform, '')
 		@compileTarget = paths.fetch(:compilemode, 'debug')
 	
-		@nunitExe = File.join('src', 'packages', 'NUnit.2.5.10.11092', 'tools', "nunit-console#{(@compilePlatform.empty? ? '' : "-#{@compilePlatform}")}.exe").gsub('/','\\') + ' /nothread'
+		@nunitExe = Nuget.tool("NUnit", "nunit-console#{(@compilePlatform.empty? ? '' : "-#{@compilePlatform}")}.exe") + Platform.switch("nothread")
 	end
 	
 	def executeTests(assemblies)
@@ -17,7 +17,7 @@ class NUnitRunner
 		
 		assemblies.each do |assem|
 			file = File.expand_path("#{@sourceDir}/#{assem}/bin/#{@compileTarget}/#{assem}.dll")
-			sh "#{@nunitExe} \"#{file}\" /xml=#{@resultsDir}/#{assem}-TestResults.xml"
+			sh Platform.runtime("#{@nunitExe} \"#{file}\"")
 		end
 	end
 end
