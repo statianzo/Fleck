@@ -3,13 +3,16 @@
 <head>
     <title>websocket client</title>
     <script type="text/javascript">
-        var ws;
         var start = function () {
             var inc = document.getElementById('incomming');
+            var wsImpl = window.WebSocket || window.MozWebSocket;
+            var form = document.getElementById('sendForm');
+            var input = document.getElementById('sendText');
+            
             inc.innerHTML += "connecting to server ..<br/>";
 
             // create a new websocket and connect
-            ws = new WebSocket('ws://localhost:8181/consoleappsample');
+            window.ws = new wsImpl('ws://localhost:8181/consoleappsample');
 
             // when data is comming from the server, this metod is called
             ws.onmessage = function (evt) {
@@ -25,11 +28,22 @@
             ws.onclose = function () {
                 inc.innerHTML += '.. connection closed<br/>';
             }
+            
+			form.addEventListener('submit', function(e){
+				e.preventDefault();
+				var val = input.value;
+				ws.send(val);
+				input.value = "";
+			});
+            
         }
         window.onload = start;
     </script>
 </head>
 <body>
+	<form id="sendForm">
+		<input id="sendText" placeholder="Text to send" />
+	</form>
     <pre id="incomming"></pre>
 </body>
 </html>

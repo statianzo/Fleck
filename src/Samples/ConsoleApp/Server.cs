@@ -27,10 +27,10 @@ namespace Fleck.Samples.ConsoleApp
                     socket.OnMessage = message =>
                         {
                             Console.WriteLine(message);
+                            allSockets.ToList().ForEach(s => s.Send("Echo: " + message));
                         };
                 });
 
-            Thread.Sleep(-1);
 
             var input = Console.ReadLine();
             while (input != "exit")
