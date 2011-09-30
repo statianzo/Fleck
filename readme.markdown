@@ -1,8 +1,9 @@
 Fleck
 ===
 
-Fleck is a websocket implementation in C#. Branched from the [Nugget][nugget]
-project, Fleck requires no inheritence, or reference to Unity. 
+Fleck is a WebSocket server implementation in C#. Branched from the
+[Nugget][nugget] project, Fleck requires no inheritance, container, or
+additional references.
 
 Example
 ---
@@ -17,12 +18,35 @@ The following is an example that will echo to a client.
           socket.OnMessage = message => socket.Send(message);
         });
 
+Supported WebSocket Versions
+---
+
+Fleck supports several WebSocket versions of modern web browsers
+
+- Hixie-Draft-76/Hybi-00 (Safari 5, Chrome < 14, Firefox 4 (when enabled))
+- Hybi-07 (Firefox 6)
+- Hybi-10 (Chrome 14+, Firefox 7)
+
+Secure WebSockets (wss://)
+---
+
+Enabling secure connections requires two things: using the scheme `wss` instead
+of `ws`, and pointing Fleck to an x509 certificate containing a public and
+private key
+
+      var server = new WebSocketServer("wss://localhost:8431");
+      server.Certificate = "MyCert.cer";
+      server.Start(socket =>
+        {
+          //...use as normal
+        });
+
 License
 ---
 
 The MIT License
 
-Copyright (c) 2010 Jason Staten
+Copyright (c) 2010-2011 Jason Staten
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
