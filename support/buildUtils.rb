@@ -9,7 +9,7 @@ class NUnitRunner
 		@compilePlatform = paths.fetch(:platform, '')
 		@compileTarget = paths.fetch(:compilemode, 'debug')
 	
-		@nunitExe = Nuget.tool("NUnit", "nunit-console#{(@compilePlatform.empty? ? '' : "-#{@compilePlatform}")}.exe") + Platform.switch("nothread")
+		@nunitExe = tool("NUnit", "nunit-console#{(@compilePlatform.empty? ? '' : "-#{@compilePlatform}")}.exe") + Platform.switch("nothread")
 	end
 	
 	def executeTests(assemblies)
@@ -20,6 +20,20 @@ class NUnitRunner
 			sh Platform.runtime("#{@nunitExe} \"#{file}\"")
 		end
 	end
+	
+	def tool(package, tool)
+		File.join(Dir.glob(File.join(package_root,"#{package}.*")).sort.last, "tools", tool)
+	end
+	
+	def package_root
+		root = nil
+		["src", "source"].each do |d|
+		  packroot = File.join d, "packages"
+		  root = packroot if File.directory? packroot
+		end
+		raise "No NuGet package root found" unless root
+		root
+  end
 end
 
 class MSBuildRunner
