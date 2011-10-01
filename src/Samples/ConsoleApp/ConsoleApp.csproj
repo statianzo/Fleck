@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -44,7 +44,7 @@
     <Content Include="client.html" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Fleck\Fleck.csproj">
+    <ProjectReference Include="..\..\Fleck\Fleck.csproj">
       <Project>{8B12D929-AFA9-4307-BEFF-2ED0F1070FEE}</Project>
       <Name>Fleck</Name>
     </ProjectReference>

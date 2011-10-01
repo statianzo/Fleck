@@ -56,13 +56,15 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\CommonAssemblyInfo.cs">
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="Handlers\ComposableHandler.cs" />
     <Compile Include="Handlers\Draft76Handler.cs" />
     <Compile Include="Handlers\Hybi13Handler.cs" />
     <Compile Include="Interfaces\ISocket.cs" />
     <Compile Include="Interfaces\IWebSocketConnection.cs" />
     <Compile Include="FleckLog.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SocketWrapper.cs" />
     <Compile Include="WebSocketServer.cs" />
     <Compile Include="WebsocketHttpRequest.cs" />
