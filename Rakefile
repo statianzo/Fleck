@@ -2,7 +2,6 @@ require 'rubygems'
 require 'albacore'
 
 load 'support/platform.rb'
-load 'support/buildUtils.rb'
 load 'VERSION.txt'
 
 ROOT_NAMESPACE = 'Fleck'
@@ -10,17 +9,24 @@ RESULTS_DIR = 'build/test-reports'
 PRODUCT = ROOT_NAMESPACE
 COPYRIGHT = 'Copyright Jason Staten 2010-2011. All rights reserved.';
 COMMON_ASSEMBLY_INFO = 'src/CommonAssemblyInfo.cs';
-CLR_VERSION = 'v4.0'
 COMPILE_TARGET = 'Debug'
+COMPILE_PLATFORM = 'Any CPU'
 CLR_TOOLS_VERSION = 'v4.0.30319'
+BUILD_RUNNER = Platform.nix? ? 'xbuild' : 'msbuild'
 
 props = { :archive => 'artifacts', :stage => 'stage' }
+
 
 desc 'Compiles and runs unit tests'
 task :all => [:default]
 
-desc '**Default**, compiles and runs tests'
-task :default => [:compile, :test]
+desc 'Compiles and runs tests'
+task :default => [:build, :test]
+
+desc 'Build application'
+task :build => [:clean, :version, :compile] do
+  copyOutputFiles "src/#{ROOT_NAMESPACE}/bin/#{COMPILE_TARGET}", "*.{dll,pdb}", props[:archive]
+end
 
 desc 'Update the version information for the build'
 assemblyinfo :version do |asm|
@@ -50,7 +56,35 @@ end
 
 desc 'Prepares the working directory for a new build'
 task :clean do
-  puts('recreating the build directory')
+  Rake::Task["clean:#{BUILD_RUNNER}"].execute
+  buildDir = props[:archive]
+  rm_r buildDir if Dir.exists?(buildDir)
+  rm_r RESULTS_DIR  if Dir.exists?(RESULTS_DIR)
+  mkdir_p buildDir
+  mkdir_p RESULTS_DIR
+end
+
+namespace :clean do
+  msbuild :msbuild do |msb|
+    clean_solution(msb)
+  end
+  xbuild :xbuild do |xb|
+    clean_solution(xb)
+  end
+
+  def clean_solution(command)
+    command.targets :Clean
+    command.solution = "src/#{ROOT_NAMESPACE}.sln"
+    command.properties = {
+      :configuration => COMPILE_TARGET,
+      :platform => COMPILE_PLATFORM
+    }
+  end
+end
+
+desc 'Prepares the working directory for a new build'
+task :clean do
+  Rake::Task["clean:#{BUILD_RUNNER}"].execute
   buildDir = props[:archive]
   rm_r buildDir if Dir.exists?(buildDir)
   rm_r RESULTS_DIR  if Dir.exists?(RESULTS_DIR)
@@ -59,23 +93,36 @@ task :clean do
 end
 
 desc 'Compiles the app'
-task :compile => [:clean, :version] do
-  MSBuildRunner.compile :compilemode => COMPILE_TARGET,
-                        :solutionfile => "src/#{ROOT_NAMESPACE}.sln",
-                        :clrversion => CLR_TOOLS_VERSION
-  copyOutputFiles "src/#{ROOT_NAMESPACE}/bin/#{COMPILE_TARGET}", "*.{dll,pdb}", props[:archive]
+task :compile do
+  Rake::Task["compile:#{BUILD_RUNNER}"].execute
 end
 
-desc 'Runs unit tests'
-task :test do
-  runner = NUnitRunner.new :compilemode => COMPILE_TARGET,
-                           :source => 'src',
-                           :platform => 'x86',
-                           :results => RESULTS_DIR
+namespace :compile do
+  msbuild :msbuild do |msb|
+    compile_solution(msb)
+  end
+  xbuild :xbuild do |xb|
+    compile_solution(xb)
+  end
 
-  runner.executeTests ['Fleck.Tests']
+  def compile_solution(command)
+    command.solution = "src/#{ROOT_NAMESPACE}.sln"
+    command.properties = {
+      :configuration => COMPILE_TARGET,
+      :platform => COMPILE_PLATFORM
+    }
+  end
+end
+
+task :test do |nunit|
+  runner = Dir['**/nunit-console.exe'].first
+  raise "nunit-console.exe not found" if runner.nil?
+  assemblies = Dir["**/#{COMPILE_TARGET}/*.Tests.dll"].reject{|a|a =~ /\/obj\//}
+
+  sh "#{Platform.runtime(runner)} #{assemblies.join}"
 end
 
 def copyOutputFiles(fromDir, filePattern, outDir)
   copy Dir[File.join(fromDir, filePattern)], outDir
 end
+
