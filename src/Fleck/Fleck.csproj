@@ -55,10 +55,16 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
+  <Choose>
+    <When Condition="Exists('$(SolutionDir)\CommonAssemblyInfo.cs')">
+      <ItemGroup>
+        <Compile Include="$(SolutionDir)\CommonAssemblyInfo.cs">
+          <Link>Properties\CommonAssemblyInfo.cs</Link>
+        </Compile>
+      </ItemGroup>
+    </When>
+  </Choose>
   <ItemGroup>
-    <Compile Include="..\CommonAssemblyInfo.cs">
-      <Link>Properties\CommonAssemblyInfo.cs</Link>
-    </Compile>
     <Compile Include="Handlers\ComposableHandler.cs" />
     <Compile Include="Handlers\Draft76Handler.cs" />
     <Compile Include="Handlers\Hybi13Handler.cs" />
