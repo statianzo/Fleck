@@ -6,7 +6,7 @@ using Fleck.Interfaces;
 
 namespace Fleck
 {
-    public class WebSocketServer : IDisposable
+    public class WebSocketServer : IWebSocketServer
     {
         private readonly string _scheme;
         private Action<IWebSocketConnection> _config;
@@ -29,7 +29,6 @@ namespace Fleck
         public ISocket ListenerSocket { get; set; }
         public string Location { get; private set; }
         public int Port { get; private set; }
-        public string Origin { get; set; }
         public string Certificate { get; set; }
 
         public bool IsSecure
@@ -39,7 +38,7 @@ namespace Fleck
 
         public void Dispose()
         {
-            ListenerSocket.Close();
+            ListenerSocket.Dispose();
         }
 
         public void Start(Action<IWebSocketConnection> config)

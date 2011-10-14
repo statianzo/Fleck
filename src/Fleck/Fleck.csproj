@@ -65,6 +65,7 @@
     <Compile Include="Interfaces\ISocket.cs" />
     <Compile Include="Interfaces\IWebSocketConnection.cs" />
     <Compile Include="FleckLog.cs" />
+    <Compile Include="Interfaces\IWebSocketServer.cs" />
     <Compile Include="SocketWrapper.cs" />
     <Compile Include="WebSocketServer.cs" />
     <Compile Include="WebsocketHttpRequest.cs" />
