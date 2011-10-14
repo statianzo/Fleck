@@ -29,6 +29,7 @@ namespace Fleck
         public Action OnClose { get; set; }
         public Action<string> OnMessage { get; set; }
         public Action<Exception> OnError { get; set; }
+        public IWebSocketConnectionInfo ConnectionInfo { get; private set; }
 
         public void Send(string message)
         {
@@ -121,6 +122,8 @@ namespace Fleck
             Handler = _handlerFactory(request);
             if (Handler == null)
                 return;
+            ConnectionInfo = WebSocketConnectionInfo.Create(request);
+
             var handshake = Handler.CreateHandshake();
             SendBytes(handshake, OnOpen);
         }

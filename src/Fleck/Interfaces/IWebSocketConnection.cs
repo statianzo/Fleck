@@ -9,5 +9,6 @@ namespace Fleck
         Action<string> OnMessage { get; set; }
         void Send(string message);
         void Close();
+        IWebSocketConnectionInfo ConnectionInfo { get; }
     }
 }

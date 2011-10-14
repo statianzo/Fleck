@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WebSocketConnectionInfoTests.cs" />
     <Compile Include="WebSocketConnectionTests.cs" />
     <Compile Include="WebSocketServerTests.cs" />
     <Compile Include="RequestParserTests.cs" />
