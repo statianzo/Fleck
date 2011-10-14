@@ -1,6 +1,4 @@
-using System;
-
-namespace Fleck.Interfaces
+namespace Fleck
 {
   public interface IRequestParser
   {

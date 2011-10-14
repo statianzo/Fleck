@@ -1,12 +1,11 @@
 using System;
 using Fleck.Handlers;
-using Fleck.Interfaces;
 
 namespace Fleck
 {
     public class DefaultHandlerFactory : IHandlerFactory
     {
-        private string _scheme;
+        private readonly string _scheme;
         public DefaultHandlerFactory(string scheme)
         {
             RequestParser = new RequestParser();

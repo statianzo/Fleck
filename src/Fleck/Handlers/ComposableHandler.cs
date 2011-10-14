@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Fleck.Interfaces;
 
 namespace Fleck.Handlers
 {
@@ -11,7 +10,7 @@ namespace Fleck.Handlers
         public Action<List<byte>> RecieveData = delegate { };
         public Func<int, byte[]> Close = i => new byte[0];
         
-        private List<byte> _data = new List<byte>();
+        private readonly List<byte> _data = new List<byte>();
 
         public byte[] CreateHandshake()
         {

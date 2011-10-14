@@ -1,7 +1,5 @@
 using System;
-using System.ComponentModel;
 using Fleck.Handlers;
-using Fleck.Interfaces;
 using System.Text;
 using NUnit.Framework;
 

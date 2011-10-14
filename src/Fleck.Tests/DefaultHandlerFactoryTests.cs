@@ -1,6 +1,4 @@
-using System;
 using NUnit.Framework;
-using Fleck.Interfaces;
 using Moq;
 
 namespace Fleck.Tests

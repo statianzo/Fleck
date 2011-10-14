@@ -2,7 +2,6 @@ using System;
 using System.Net;
 using Moq;
 using NUnit.Framework;
-using Fleck.Interfaces;
 
 namespace Fleck.Tests
 {

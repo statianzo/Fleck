@@ -1,5 +1,4 @@
 ﻿using System;
-using Fleck.Interfaces;
 using Moq;
 using NUnit.Framework;
 

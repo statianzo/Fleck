@@ -1,7 +1,5 @@
-using System;
 using System.Text;
 using System.Text.RegularExpressions;
-using Fleck.Interfaces;
 
 namespace Fleck
 {
