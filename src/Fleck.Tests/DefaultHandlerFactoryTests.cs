@@ -1,58 +1,15 @@
 using NUnit.Framework;
-using Moq;
 
 namespace Fleck.Tests
 {
     [TestFixture]
     public class DefaultHandlerFactoryTests
     {
-        DefaultHandlerFactory _factory;
-        MockRepository _mockRepository;
-        
-        [SetUp]
-        public void Setup()
-        {
-            _mockRepository = new MockRepository(MockBehavior.Default);
-            _factory = new DefaultHandlerFactory("");
-        }
-        
-        [TearDown]
-        public void TearDown()
-        {
-            _mockRepository.Verify();
-        }
-        
-        [Test]
-        public void ShouldReturnNullForIncompleteHeaders()
-        {
-            var parser = _mockRepository.Create<IRequestParser>();
-            parser
-                .Setup(x => x.IsComplete(It.IsAny<byte[]>()))
-                .Returns(false)
-                .Verifiable();
-            
-            _factory.RequestParser = parser.Object;
-            
-            var handler = _factory.BuildHandler(new byte[0], x => {}, () => {});
-            
-            Assert.IsNull(handler);
-        }
-        
         [Test]
         public void ShouldReturnHandlerForValidHeaders()
         {
-            var parser = _mockRepository.Create<IRequestParser>();
-            parser
-                .Setup(x => x.IsComplete(It.IsAny<byte[]>()))
-                .Returns(true)
-                .Verifiable();
-                
-            parser.Setup(x => x.Parse(It.IsAny<byte[]>(), It.IsAny<string>()))
-                .Returns(new WebSocketHttpRequest {Headers = {{"Sec-WebSocket-Key1", "BLAH"}}});
-            
-            _factory.RequestParser = parser.Object;
-            
-            var handler = _factory.BuildHandler(new byte[0], x => {}, () => {});
+            var request = new WebSocketHttpRequest {Headers = {{"Sec-WebSocket-Key1", "BLAH"}}};
+            var handler = HandlerFactory.BuildHandler(request, x => { }, () => { });
             
             Assert.IsNotNull(handler);
         }
@@ -60,18 +17,9 @@ namespace Fleck.Tests
         [Test]
         public void ShouldThrowWhenUnsupportedType()
         {
-            var parser = _mockRepository.Create<IRequestParser>();
-            parser
-                .Setup(x => x.IsComplete(It.IsAny<byte[]>()))
-                .Returns(true)
-                .Verifiable();
             
-            parser.Setup(x => x.Parse(It.IsAny<byte[]>(), It.IsAny<string>()))
-                .Returns(new WebSocketHttpRequest {Headers = {{"Bad", "Request"}}});
-            
-            _factory.RequestParser = parser.Object;
-            
-            Assert.Throws<WebSocketException>(() => _factory.BuildHandler(new byte[0], x => {}, () => {}));
+            var request = new WebSocketHttpRequest {Headers = {{"Bad", "Request"}}};
+            Assert.Throws<WebSocketException>(() => HandlerFactory.BuildHandler(request, x => {}, () => {}));
             
         }
     }

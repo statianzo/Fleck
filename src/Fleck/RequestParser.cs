@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace Fleck
 {
-  public class RequestParser : IRequestParser
+  public class RequestParser
   {
     const string pattern = @"^(?<method>[^\s]+)\s(?<path>[^\s]+)\sHTTP\/1\.1\r\n" + // request line
                            @"((?<field_name>[^:\r\n]+):\s(?<field_value>[^\r\n]+)\r\n)+" + //headers
@@ -12,18 +12,18 @@ namespace Fleck
                            
     private static readonly Regex _regex = new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
                            
-    public bool IsComplete(byte[] bytes)
+    public static bool IsComplete(byte[] bytes)
     {
       var requestString = Encoding.UTF8.GetString(bytes);
       return _regex.IsMatch(requestString);
     }
     
-    public WebSocketHttpRequest Parse(byte[] bytes)
+    public static WebSocketHttpRequest Parse(byte[] bytes)
     {
         return Parse(bytes, "ws");
     }
     
-    public WebSocketHttpRequest Parse(byte[] bytes, string scheme)
+    public static WebSocketHttpRequest Parse(byte[] bytes, string scheme)
     {
       var body = Encoding.UTF8.GetString(bytes);
       Match match = _regex.Match(body);

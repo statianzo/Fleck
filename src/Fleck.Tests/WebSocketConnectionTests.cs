@@ -7,7 +7,6 @@ namespace Fleck.Tests
     [TestFixture]
     public class WebSocketConnectionTests
     {
-        private Mock<IHandlerFactory> _handlerFactoryMock;
         private Mock<ISocket> _socketMock;
         private WebSocketConnection _connection;
         private Mock<IHandler> _handlerMock;
@@ -16,13 +15,10 @@ namespace Fleck.Tests
         public void Setup()
         {
             _socketMock = new Mock<ISocket>();
-            _handlerFactoryMock = new Mock<IHandlerFactory>();
-            _connection = new WebSocketConnection(_socketMock.Object, _handlerFactoryMock.Object);
             _handlerMock = new Mock<IHandler>();
-
-            _handlerFactoryMock
-                .Setup(x => x.BuildHandler(It.IsAny<byte[]>(), It.IsAny<Action<string>>(), It.IsAny<Action>()))
-                .Returns(_handlerMock.Object);
+            _connection = new WebSocketConnection(_socketMock.Object,
+                                                  b => new WebSocketHttpRequest(),
+                                                  r => _handlerMock.Object); 
         }
 
         [Test]
@@ -62,6 +58,7 @@ namespace Fleck.Tests
             _connection.StartReceiving();
             _socketMock.Verify(x => x.Receive(It.IsAny<byte[]>(), It.IsAny<Action<int>>(), It.IsAny<Action<Exception>>(), 0), Times.Never());
         }
+
 
         [Test]
         public void ShouldCallOnErrorWhenError()

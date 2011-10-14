@@ -70,8 +70,7 @@
     <Compile Include="WebSocketServer.cs" />
     <Compile Include="WebsocketHttpRequest.cs" />
     <Compile Include="RequestParser.cs" />
-    <Compile Include="Interfaces\IRequestParser.cs" />
-    <Compile Include="DefaultHandlerFactory.cs" />
+    <Compile Include="HandlerFactory.cs" />
     <Compile Include="WebSocketConnection.cs" />
     <Compile Include="WebSocketException.cs" />
     <Compile Include="IntExtensions.cs" />
@@ -79,7 +78,6 @@
     <Compile Include="FrameType.cs" />
     <Compile Include="ReadState.cs" />
     <Compile Include="Interfaces\IHandler.cs" />
-    <Compile Include="Interfaces\IHandlerFactory.cs" />
     <Compile Include="WebSocketStatusCodes.cs" />
   </ItemGroup>
   <ItemGroup>

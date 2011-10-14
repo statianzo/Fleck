@@ -6,7 +6,7 @@ namespace Fleck
 {
     public class WebSocketConnection : IWebSocketConnection
     {
-        public WebSocketConnection(ISocket socket, IHandlerFactory handlerFactory)
+        public WebSocketConnection(ISocket socket, Func<byte[], WebSocketHttpRequest> parseRequest, Func<WebSocketHttpRequest, IHandler> handlerFactory)
         {
             Socket = socket;
             OnOpen = () => { };
@@ -14,11 +14,13 @@ namespace Fleck
             OnMessage = x => { };
             OnError = x => { };
             _handlerFactory = handlerFactory;
+            _parseRequest = parseRequest;
         }
 
         public ISocket Socket { get; set; }
 
-        private readonly IHandlerFactory _handlerFactory;
+        private readonly Func<WebSocketHttpRequest, IHandler> _handlerFactory;
+        readonly Func<byte[], WebSocketHttpRequest> _parseRequest;
         public IHandler Handler { get; set; }
         private bool _closed;
         private const int ReadSize = 1024 * 4;
@@ -113,7 +115,10 @@ namespace Fleck
 
         private void CreateHandler(IEnumerable<byte> data)
         {
-            Handler = _handlerFactory.BuildHandler(data.ToArray(), OnMessage, CloseSocket);
+            var request = _parseRequest(data.ToArray());
+            if (request == null)
+                return;
+            Handler = _handlerFactory(request);
             if (Handler == null)
                 return;
             var handshake = Handler.CreateHandshake();

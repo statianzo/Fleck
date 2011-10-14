@@ -11,7 +11,8 @@ namespace Fleck
         private Action<IWebSocketConnection> _config;
         private X509Certificate2 _x509Certificate;
 
-        public WebSocketServer(string location) : this(8181, location)
+        public WebSocketServer(string location)
+            : this(8181, location)
         {
         }
 
@@ -24,7 +25,7 @@ namespace Fleck
             var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
             ListenerSocket = new SocketWrapper(socket);
         }
-        
+
         public ISocket ListenerSocket { get; set; }
         public string Location { get; private set; }
         public int Port { get; private set; }
@@ -69,8 +70,14 @@ namespace Fleck
             FleckLog.Debug("Client Connected");
             ListenForClients();
 
-            
-            var connection = new WebSocketConnection(clientSocket, new DefaultHandlerFactory(_scheme));
+            WebSocketConnection connection = null;
+
+            connection = new WebSocketConnection(
+                clientSocket,
+                bytes => RequestParser.Parse(bytes, _scheme),
+                r => HandlerFactory.BuildHandler(r, s => connection.OnMessage(s),
+                                                         connection.Close));
+
             _config(connection);
 
 

@@ -3,24 +3,10 @@ using Fleck.Handlers;
 
 namespace Fleck
 {
-    public class DefaultHandlerFactory : IHandlerFactory
+    public class HandlerFactory
     {
-        private readonly string _scheme;
-        public DefaultHandlerFactory(string scheme)
+        public static IHandler BuildHandler(WebSocketHttpRequest request, Action<string> onMessage, Action onClose)
         {
-            RequestParser = new RequestParser();
-            _scheme = scheme;
-        }
-        
-        public IRequestParser RequestParser { get; set; }
-
-        public IHandler BuildHandler(byte[] data, Action<string> onMessage, Action onClose)
-        {
-            if (!RequestParser.IsComplete(data))
-                return null;
-            
-            var request = RequestParser.Parse(data, _scheme);
-            
             var version = GetVersion(request);
             
             switch (version)

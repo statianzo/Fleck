@@ -6,19 +6,10 @@ namespace Fleck.Tests
   [TestFixtureAttribute]
   public class RequestParserTests
   {
-  
-    RequestParser _parser;
-  
-    [SetUp]
-    public void Setup()
-    {
-      _parser = new RequestParser();
-    }
-    
     [Test]
     public void ShouldReturnRequest()
     {
-      WebSocketHttpRequest request = _parser.Parse(new byte[0]);
+      WebSocketHttpRequest request = RequestParser.Parse(new byte[0]);
       
       Assert.IsNotNull(request);
     }
@@ -26,7 +17,7 @@ namespace Fleck.Tests
     [Test]
     public void ShouldReadResourceLine()
     {
-      WebSocketHttpRequest request = _parser.Parse(ValidRequestArray());
+      WebSocketHttpRequest request = RequestParser.Parse(ValidRequestArray());
       
       Assert.AreEqual("GET", request.Method);
       Assert.AreEqual("/demo", request.Path);
@@ -35,7 +26,7 @@ namespace Fleck.Tests
     [Test]
     public void ShouldReadHeaders()
     {
-      WebSocketHttpRequest request = _parser.Parse(ValidRequestArray());
+      WebSocketHttpRequest request = RequestParser.Parse(ValidRequestArray());
       
       Assert.AreEqual("example.com", request.Headers["Host"]);
       Assert.AreEqual("Upgrade", request.Headers["Connection"]);
@@ -46,7 +37,7 @@ namespace Fleck.Tests
     [Test]
     public void ShouldReadBody()
     {
-      WebSocketHttpRequest request = _parser.Parse(ValidRequestArray());
+      WebSocketHttpRequest request = RequestParser.Parse(ValidRequestArray());
       
       Assert.AreEqual("^n:ds[4U", request.Body);
     }
@@ -55,7 +46,7 @@ namespace Fleck.Tests
     [Test]
     public void ValidRequestShouldBeComplete()
     {
-      Assert.True(_parser.IsComplete(ValidRequestArray()));
+      Assert.True(RequestParser.IsComplete(ValidRequestArray()));
     }
     
     [Test]
@@ -74,13 +65,13 @@ namespace Fleck.Tests
         "";
       var bytes = RequestArray(noBodyRequest);
       
-      Assert.True(_parser.IsComplete(bytes));
+      Assert.True(RequestParser.IsComplete(bytes));
     }
     
     [Test]
     public void EmptyRequestShouldNotBeComplete()
     {
-      Assert.False(_parser.IsComplete(new byte[0]));
+      Assert.False(RequestParser.IsComplete(new byte[0]));
     }
     
     [Test]
@@ -92,7 +83,7 @@ namespace Fleck.Tests
         "";
       var bytes = RequestArray(noHeadersNoBodyRequest);
       
-      Assert.False(_parser.IsComplete(bytes));
+      Assert.False(RequestParser.IsComplete(bytes));
     }
     
     [Test]
@@ -108,7 +99,7 @@ namespace Fleck.Tests
         "Sec-WebSoc"; //Cut off
       var bytes = RequestArray(partialHeaderRequest);
       
-      Assert.False(_parser.IsComplete(bytes));
+      Assert.False(RequestParser.IsComplete(bytes));
     }
     
     public byte[] ValidRequestArray()
