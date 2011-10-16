@@ -17,7 +17,7 @@ namespace Fleck.Handlers
                 Handshake = () => Hybi13Handler.BuildHandshake(request),
                 Frame = s => Hybi13Handler.FrameData(Encoding.UTF8.GetBytes(s), FrameType.Text),
                 Close = i => Hybi13Handler.FrameData(i.ToBigEndianBytes<ushort>(), FrameType.Close),
-                RecieveData = d => Hybi13Handler.ReceiveData(d, readState, (op, data) => Hybi13Handler.ProcessFrame(op, data, onMessage, onClose))
+                ReceiveData = d => Hybi13Handler.ReceiveData(d, readState, (op, data) => Hybi13Handler.ProcessFrame(op, data, onMessage, onClose))
             };
         }
         
@@ -129,7 +129,7 @@ namespace Fleck.Handlers
                 onMessage(Encoding.UTF8.GetString(data));
                 break;
             default:
-                FleckLog.Debug("Recieved unhandled " + frameType);
+                FleckLog.Debug("Received unhandled " + frameType);
                 break;
             }
         }

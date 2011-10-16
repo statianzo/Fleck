@@ -94,7 +94,7 @@ Sec-WebSocket-Protocol: sample
             string result = null;
             _onMessage = s => result = s;
 
-            _handler.Recieve(bytes);
+            _handler.Receive(bytes);
             Assert.AreEqual(expected, result);
         }
 
@@ -109,7 +109,7 @@ Sec-WebSocket-Protocol: sample
             bool hit = false;
             _onMessage = s => hit = true;
 
-            _handler.Recieve(bytes);
+            _handler.Receive(bytes);
             Assert.IsFalse(hit);
         }
 
@@ -131,15 +131,15 @@ Sec-WebSocket-Protocol: sample
             string result = null;
             _onMessage = s => result = s;
 
-            _handler.Recieve(bytes);
-            _handler.Recieve(bytes2);
+            _handler.Receive(bytes);
+            _handler.Receive(bytes2);
             Assert.AreEqual(expected, result);
         }
 
         [Test]
         public void ShouldThrowOnInvalidFirstFrame()
         {
-            Assert.Catch<WebSocketException>(() =>_handler.Recieve(new byte[] {87}));
+            Assert.Catch<WebSocketException>(() =>_handler.Receive(new byte[] {87}));
         }
     }
 }

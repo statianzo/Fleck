@@ -19,11 +19,11 @@ namespace Fleck.Handlers
             {
                 Frame = Draft76Handler.FrameText,
                 Handshake = () => Draft76Handler.Handshake(request),
-                RecieveData = data => RecieveData(onMessage, data)
+                ReceiveData = data => ReceiveData(onMessage, data)
             };
         }
         
-        public static void RecieveData(Action<string> onMessage, List<byte> data)
+        public static void ReceiveData(Action<string> onMessage, List<byte> data)
         {
             while (data.Count > 0)
             {

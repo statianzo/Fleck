@@ -82,7 +82,7 @@ namespace Fleck.Tests
             //FIN:1 Type:1 (text) LEN:5 Payload:"Hello"
             var data = new byte[]{ 129, 5, 72, 101, 108, 108, 111 };
 
-            Assert.Catch<WebSocketException>(() => _handler.Recieve(data));
+            Assert.Catch<WebSocketException>(() => _handler.Receive(data));
         }
 
 
@@ -101,7 +101,7 @@ namespace Fleck.Tests
 
             string result = null;
             _onMessage = s => result = s;
-            _handler.Recieve(frame.ToBytes());
+            _handler.Receive(frame.ToBytes());
 
             Assert.AreEqual(expected, result);
         }
@@ -122,7 +122,7 @@ namespace Fleck.Tests
 
             var hit = false;
             _onMessage = s => hit = true;
-            _handler.Recieve(frame.ToBytes());
+            _handler.Receive(frame.ToBytes());
 
             Assert.IsFalse(hit);
         }
@@ -154,8 +154,8 @@ namespace Fleck.Tests
 
             string result = null;
             _onMessage = s => result = s;
-            _handler.Recieve(firstFrame.ToBytes());
-            _handler.Recieve(secondFrame.ToBytes());
+            _handler.Receive(firstFrame.ToBytes());
+            _handler.Receive(secondFrame.ToBytes());
 
             Assert.AreEqual(expected, result);
         }
@@ -172,7 +172,7 @@ namespace Fleck.Tests
                     Payload = Encoding.UTF8.GetBytes("continue")
                 };
 
-            Assert.Catch<WebSocketException>(() => _handler.Recieve(frame.ToBytes()));
+            Assert.Catch<WebSocketException>(() => _handler.Receive(frame.ToBytes()));
         }
 
         [Test]
@@ -189,7 +189,7 @@ namespace Fleck.Tests
 
             var hit = false;
             _onClose = () => hit = true;
-            _handler.Recieve(frame.ToBytes());
+            _handler.Receive(frame.ToBytes());
 
             Assert.IsTrue(hit);
         }
@@ -209,7 +209,7 @@ namespace Fleck.Tests
 
             string result = null;
             _onMessage = s => result = s;
-            _handler.Recieve(frame.ToBytes());
+            _handler.Receive(frame.ToBytes());
 
             Assert.AreEqual(expected, result);
         }
@@ -229,7 +229,7 @@ namespace Fleck.Tests
 
             string result = null;
             _onMessage = s => result = s;
-            _handler.Recieve(frame.ToBytes());
+            _handler.Receive(frame.ToBytes());
 
             Assert.AreEqual(expected, result);
         }

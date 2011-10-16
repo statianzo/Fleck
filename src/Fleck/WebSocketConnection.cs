@@ -69,7 +69,7 @@ namespace Fleck
                 var readBytes = buffer.Take(r);
                 if (Handler != null)
                 {
-                    Handler.Recieve(readBytes);
+                    Handler.Receive(readBytes);
                 }
                 else
                 {
