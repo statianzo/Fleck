@@ -17,6 +17,8 @@ namespace Fleck
                     return Hybi13Handler.Create(request, onMessage, onClose);
                 case "8":
                     return Hybi13Handler.Create(request, onMessage, onClose);
+                case "13":
+                    return Hybi13Handler.Create(request, onMessage, onClose);
             }
             
             throw new WebSocketException("Unsupported Request");
