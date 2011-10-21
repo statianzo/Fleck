@@ -9,6 +9,7 @@ namespace Fleck
     public interface ISocket
     {
         bool Connected { get; }
+        string RemoteIpAddress { get; }
         Stream Stream { get; }
 
         Task<ISocket> Accept(Action<ISocket> callback, Action<Exception> error);

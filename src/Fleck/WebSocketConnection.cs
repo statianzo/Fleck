@@ -122,7 +122,7 @@ namespace Fleck
             Handler = _handlerFactory(request);
             if (Handler == null)
                 return;
-            ConnectionInfo = WebSocketConnectionInfo.Create(request);
+            ConnectionInfo = WebSocketConnectionInfo.Create(request, Socket.RemoteIpAddress);
 
             var handshake = Handler.CreateHandshake();
             SendBytes(handshake, OnOpen);

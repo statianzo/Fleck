@@ -11,6 +11,8 @@ namespace Fleck.Tests
             const string origin = "http://blah.com/path/to/page";
             const string host = "blah.com";
             const string subprotocol = "Submarine!";
+            const string path = "/path/to/page";
+            const string clientIp = "127.0.0.1";
             var request =
                 new WebSocketHttpRequest
                     {
@@ -19,13 +21,30 @@ namespace Fleck.Tests
                                 {"Origin", origin},
                                 {"Host", host},
                                 {"Sec-WebSocket-Protocol", subprotocol}
-                            }
+                            },
+                        Path = path
                     };
-            var info = WebSocketConnectionInfo.Create(request);
+            var info = WebSocketConnectionInfo.Create(request, clientIp);
 
             Assert.AreEqual(origin, info.Origin);
             Assert.AreEqual(host, info.Host);
             Assert.AreEqual(subprotocol, info.SubProtocol);
+            Assert.AreEqual(path, info.Path);
+            Assert.AreEqual(clientIp, info.ClientIpAddress);
+        }
+
+        [Test]
+        public void ShouldReadSecWebSocketOrigin()
+        {
+            const string origin = "http://example.com/myPath";
+            var request =
+                new WebSocketHttpRequest
+                    {
+                        Headers = { {"Sec-WebSocket-Origin", origin} }
+                    };
+            var info = WebSocketConnectionInfo.Create(request, null);
+
+            Assert.AreEqual(origin, info.Origin);
         }
 
         [Test]
@@ -38,7 +57,7 @@ namespace Fleck.Tests
                         Headers = { {"Cookie", cookie} }
                     };
 
-            var info = WebSocketConnectionInfo.Create(request);
+            var info = WebSocketConnectionInfo.Create(request, null);
             Assert.AreEqual(info.Cookies["chocolate"], "tasty");
             Assert.AreEqual(info.Cookies["cabbage"], "not so much");
         }

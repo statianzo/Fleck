@@ -14,16 +14,20 @@ namespace Fleck
         private readonly Socket _socket;
         private Stream _stream;
 
+        public string RemoteIpAddress
+        {
+            get
+            {
+                var endpoint = _socket.RemoteEndPoint as IPEndPoint;
+                return endpoint != null ? endpoint.Address.ToString() : null;
+            }
+        }
+
         public SocketWrapper(Socket socket)
         {
             _socket = socket;
             if (_socket.Connected)
                 _stream = new NetworkStream(_socket);
-        }
-
-        public EndPoint LocalEndPoint
-        {
-            get { return _socket.LocalEndPoint; }
         }
 
         public Task Authenticate(X509Certificate2 certificate, Action callback, Action<Exception> error)
