@@ -6,9 +6,10 @@ load 'VERSION.txt'
 
 ROOT_NAMESPACE = 'Fleck'
 PRODUCT = ROOT_NAMESPACE
-COPYRIGHT = 'Copyright Jason Staten 2010-2011. All rights reserved.';
-COMMON_ASSEMBLY_INFO = 'src/CommonAssemblyInfo.cs';
-COMPILE_TARGET = 'Debug'
+COPYRIGHT = 'Copyright Jason Staten 2010-2011. All rights reserved.'
+DESCRIPTION = 'C# WebSocket Implementation'
+COMMON_ASSEMBLY_INFO = 'src/CommonAssemblyInfo.cs'
+COMPILE_TARGET = ENV['COMPILE_TARGET'] || 'Debug'
 COMPILE_PLATFORM = 'Any CPU'
 CLR_TOOLS_VERSION = 'v4.0.30319'
 BUILD_RUNNER = Platform.nix? ? 'xbuild' : 'msbuild'
@@ -44,7 +45,7 @@ assemblyinfo :version do |asm|
   puts "Version: #{BUILD_NUMBER}" if tc_build_number.nil?
   asm.trademark = commit
   asm.product_name = PRODUCT
-  asm.description = BUILD_NUMBER
+  asm.description = DESCRIPTION
   asm.version = asm_version
   asm.file_version = BUILD_NUMBER
   asm.custom_attributes :AssemblyInformationalVersion => asm_version
@@ -56,7 +57,7 @@ desc 'Prepares the working directory for a new build'
 task :clean do
   Rake::Task["clean:#{BUILD_RUNNER}"].execute
   rm_r ARCHIVE_DIR if Dir.exists?(ARCHIVE_DIR)
-  rm_r RESULTS_DIR  if Dir.exists?(RESULTS_DIR)
+  rm_r RESULTS_DIR if Dir.exists?(RESULTS_DIR)
   mkdir_p ARCHIVE_DIR
   mkdir_p RESULTS_DIR
 end
@@ -98,6 +99,11 @@ namespace :compile do
       :platform => COMPILE_PLATFORM
     }
   end
+end
+
+desc 'Build the nuget package'
+task :nuget => [:build] do
+  sh "nuget pack -OutputDirectory #{ARCHIVE_DIR} -Properties Configuration=#{COMPILE_TARGET} src/#{ROOT_NAMESPACE}/#{ROOT_NAMESPACE}.csproj"
 end
 
 desc 'Run tests'
