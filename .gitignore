@@ -5,6 +5,7 @@ _ReSharper.*
 *.csproj.user
 *.resharper.user
 *.ReSharper.user
+*.ReSharper
 *.suo
 *.userprefs
 test-results
