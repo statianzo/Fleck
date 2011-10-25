@@ -2,7 +2,6 @@ require 'rubygems'
 require 'albacore'
 
 load 'support/platform.rb'
-load 'VERSION.txt'
 
 ROOT_NAMESPACE = 'Fleck'
 PRODUCT = ROOT_NAMESPACE
@@ -31,23 +30,18 @@ desc 'Update the version information for the build'
 assemblyinfo :version do |asm|
   tc_build_number = ENV['BUILD_NUMBER']
   build_revision = tc_build_number || Time.new.strftime('5%H%M')
-  BUILD_NUMBER = "#{BUILD_VERSION}.#{build_revision}"
 
-  asm_version = "#{BUILD_VERSION}.0"
+  description = `git describe --long`.chomp
+  segments = description.split '-'
+  asm_version = "#{segments[0]}.#{segments[1]}"
 
-  begin
-    commit = `git log -1 --pretty=format:%H`
-  rescue
-    commit = "git unavailable"
-  end
+  commit = `git log -1 --pretty=format:%H`
 
-  puts "##teamcity[buildNumber '#{BUILD_NUMBER}']" unless tc_build_number.nil?
-  puts "Version: #{BUILD_NUMBER}" if tc_build_number.nil?
   asm.trademark = commit
   asm.product_name = PRODUCT
   asm.description = DESCRIPTION
   asm.version = asm_version
-  asm.file_version = BUILD_NUMBER
+  asm.file_version = asm_version
   asm.custom_attributes :AssemblyInformationalVersion => asm_version
   asm.copyright = COPYRIGHT
   asm.output_file = COMMON_ASSEMBLY_INFO
