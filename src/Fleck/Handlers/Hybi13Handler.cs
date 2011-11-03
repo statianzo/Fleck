@@ -152,15 +152,13 @@ namespace Fleck.Handlers
             return Encoding.ASCII.GetBytes(builder.ToString());
         }
 
-        private static SHA1 Sha1 = SHA1.Create();
-        
         private const string WebSocketResponseGuid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
         
         public static string CreateResponseKey(string requestKey)
         {
             var combined = requestKey + WebSocketResponseGuid;
 
-            var bytes = Sha1.ComputeHash(Encoding.ASCII.GetBytes(combined));
+            var bytes = SHA1.Create().ComputeHash(Encoding.ASCII.GetBytes(combined));
 
             return Convert.ToBase64String(bytes);
         }
