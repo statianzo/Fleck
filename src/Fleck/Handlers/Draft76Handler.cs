@@ -11,8 +11,7 @@ namespace Fleck.Handlers
         private const byte End = 255;
         private const byte Start = 0;
         private const int MaxSize = 1024 * 1024 * 5;
-        private static readonly MD5 Md5 = MD5.Create();
-        
+                
         public static IHandler Create(WebSocketHttpRequest request, Action<string> onMessage)
         {
             return new ComposableHandler
@@ -97,8 +96,8 @@ namespace Fleck.Handlers
             Array.Copy(result1Bytes, 0, rawAnswer, 0, 4);
             Array.Copy(result2Bytes, 0, rawAnswer, 4, 4);
             Array.Copy(challenge.Array, challenge.Offset, rawAnswer, 8, 8);
-
-            return Md5.ComputeHash(rawAnswer);
+            
+            return MD5.Create().ComputeHash(rawAnswer);
         }
 
         private static byte[] ParseKey(string key)
