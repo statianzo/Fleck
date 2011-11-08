@@ -235,23 +235,21 @@ namespace Fleck.Tests
         }
 
         private const string ExampleRequest =
-@"GET /chat HTTP/1.1
-Host: server.example.com
-Upgrade: websocket
-Connection: Upgrade
-Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==
-Origin: http://example.com
-Sec-WebSocket-Protocol: chat, superchat
-Sec-WebSocket-Version: 13
-
-";
+"GET /chat HTTP/1.1\r\n" +
+"Host: server.example.com\r\n" +
+"Upgrade: websocket\r\n" +
+"Connection: Upgrade\r\n" +
+"Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n" +
+"Origin: http://example.com\r\n" +
+"Sec-WebSocket-Protocol: chat, superchat\r\n" +
+"Sec-WebSocket-Version: 13\r\n" +
+"\r\n";
 
         private const string ExampleResponse =
-@"HTTP/1.1 101 Switching Protocols
-Upgrade: websocket
-Connection: Upgrade
-Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=
-
-";
+"HTTP/1.1 101 Switching Protocols\r\n" +
+"Upgrade: websocket\r\n" +
+"Connection: Upgrade\r\n" +
+"Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=\r\n" +
+"\r\n";
     }
 }
