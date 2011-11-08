@@ -7,11 +7,11 @@ namespace Fleck.Tests
   public class RequestParserTests
   {
     [Test]
-    public void ShouldReturnRequest()
+    public void ShouldReturnNullForEmptyBytes()
     {
       WebSocketHttpRequest request = RequestParser.Parse(new byte[0]);
       
-      Assert.IsNotNull(request);
+      Assert.IsNull(request);
     }
     
     [Test]
@@ -44,13 +44,13 @@ namespace Fleck.Tests
     
     
     [Test]
-    public void ValidRequestShouldBeComplete()
+    public void ValidRequestShouldNotBeNull()
     {
-      Assert.True(RequestParser.IsComplete(ValidRequestArray()));
+      Assert.NotNull(RequestParser.Parse(ValidRequestArray()));
     }
     
     [Test]
-    public void NoBodyRequestShouldBeComplete()
+    public void NoBodyRequestShouldNotBeNull()
     {
       const string noBodyRequest =
         "GET /demo HTTP/1.1\r\n" +
@@ -65,17 +65,11 @@ namespace Fleck.Tests
         "";
       var bytes = RequestArray(noBodyRequest);
       
-      Assert.True(RequestParser.IsComplete(bytes));
+      Assert.IsNotNull(RequestParser.Parse(bytes));
     }
     
     [Test]
-    public void EmptyRequestShouldNotBeComplete()
-    {
-      Assert.False(RequestParser.IsComplete(new byte[0]));
-    }
-    
-    [Test]
-    public void NoHeadersRequestShouldNotBeComplete()
+    public void NoHeadersRequestShouldBeNull()
     {
       const string noHeadersNoBodyRequest =
         "GET /zing HTTP/1.1\r\n" +
@@ -83,11 +77,11 @@ namespace Fleck.Tests
         "";
       var bytes = RequestArray(noHeadersNoBodyRequest);
       
-      Assert.False(RequestParser.IsComplete(bytes));
+      Assert.IsNull(RequestParser.Parse(bytes));
     }
     
     [Test]
-    public void PartialHeaderRequestShouldNotBeComplete()
+    public void PartialHeaderRequestShouldBeNull()
     {
       const string partialHeaderRequest =
         "GET /demo HTTP/1.1\r\n" +
@@ -99,7 +93,7 @@ namespace Fleck.Tests
         "Sec-WebSoc"; //Cut off
       var bytes = RequestArray(partialHeaderRequest);
       
-      Assert.False(RequestParser.IsComplete(bytes));
+      Assert.IsNull(RequestParser.Parse(bytes));
     }
     
     public byte[] ValidRequestArray()

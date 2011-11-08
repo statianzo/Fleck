@@ -23,26 +23,26 @@ namespace Fleck.Tests
         }
 
         private const string ExampleRequest =
-@"GET /demo HTTP/1.1
-Host: example.com
-Connection: Upgrade
-Sec-WebSocket-Key2: 12998 5 Y3 1  .P00
-Sec-WebSocket-Protocol: sample
-Upgrade: WebSocket
-Sec-WebSocket-Key1: 4 @1  46546xW%0l 1 5
-Origin: http://example.com
-
-^n:ds[4U";
+"GET /demo HTTP/1.1\r\n" +
+"Host: example.com\r\n" +
+"Connection: Upgrade\r\n" +
+"Sec-WebSocket-Key2: 12998 5 Y3 1  .P00\r\n" +
+"Sec-WebSocket-Protocol: sample\r\n" +
+"Upgrade: WebSocket\r\n" +
+"Sec-WebSocket-Key1: 4 @1  46546xW%0l 1 5\r\n" +
+"Origin: http://example.com\r\n" +
+"\r\n" +
+"^n:ds[4U";
 
         private const string ExampleResponse =
-@"HTTP/1.1 101 WebSocket Protocol Handshake
-Upgrade: WebSocket
-Connection: Upgrade
-Sec-WebSocket-Origin: http://example.com
-Sec-WebSocket-Location: ws://example.com/demo
-Sec-WebSocket-Protocol: sample
-
-8jKS'y:G*Co,Wxa-";
+"HTTP/1.1 101 WebSocket Protocol Handshake\r\n" +
+"Upgrade: WebSocket\r\n" +
+"Connection: Upgrade\r\n" +
+"Sec-WebSocket-Origin: http://example.com\r\n" +
+"Sec-WebSocket-Location: ws://example.com/demo\r\n" +
+"Sec-WebSocket-Protocol: sample\r\n" +
+"\r\n" +
+"8jKS'y:G*Co,Wxa-";
 
         const string Key1 = "4 @1  46546xW%0l 1 5";
         const string Key2 = "12998 5 Y3 1  .P00";
@@ -125,8 +125,8 @@ Sec-WebSocket-Protocol: sample
             bytes.AddRange(Encoding.UTF8.GetBytes(part1));
 
             var bytes2 = new System.Collections.Generic.List<byte>();
-            bytes.AddRange(Encoding.UTF8.GetBytes(part2));
-            bytes.Add(255);
+            bytes2.AddRange(Encoding.UTF8.GetBytes(part2));
+            bytes2.Add(255);
 
             string result = null;
             _onMessage = s => result = s;
@@ -135,7 +135,29 @@ Sec-WebSocket-Protocol: sample
             _handler.Receive(bytes2);
             Assert.AreEqual(expected, result);
         }
+        
+        [Test]
+        public void ShouldCallOnMessageAfterSplitFrameTypeAndBody()
+        {
+            const string expected = "A little late";
 
+            //Just a 0x00
+            var bytes = new System.Collections.Generic.List<byte>();
+            bytes.Add(0);
+
+            //Everything else
+            var bytes2 = new System.Collections.Generic.List<byte>();
+            bytes2.AddRange(Encoding.UTF8.GetBytes(expected));
+            bytes2.Add(255);
+
+            string result = null;
+            _onMessage = s => result = s;
+
+            _handler.Receive(bytes);
+            _handler.Receive(bytes2);
+            Assert.AreEqual(expected, result);
+        }
+        
         [Test]
         public void ShouldThrowOnInvalidFirstFrame()
         {
