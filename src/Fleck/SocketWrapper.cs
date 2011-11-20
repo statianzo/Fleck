@@ -1,18 +1,19 @@
-using System;
-using System.IO;
-using System.Net;
-using System.Net.Security;
-using System.Net.Sockets;
-using System.Security.Authentication;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
-
 namespace Fleck
 {
+    using System;
+    using System.IO;
+    using System.Net;
+    using System.Net.Security;
+    using System.Net.Sockets;
+    using System.Security.Authentication;
+    using System.Security.Cryptography.X509Certificates;
+    using System.Threading.Tasks;
+
     public class SocketWrapper : ISocket
     {
-        private readonly Socket _socket;
+        private Socket _socket;
         private Stream _stream;
+        private bool _disposed;
 
         public string RemoteIpAddress
         {
@@ -36,7 +37,7 @@ namespace Fleck
             _stream = ssl;
             Func<AsyncCallback, object, IAsyncResult> begin =
                 (cb, s) => ssl.BeginAuthenticateAsServer(certificate, false, SslProtocols.Tls, false, cb, s);
-                
+
             Task task = Task.Factory.FromAsync(begin, ssl.EndAuthenticateAsServer, null);
             task.ContinueWith(t => callback(), TaskContinuationOptions.NotOnFaulted)
                 .ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
@@ -59,7 +60,7 @@ namespace Fleck
         {
             get { return _socket.Connected; }
         }
-        
+
         public Stream Stream
         {
             get { return _stream; }
@@ -79,7 +80,8 @@ namespace Fleck
 
         public Task<ISocket> Accept(Action<ISocket> callback, Action<Exception> error)
         {
-            Func<IAsyncResult, ISocket> end = r => new SocketWrapper(_socket.EndAccept(r));
+            Func<IAsyncResult, ISocket> end = r => _socket == null ? null : new SocketWrapper(_socket.EndAccept(r));
+
             var task = Task.Factory.FromAsync(_socket.BeginAccept, end, null);
             task.ContinueWith(t => callback(t.Result), TaskContinuationOptions.NotOnFaulted)
                 .ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
@@ -89,8 +91,28 @@ namespace Fleck
 
         public void Dispose()
         {
-            if (_stream != null) _stream.Dispose();
-            if (_socket != null) _socket.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~SocketWrapper()
+        {
+            Dispose(false);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            if (disposing)
+            {
+                if (_stream != null) _stream.Dispose();
+                if (_socket != null) _socket.Dispose();
+
+                _socket = null;
+                _stream = null;
+            }
+
+            _disposed = true;
         }
 
         public void Close()

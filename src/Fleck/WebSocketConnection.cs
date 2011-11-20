@@ -55,8 +55,9 @@ namespace Fleck
 
         private void Read(List<byte> data, byte[] buffer)
         {
-            if (_closed || !Socket.Connected)
+            if (_closed || Socket == null || !Socket.Connected)
                 return;
+
             Socket.Receive(buffer, r =>
             {
                 if (r <= 0)
