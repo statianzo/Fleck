@@ -58,7 +58,7 @@ namespace Fleck
 
         public bool Connected
         {
-            get { return _socket.Connected; }
+            get { return _socket != null && _socket.Connected; }
         }
 
         public Stream Stream
@@ -71,10 +71,10 @@ namespace Fleck
             Func<AsyncCallback, object, IAsyncResult> begin =
                 (cb, s) => _stream.BeginRead(buffer, offset, buffer.Length, cb, s);
 
-            Task<int> task = Task.Factory.FromAsync<int>(begin, _stream.EndRead, null);
+            var task = Task.Factory.FromAsync<int>(begin, _stream.EndRead, null);
             task.ContinueWith(t => callback(t.Result), TaskContinuationOptions.NotOnFaulted)
                 .ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
-            task.ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
+
             return task;
         }
 
@@ -85,7 +85,7 @@ namespace Fleck
             var task = Task.Factory.FromAsync(_socket.BeginAccept, end, null);
             task.ContinueWith(t => callback(t.Result), TaskContinuationOptions.NotOnFaulted)
                 .ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
-            task.ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
+
             return task;
         }
 
@@ -132,10 +132,10 @@ namespace Fleck
             Func<AsyncCallback, object, IAsyncResult> begin =
                 (cb, s) => _stream.BeginWrite(buffer, 0, buffer.Length, cb, s);
 
-            Task task = Task.Factory.FromAsync(begin, _stream.EndWrite, null);
+            var task = Task.Factory.FromAsync(begin, _stream.EndWrite, null);
             task.ContinueWith(t => callback(), TaskContinuationOptions.NotOnFaulted)
                 .ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
-            task.ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
+
             return task;
         }
     }
