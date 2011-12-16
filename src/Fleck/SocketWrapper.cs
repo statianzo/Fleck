@@ -12,7 +12,6 @@ namespace Fleck
     public class SocketWrapper : ISocket
     {
         private Socket _socket;
-        private Stream _stream;
         private bool _disposed;
 
         public string RemoteIpAddress
@@ -28,22 +27,7 @@ namespace Fleck
         {
             _socket = socket;
             if (_socket.Connected)
-                _stream = new NetworkStream(_socket);
-        }
-
-        public Task Authenticate(X509Certificate2 certificate, Action callback, Action<Exception> error)
-        {
-            var ssl = new SslStream(_stream, false);
-            _stream = ssl;
-            Func<AsyncCallback, object, IAsyncResult> begin =
-                (cb, s) => ssl.BeginAuthenticateAsServer(certificate, false, SslProtocols.Tls, false, cb, s);
-
-            Task task = Task.Factory.FromAsync(begin, ssl.EndAuthenticateAsServer, null);
-            task.ContinueWith(t => callback(), TaskContinuationOptions.NotOnFaulted)
-                .ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
-            task.ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
-
-            return task;
+                Stream = new NetworkStream(_socket);
         }
 
         public void Listen(int backlog)
@@ -61,32 +45,151 @@ namespace Fleck
             get { return _socket != null && _socket.Connected; }
         }
 
-        public Stream Stream
+        public Stream Stream { get; private set; }
+
+        public void Close()
         {
-            get { return _stream; }
+            if (Stream != null) Stream.Close();
+            if (_socket != null) _socket.Close();
         }
 
-        public Task<int> Receive(byte[] buffer, Action<int> callback, Action<Exception> error, int offset)
+        public void Receive(byte[] buffer, Action<int> callback, Action<Exception> error, int offset)
         {
-            Func<AsyncCallback, object, IAsyncResult> begin =
-                (cb, s) => _stream.BeginRead(buffer, offset, buffer.Length, cb, s);
+            if (Stream == null) return;
 
-            var task = Task.Factory.FromAsync<int>(begin, _stream.EndRead, null);
-            task.ContinueWith(t => callback(t.Result), TaskContinuationOptions.NotOnFaulted)
-                .ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
-
-            return task;
+            Task.Factory.StartNew(
+                () => RunAsync((cb, s) => Stream.BeginRead(buffer, offset, buffer.Length, cb, s),
+                               Stream.EndRead,
+                               callback,
+                               error));
         }
 
-        public Task<ISocket> Accept(Action<ISocket> callback, Action<Exception> error)
+        public void Accept(Action<ISocket> callback, Action<Exception> error)
         {
-            Func<IAsyncResult, ISocket> end = r => _socket == null ? null : new SocketWrapper(_socket.EndAccept(r));
+            Task.Factory.StartNew(
+                () => RunAsync(_socket.BeginAccept,
+                               socket => new SocketWrapper(_socket.EndAccept(socket)),
+                               callback,
+                               error));
+        }
 
-            var task = Task.Factory.FromAsync(_socket.BeginAccept, end, null);
-            task.ContinueWith(t => callback(t.Result), TaskContinuationOptions.NotOnFaulted)
-                .ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
+        public void Send(byte[] buffer, Action callback, Action<Exception> error)
+        {
+            Task.Factory.StartNew(
+                () => RunAsync((cb, s) => Stream.BeginWrite(buffer, 0, buffer.Length, cb, s),
+                               Stream.EndWrite,
+                               callback,
+                               error));
+        }
 
-            return task;
+        public void Authenticate(X509Certificate2 certificate, Action callback, Action<Exception> error)
+        {
+            if (Stream == null) return;
+
+            var ssl = new SslStream(Stream, false);
+            Stream = ssl;
+
+            Task.Factory.StartNew(
+                () => RunAsync((cb, s) => ssl.BeginAuthenticateAsServer(certificate, false, SslProtocols.Tls, false, cb, s),
+                               ssl.EndAuthenticateAsServer,
+                               callback,
+                               error));
+        }
+
+        private void RunAsync<T>(Func<AsyncCallback, object, IAsyncResult> begin, Func<IAsyncResult, T> end, Action<T> callback, Action<Exception> error)
+        {
+            try
+            {
+                if (_socket == null) return;
+
+                begin(ar =>
+                          {
+                              var result = default(T);
+
+                              try
+                              {
+                                  if (_socket == null) return;
+
+                                  result = end(ar);
+                              }
+                              catch (ObjectDisposedException)
+                              {
+                              }
+                              catch (IOException)
+                              {
+                              }
+                              catch (Exception ex)
+                              {
+                                  error(ex);
+                              }
+
+                              try
+                              {
+                                  callback(result);
+                              }
+                              catch (Exception ex)
+                              {
+                                  error(ex);
+                                  throw;
+                              }
+                          }, null);
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+            catch (IOException)
+            {
+            }
+            catch (Exception ex)
+            {
+                error(ex);
+            }
+        }
+
+        private void RunAsync(Func<AsyncCallback, object, IAsyncResult> begin, Action<IAsyncResult> end, Action callback, Action<Exception> error)
+        {
+            try
+            {
+                if (_socket == null) return;
+
+                begin(ar =>
+                          {
+                              try
+                              {
+                                  if (_socket == null) return;
+                                  end(ar);
+                              }
+                              catch (ObjectDisposedException)
+                              {
+                              }
+                              catch (IOException)
+                              {
+                              }
+                              catch(Exception ex)
+                              {
+                                  error(ex);
+                              }
+
+                              try
+                              {
+                                  callback();
+                              }
+                              catch (Exception ex)
+                              {
+                                  error(ex);
+                              }
+                          }, null);
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+            catch (IOException)
+            {
+            }
+            catch (Exception ex)
+            {
+                error(ex);
+            }
         }
 
         public void Dispose()
@@ -105,38 +208,14 @@ namespace Fleck
             if (_disposed) return;
             if (disposing)
             {
-                if (_stream != null) _stream.Dispose();
+                if (Stream != null) Stream.Dispose();
                 if (_socket != null) _socket.Dispose();
 
                 _socket = null;
-                _stream = null;
+                Stream = null;
             }
 
             _disposed = true;
-        }
-
-        public void Close()
-        {
-            if (_stream != null) _stream.Close();
-            if (_socket != null) _socket.Close();
-        }
-
-        public int EndSend(IAsyncResult asyncResult)
-        {
-            _stream.EndWrite(asyncResult);
-            return 0;
-        }
-
-        public Task Send(byte[] buffer, Action callback, Action<Exception> error)
-        {
-            Func<AsyncCallback, object, IAsyncResult> begin =
-                (cb, s) => _stream.BeginWrite(buffer, 0, buffer.Length, cb, s);
-
-            var task = Task.Factory.FromAsync(begin, _stream.EndWrite, null);
-            task.ContinueWith(t => callback(), TaskContinuationOptions.NotOnFaulted)
-                .ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
-
-            return task;
         }
     }
 }
