@@ -10,13 +10,17 @@ Example
 
 The following is an example that will echo to a client.
 
-      var server = new WebSocketServer("ws://localhost:8181");
-      server.Start(socket =>
-        {
-          socket.OnOpen = () => Console.WriteLine("Open!");
-          socket.OnClose = () => Console.WriteLine("Close!");
-          socket.OnMessage = message => socket.Send(message);
-        });
+```c#
+
+var server = new WebSocketServer("ws://localhost:8181");
+server.Start(socket =>
+  {
+    socket.OnOpen = () => Console.WriteLine("Open!");
+    socket.OnClose = () => Console.WriteLine("Close!");
+    socket.OnMessage = message => socket.Send(message);
+  });
+        
+```
 
 Supported WebSocket Versions
 ---
@@ -35,12 +39,14 @@ Enabling secure connections requires two things: using the scheme `wss` instead
 of `ws`, and pointing Fleck to an x509 certificate containing a public and
 private key
 
-      var server = new WebSocketServer("wss://localhost:8431");
-      server.Certificate = "MyCert.cer";
-      server.Start(socket =>
-        {
-          //...use as normal
-        });
+```cs
+var server = new WebSocketServer("wss://localhost:8431");
+server.Certificate = "MyCert.cer";
+server.Start(socket =>
+  {
+    //...use as normal
+  });
+```
 
 License
 ---
