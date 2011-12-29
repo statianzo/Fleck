@@ -1,4 +1,4 @@
-Fleck
+Fleck ![project-status](http://stillmaintained.com/statianzo/Fleck.png)
 ===
 
 Fleck is a WebSocket server implementation in C#. Branched from the
