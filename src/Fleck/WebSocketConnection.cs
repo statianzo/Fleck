@@ -52,6 +52,26 @@ namespace Fleck
             var buffer = new byte[ReadSize];
             Read(data, buffer);
         }
+        
+        public void Close()
+        {
+            Close(1000);
+        }
+
+        public void Close(int code)
+        {
+            if (Handler == null)
+            {
+                CloseSocket();
+                return;
+            }
+
+            var bytes = Handler.FrameClose(code);
+            if (bytes.Length == 0)
+                CloseSocket();
+            else
+                SendBytes(bytes, CloseSocket);
+        }
 
         private void Read(List<byte> data, byte[] buffer)
         {
@@ -79,24 +99,39 @@ namespace Fleck
 
                 Read(data, buffer);
             },
-            e =>
+            HandleReadError);
+        }
+        
+        private void HandleReadError(Exception e)
+        {
+            if (e is AggregateException)
             {
-                OnError(e);
-                if (e is HandshakeException)
-                {
-                    FleckLog.Debug("Error while reading", e);
-                }
-                else if (e is WebSocketException)
-                {
-                    FleckLog.Debug("Error while reading", e);
-                    Close(WebSocketStatusCodes.ProtocolError);
-                }
-                else
-                {
-                    FleckLog.Error("Application Error", e);
-                    Close(WebSocketStatusCodes.ApplicationError);
-                }
-            });
+                var agg = e as AggregateException;
+                HandleReadError(agg.InnerException);
+                return;
+            }
+            else if (e is ObjectDisposedException)
+            {
+                FleckLog.Debug("Swallowing ObjectDisposedException", e);
+                return;
+            }
+            
+            OnError(e);
+            
+            if (e is HandshakeException)
+            {
+                FleckLog.Debug("Error while reading", e);
+            }
+            else if (e is WebSocketException)
+            {
+                FleckLog.Debug("Error while reading", e);
+                Close(WebSocketStatusCodes.ProtocolError);
+            }
+            else
+            {
+                FleckLog.Error("Application Error", e);
+                Close(WebSocketStatusCodes.ApplicationError);
+            }
         }
 
         private void SendBytes(byte[] bytes, Action callback = null)
@@ -126,26 +161,6 @@ namespace Fleck
 
             var handshake = Handler.CreateHandshake();
             SendBytes(handshake, OnOpen);
-        }
-
-        public void Close()
-        {
-            Close(1000);
-        }
-
-        public void Close(int code)
-        {
-            if (Handler == null)
-            {
-                CloseSocket();
-                return;
-            }
-
-            var bytes = Handler.FrameClose(code);
-            if (bytes.Length == 0)
-                CloseSocket();
-            else
-                SendBytes(bytes, CloseSocket);
         }
 
         private void CloseSocket()

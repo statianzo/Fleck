@@ -79,6 +79,26 @@ namespace Fleck.Tests
             _connection.StartReceiving();
             Assert.IsTrue(hit);
         }
+        
+        [Test]
+        public void ShouldSwallowObjectDisposedExceptionOnRead()
+        {
+            _socketMock.Setup(
+                x =>
+                x.Receive(It.IsAny<byte[]>(), It.IsAny<Action<int>>(), It.IsAny<Action<Exception>>(), It.IsAny<int>()))
+                .Callback<byte[], Action<int>, Action<Exception>, int>((buffer, success, error, offset) =>
+                {
+                    error(new ObjectDisposedException("socket"));
+                });
+
+            _socketMock.SetupGet(x => x.Connected).Returns(true);
+
+            bool hit = false;
+            _connection.OnError = e => hit = true;
+
+            _connection.StartReceiving();
+            Assert.IsFalse(hit);
+        }
          
         private void SetupReadLengths(params int[] args)
         {
