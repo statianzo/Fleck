@@ -74,12 +74,10 @@ namespace Fleck
 
             connection = new WebSocketConnection(
                 clientSocket,
+                _config,
                 bytes => RequestParser.Parse(bytes, _scheme),
                 r => HandlerFactory.BuildHandler(r, s => connection.OnMessage(s),
                                                          connection.Close));
-
-            _config(connection);
-
 
             if (IsSecure)
             {

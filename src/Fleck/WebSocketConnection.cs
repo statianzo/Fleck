@@ -6,19 +6,21 @@ namespace Fleck
 {
     public class WebSocketConnection : IWebSocketConnection
     {
-        public WebSocketConnection(ISocket socket, Func<byte[], WebSocketHttpRequest> parseRequest, Func<WebSocketHttpRequest, IHandler> handlerFactory)
+        public WebSocketConnection(ISocket socket, Action<IWebSocketConnection> initialize, Func<byte[], WebSocketHttpRequest> parseRequest, Func<WebSocketHttpRequest, IHandler> handlerFactory)
         {
             Socket = socket;
             OnOpen = () => { };
             OnClose = () => { };
             OnMessage = x => { };
             OnError = x => { };
+            _initialize = initialize;
             _handlerFactory = handlerFactory;
             _parseRequest = parseRequest;
         }
 
         public ISocket Socket { get; set; }
 
+        private readonly Action<IWebSocketConnection> _initialize;
         private readonly Func<WebSocketHttpRequest, IHandler> _handlerFactory;
         readonly Func<byte[], WebSocketHttpRequest> _parseRequest;
         public IHandler Handler { get; set; }
@@ -158,6 +160,8 @@ namespace Fleck
             if (Handler == null)
                 return;
             ConnectionInfo = WebSocketConnectionInfo.Create(request, Socket.RemoteIpAddress);
+
+            _initialize(this);
 
             var handshake = Handler.CreateHandshake();
             SendBytes(handshake, OnOpen);
