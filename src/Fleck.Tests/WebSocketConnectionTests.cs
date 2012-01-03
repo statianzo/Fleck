@@ -17,8 +17,9 @@ namespace Fleck.Tests
             _socketMock = new Mock<ISocket>();
             _handlerMock = new Mock<IHandler>();
             _connection = new WebSocketConnection(_socketMock.Object,
+                                                  connection => { },
                                                   b => new WebSocketHttpRequest(),
-                                                  r => _handlerMock.Object); 
+                                                  r => _handlerMock.Object);
         }
 
         [Test]
@@ -59,6 +60,53 @@ namespace Fleck.Tests
             _socketMock.Verify(x => x.Receive(It.IsAny<byte[]>(), It.IsAny<Action<int>>(), It.IsAny<Action<Exception>>(), 0), Times.Never());
         }
 
+        [Test]
+        public void ShouldRaiseInitializeOnFirstRead()
+        {
+            bool initializeRaised = false;
+            var connection = new WebSocketConnection(_socketMock.Object,
+                                                  conn => { initializeRaised = true; },
+                                                  b => new WebSocketHttpRequest(),
+                                                  r => _handlerMock.Object);
+
+            _socketMock.SetupGet(x => x.Connected).Returns(true);
+            SetupReadLengths(1, 0);
+            connection.StartReceiving();
+
+            Assert.IsTrue(initializeRaised);
+        }
+
+        [Test]
+        public void ShouldNotRaiseInitializeIfParseRequestReturnsNull()
+        {
+            bool initializeRaised = false;
+            var connection = new WebSocketConnection(_socketMock.Object,
+                                                  conn => { initializeRaised = true; },
+                                                  b => null,
+                                                  r => _handlerMock.Object);
+
+            _socketMock.SetupGet(x => x.Connected).Returns(true);
+            SetupReadLengths(1, 0);
+            connection.StartReceiving();
+
+            Assert.IsFalse(initializeRaised);
+        }
+
+        [Test]
+        public void ShouldNotRaiseInitializeIfHandlerFactoryReturnsNull()
+        {
+            bool initializeRaised = false;
+            var connection = new WebSocketConnection(_socketMock.Object,
+                                                  conn => { initializeRaised = true; },
+                                                  b => new WebSocketHttpRequest(),
+                                                  r => null);
+
+            _socketMock.SetupGet(x => x.Connected).Returns(true);
+            SetupReadLengths(1, 0);
+            connection.StartReceiving();
+
+            Assert.IsFalse(initializeRaised);
+        }
 
         [Test]
         public void ShouldCallOnErrorWhenError()
@@ -79,7 +127,7 @@ namespace Fleck.Tests
             _connection.StartReceiving();
             Assert.IsTrue(hit);
         }
-        
+
         [Test]
         public void ShouldSwallowObjectDisposedExceptionOnRead()
         {
@@ -99,7 +147,7 @@ namespace Fleck.Tests
             _connection.StartReceiving();
             Assert.IsFalse(hit);
         }
-         
+
         private void SetupReadLengths(params int[] args)
         {
             var index = 0;
@@ -109,7 +157,7 @@ namespace Fleck.Tests
                 .Callback<byte[], Action<int>, Action<Exception>, int>((buffer, success, error, offset) =>
                 {
                     if (args.Length > index)
-                        success(args[index]);
+                        success(args[index++]);
                     else
                         _socketMock.SetupGet(x => x.Connected == false);
                 });
