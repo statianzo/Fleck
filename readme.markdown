@@ -53,7 +53,7 @@ License
 
 The MIT License
 
-Copyright (c) 2010-2011 Jason Staten
+Copyright (c) 2010-2012 Jason Staten
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
