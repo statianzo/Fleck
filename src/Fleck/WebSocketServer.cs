@@ -10,6 +10,7 @@ namespace Fleck
         private readonly string _scheme;
         private Action<IWebSocketConnection> _config;
         private X509Certificate2 _x509Certificate;
+        private bool _disposed;
 
         public WebSocketServer(string location)
             : this(8181, location)
@@ -38,7 +39,25 @@ namespace Fleck
 
         public void Dispose()
         {
-            ListenerSocket.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~WebSocketServer()
+        {
+            Dispose(false);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            if (disposing)
+            {
+                ListenerSocket.Dispose();
+                ListenerSocket = null;
+            }
+
+            _disposed = true;
         }
 
         public void Start(Action<IWebSocketConnection> config)
@@ -62,6 +81,8 @@ namespace Fleck
 
         private void ListenForClients()
         {
+            if (ListenerSocket == null) return;
+            
             ListenerSocket.Accept(OnClientConnect, e => FleckLog.Error("Listener socket is closed", e));
         }
 

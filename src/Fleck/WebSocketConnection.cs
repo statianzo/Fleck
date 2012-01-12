@@ -77,8 +77,9 @@ namespace Fleck
 
         private void Read(List<byte> data, byte[] buffer)
         {
-            if (_closed || !Socket.Connected)
+            if (_closed || Socket == null || !Socket.Connected)
                 return;
+
             Socket.Receive(buffer, r =>
             {
                 if (r <= 0)
@@ -138,6 +139,8 @@ namespace Fleck
 
         private void SendBytes(byte[] bytes, Action callback = null)
         {
+            if(!Socket.Connected) return;
+
             Socket.Send(bytes, () =>
             {
                 FleckLog.Debug("Sent " + bytes.Length + " bytes");
