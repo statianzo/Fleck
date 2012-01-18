@@ -172,7 +172,8 @@ namespace Fleck.Tests
                     Payload = Encoding.UTF8.GetBytes("continue")
                 };
 
-            Assert.Catch<WebSocketException>(() => _handler.Receive(frame.ToBytes()));
+            var ex = Assert.Catch<WebSocketException>(() => _handler.Receive(frame.ToBytes()));
+            Assert.AreEqual(WebSocketStatusCodes.ProtocolError, ex.StatusCode);
         }
 
         [Test]

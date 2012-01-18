@@ -59,7 +59,7 @@ namespace Fleck.Handlers
                     throw new WebSocketException(WebSocketStatusCodes.ProtocolError);
 
                 if (frameType == FrameType.Continuation && !readState.FrameType.HasValue)
-                    throw new WebSocketException(WebSocketStatusCodes.InvalidFramePayloadData);
+                    throw new WebSocketException(WebSocketStatusCodes.ProtocolError);
                 
                 var index = 2;
                 int payloadLength;
