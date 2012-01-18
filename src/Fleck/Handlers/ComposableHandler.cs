@@ -6,9 +6,10 @@ namespace Fleck.Handlers
     public class ComposableHandler : IHandler
     {
         public Func<byte[]> Handshake = () => new byte[0];
-        public Func<string, byte[]> Frame = x => new byte[0];
+        public Func<string, byte[]> TextFrame = x => new byte[0];
+        public Func<byte[], byte[]> BinaryFrame = x => new byte[0];
         public Action<List<byte>> ReceiveData = delegate { };
-        public Func<int, byte[]> Close = i => new byte[0];
+        public Func<int, byte[]> CloseFrame = i => new byte[0];
         
         private readonly List<byte> _data = new List<byte>();
 
@@ -26,12 +27,17 @@ namespace Fleck.Handlers
         
         public byte[] FrameText(string text)
         {
-            return Frame(text);
+            return TextFrame(text);
+        }
+        
+        public byte[] FrameBinary(byte[] bytes)
+        {
+            return BinaryFrame(bytes);
         }
         
         public byte[] FrameClose(int code)
         {
-            return Close(code);
+            return CloseFrame(code);
         }
     }
 }

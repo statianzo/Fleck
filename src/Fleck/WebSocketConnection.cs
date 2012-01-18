@@ -12,6 +12,7 @@ namespace Fleck
             OnOpen = () => { };
             OnClose = () => { };
             OnMessage = x => { };
+            OnBinary = x => { };
             OnError = x => { };
             _initialize = initialize;
             _handlerFactory = handlerFactory;
@@ -30,6 +31,7 @@ namespace Fleck
         public Action OnOpen { get; set; }
         public Action OnClose { get; set; }
         public Action<string> OnMessage { get; set; }
+        public Action<byte[]> OnBinary { get; set; }
         public Action<Exception> OnError { get; set; }
         public IWebSocketConnectionInfo ConnectionInfo { get; private set; }
 
@@ -45,6 +47,21 @@ namespace Fleck
             }
 
             var bytes = Handler.FrameText(message);
+            SendBytes(bytes);
+        }
+        
+        public void Send(byte[] message)
+        {
+            if (Handler == null)
+                throw new InvalidOperationException("Cannot send before handshake");
+
+            if (_closed || !Socket.Connected)
+            {
+                FleckLog.Warn("Data sent after close. Ignoring.");
+                return;
+            }
+
+            var bytes = Handler.FrameBinary(message);
             SendBytes(bytes);
         }
 

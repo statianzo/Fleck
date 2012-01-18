@@ -11,6 +11,7 @@ namespace Fleck.Tests
         private IHandler _handler;
         private WebSocketHttpRequest _request;
         private Action<string> _onMessage;
+        private Action<byte[]> _onBinary;
         private Action _onClose;
 
         [SetUp]
@@ -19,8 +20,9 @@ namespace Fleck.Tests
             _request = new WebSocketHttpRequest();
             _onClose = delegate { };
             _onMessage = delegate { };
+            _onBinary = delegate { };
 
-            _handler = Hybi13Handler.Create(_request, s => _onMessage(s), () => _onClose());
+            _handler = Hybi13Handler.Create(_request, s => _onMessage(s), () => _onClose(), b => _onBinary(b));
         }
 
         [Test]
@@ -249,6 +251,26 @@ namespace Fleck.Tests
             
             var ex = Assert.Throws<WebSocketException>(() => _handler.Receive(frame.ToBytes()));
             Assert.AreEqual(WebSocketStatusCodes.InvalidFramePayloadData, ex.StatusCode);
+        }
+        
+        [Test]
+        public void ShouldCallOnBinaryWhenBinaryFrame()
+        {
+            var expected = new byte[] {1, 2, byte.MaxValue, byte.MinValue};
+            var frame = new Hybi14DataFrame
+                {
+                    FrameType = FrameType.Binary,
+                    IsFinal = true,
+                    IsMasked = true,
+                    MaskKey = 234234,
+                    Payload = expected
+                };
+
+            byte[] result = null;
+            _onBinary = b => result = b;
+            _handler.Receive(frame.ToBytes());
+
+            Assert.AreEqual(expected, result);
         }
 
         private const string ExampleRequest =

@@ -16,7 +16,7 @@ namespace Fleck.Handlers
         {
             return new ComposableHandler
             {
-                Frame = Draft76Handler.FrameText,
+                TextFrame = Draft76Handler.FrameText,
                 Handshake = () => Draft76Handler.Handshake(request),
                 ReceiveData = data => ReceiveData(onMessage, data)
             };

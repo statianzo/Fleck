@@ -9,15 +9,16 @@ namespace Fleck.Handlers
 {
     public static class Hybi13Handler
     {
-        public static IHandler Create(WebSocketHttpRequest request, Action<string> onMessage, Action onClose)
+        public static IHandler Create(WebSocketHttpRequest request, Action<string> onMessage, Action onClose, Action<byte[]> onBinary)
         {
             var readState = new ReadState();
             return new ComposableHandler
             {
                 Handshake = () => Hybi13Handler.BuildHandshake(request),
-                Frame = s => Hybi13Handler.FrameData(Encoding.UTF8.GetBytes(s), FrameType.Text),
-                Close = i => Hybi13Handler.FrameData(i.ToBigEndianBytes<ushort>(), FrameType.Close),
-                ReceiveData = d => Hybi13Handler.ReceiveData(d, readState, (op, data) => Hybi13Handler.ProcessFrame(op, data, onMessage, onClose))
+                TextFrame = s => Hybi13Handler.FrameData(Encoding.UTF8.GetBytes(s), FrameType.Text),
+                BinaryFrame = s => Hybi13Handler.FrameData(s, FrameType.Binary),
+                CloseFrame = i => Hybi13Handler.FrameData(i.ToBigEndianBytes<ushort>(), FrameType.Close),
+                ReceiveData = d => Hybi13Handler.ReceiveData(d, readState, (op, data) => Hybi13Handler.ProcessFrame(op, data, onMessage, onClose, onBinary))
             };
         }
         
@@ -117,7 +118,7 @@ namespace Fleck.Handlers
             }
         }
         
-        public static void ProcessFrame(FrameType frameType, byte[] data, Action<string> onMessage, Action onClose)
+        public static void ProcessFrame(FrameType frameType, byte[] data, Action<string> onMessage, Action onClose, Action<byte[]> onBinary)
         {
             switch (frameType)
             {
@@ -125,6 +126,8 @@ namespace Fleck.Handlers
                 onClose();
                 break;
             case FrameType.Binary:
+                onBinary(data);
+                break;
             case FrameType.Text:
                 var encoding = new UTF8Encoding(false, true);
                 try
