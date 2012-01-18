@@ -27,14 +27,14 @@ namespace Fleck.Handlers
             while (data.Count > 0)
             {
                 if (data[0] != Start)
-                    throw new WebSocketException("Invalid Frame");
+                    throw new WebSocketException(WebSocketStatusCodes.InvalidFramePayloadData);
                 
                 var endIndex = data.IndexOf(End);
                 if (endIndex < 0)
                     return;
                 
                 if (endIndex > MaxSize)
-                    throw new WebSocketException("Frame too large");
+                    throw new WebSocketException(WebSocketStatusCodes.MessageTooBig);
                 
                 var bytes = data.Skip(1).Take(endIndex - 1).ToArray();
                 

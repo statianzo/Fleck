@@ -233,6 +233,22 @@ namespace Fleck.Tests
 
             Assert.AreEqual(expected, result);
         }
+        
+        [Test]
+        public void ShouldThrowInvalidFrameOnInvalidUTF8()
+        {
+            var frame = new Hybi14DataFrame
+                {
+                    FrameType = FrameType.Text,
+                    IsFinal = true,
+                    IsMasked = true,
+                    MaskKey = 34398,
+                    Payload = new byte[] { 0, 7, 3, 2, byte.MaxValue}
+                };
+            
+            var ex = Assert.Throws<WebSocketException>(() => _handler.Receive(frame.ToBytes()));
+            Assert.AreEqual(WebSocketStatusCodes.InvalidFramePayloadData, ex.StatusCode);
+        }
 
         private const string ExampleRequest =
 "GET /chat HTTP/1.1\r\n" +

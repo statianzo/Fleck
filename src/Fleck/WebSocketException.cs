@@ -3,10 +3,21 @@ namespace Fleck
 {
     public class WebSocketException : Exception
     {
-        public WebSocketException() : base() { }
+        public WebSocketException(ushort statusCode) : base()
+        {
+            StatusCode = statusCode;
+        }
         
-        public WebSocketException(string message) : base(message) {}
+        public WebSocketException(ushort statusCode, string message) : base(message)
+        {
+            StatusCode = statusCode;
+        }
         
-        public WebSocketException(string message, Exception innerException) : base(message, innerException) {}
+        public WebSocketException(ushort statusCode, string message, Exception innerException) : base(message, innerException)
+        {
+            StatusCode = statusCode;
+        }
+        
+        public ushort StatusCode { get; private set;}
     }
 }

@@ -21,7 +21,7 @@ namespace Fleck
                     return Hybi13Handler.Create(request, onMessage, onClose);
             }
             
-            throw new WebSocketException("Unsupported Request");
+            throw new WebSocketException(WebSocketStatusCodes.UnsupportedDataType);
         }
         
         public static string GetVersion(WebSocketHttpRequest request) 

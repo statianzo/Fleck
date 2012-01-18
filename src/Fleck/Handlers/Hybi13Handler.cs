@@ -56,10 +56,10 @@ namespace Fleck.Handlers
                 var length = (data[1] & 127);
                 
                 if (!isMasked)
-                    throw new WebSocketException("Client data must be masked");
+                    throw new WebSocketException(WebSocketStatusCodes.ProtocolError);
 
                 if (frameType == FrameType.Continuation && !readState.FrameType.HasValue)
-                    throw new WebSocketException("Unexpected continuation frame received");
+                    throw new WebSocketException(WebSocketStatusCodes.InvalidFramePayloadData);
                 
                 var index = 2;
                 int payloadLength;
@@ -126,7 +126,16 @@ namespace Fleck.Handlers
                 break;
             case FrameType.Binary:
             case FrameType.Text:
-                onMessage(Encoding.UTF8.GetString(data));
+                var encoding = new UTF8Encoding(false, true);
+                try
+                {
+                    var message = encoding.GetString(data);
+                    onMessage(message);
+                }
+                catch(ArgumentException)
+                {
+                    throw new WebSocketException(WebSocketStatusCodes.InvalidFramePayloadData);
+                }
                 break;
             default:
                 FleckLog.Debug("Received unhandled " + frameType);

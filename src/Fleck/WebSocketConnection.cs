@@ -36,7 +36,7 @@ namespace Fleck
         public void Send(string message)
         {
             if (Handler == null)
-                throw new WebSocketException("Cannot send before handshake");
+                throw new InvalidOperationException("Cannot send before handshake");
 
             if (_closed || !Socket.Connected)
             {
@@ -57,7 +57,7 @@ namespace Fleck
         
         public void Close()
         {
-            Close(1000);
+            Close(WebSocketStatusCodes.NormalClosure);
         }
 
         public void Close(int code)
@@ -127,12 +127,12 @@ namespace Fleck
             else if (e is WebSocketException)
             {
                 FleckLog.Debug("Error while reading", e);
-                Close(WebSocketStatusCodes.ProtocolError);
+                Close(((WebSocketException)e).StatusCode);
             }
             else
             {
                 FleckLog.Error("Application Error", e);
-                Close(WebSocketStatusCodes.ApplicationError);
+                Close(WebSocketStatusCodes.InternalServerError);
             }
         }
 
