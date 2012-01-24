@@ -123,6 +123,16 @@ namespace Fleck.Handlers
             switch (frameType)
             {
             case FrameType.Close:
+                if (data.Length == 1 || data.Length>125)
+                    throw new WebSocketException(WebSocketStatusCodes.ProtocolError);
+                    
+                if (data.Length == 2)
+                {
+                    var closeCode = (ushort)data.Take(2).ToArray().ToLittleEndianInt();
+                    if (!WebSocketStatusCodes.ValidCloseCodes.Contains(closeCode) && (closeCode < 3000 || closeCode > 4999))
+                        throw new WebSocketException(WebSocketStatusCodes.ProtocolError);
+                    
+                }
                 onClose();
                 break;
             case FrameType.Binary:

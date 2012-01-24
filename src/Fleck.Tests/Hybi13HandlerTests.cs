@@ -179,7 +179,7 @@ namespace Fleck.Tests
         }
 
         [Test]
-        public void ShouldCloseOnCloseFromTextFrame()
+        public void ShouldCloseOnCloseFromValidStatusCode()
         {
             var frame = new Hybi14DataFrame
                 {
@@ -195,6 +195,57 @@ namespace Fleck.Tests
             _handler.Receive(frame.ToBytes());
 
             Assert.IsTrue(hit);
+        }
+        
+        [Test]
+        public void ShouldCloseOnCloseFromText()
+        {
+            var frame = new Hybi14DataFrame
+                {
+                    FrameType = FrameType.Close,
+                    IsFinal = true,
+                    IsMasked = true,
+                    MaskKey = 5232,
+                    Payload = Encoding.UTF8.GetBytes("Just right")
+                };
+
+            var hit = false;
+            _onClose = () => hit = true;
+            _handler.Receive(frame.ToBytes());
+
+            Assert.IsTrue(hit);
+        }
+        
+        [Test]
+        public void ShouldThrowOnInvalidCloseCode()
+        {
+            var frame = new Hybi14DataFrame
+                {
+                    FrameType = FrameType.Close,
+                    IsFinal = true,
+                    IsMasked = true,
+                    MaskKey = 5232,
+                    Payload = 5000.ToBigEndianBytes<ushort>()
+                };
+
+            var ex = Assert.Throws<WebSocketException>(() => _handler.Receive(frame.ToBytes()));
+            Assert.AreEqual(WebSocketStatusCodes.ProtocolError, ex.StatusCode);
+        }
+        
+        [Test]
+        public void ShouldThrowOnCloseFrameTooLong()
+        {
+            var frame = new Hybi14DataFrame
+                {
+                    FrameType = FrameType.Close,
+                    IsFinal = true,
+                    IsMasked = true,
+                    MaskKey = 5232,
+                    Payload = Encoding.UTF8.GetBytes(new String('x',128))
+                };
+
+            var ex = Assert.Throws<WebSocketException>(() => _handler.Receive(frame.ToBytes()));
+            Assert.AreEqual(WebSocketStatusCodes.ProtocolError, ex.StatusCode);
         }
 
         [Test]
