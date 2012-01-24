@@ -52,14 +52,16 @@ namespace Fleck.Handlers
             while (data.Count >= 2)
             {
                 var isFinal = (data[0] & 128) != 0;
+                var reservedBits = (data[0] & 112);
                 var frameType = (FrameType)(data[0] & 15);
                 var isMasked = (data[1] & 128) != 0;
                 var length = (data[1] & 127);
                 
-                if (!isMasked)
-                    throw new WebSocketException(WebSocketStatusCodes.ProtocolError);
-
-                if (frameType == FrameType.Continuation && !readState.FrameType.HasValue)
+                
+                if (!isMasked
+                    || !Enum.IsDefined(typeof(FrameType), frameType)
+                    || reservedBits != 0 //Must be zero per spec 5.2
+                    || (frameType == FrameType.Continuation && !readState.FrameType.HasValue))
                     throw new WebSocketException(WebSocketStatusCodes.ProtocolError);
                 
                 var index = 2;
@@ -126,29 +128,23 @@ namespace Fleck.Handlers
                 if (data.Length == 1 || data.Length>125)
                     throw new WebSocketException(WebSocketStatusCodes.ProtocolError);
                     
-                if (data.Length == 2)
+                if (data.Length >= 2)
                 {
                     var closeCode = (ushort)data.Take(2).ToArray().ToLittleEndianInt();
                     if (!WebSocketStatusCodes.ValidCloseCodes.Contains(closeCode) && (closeCode < 3000 || closeCode > 4999))
                         throw new WebSocketException(WebSocketStatusCodes.ProtocolError);
-                    
                 }
+                
+                if (data.Length > 2)
+                    ReadUTF8PayloadData(data.Skip(2).ToArray());
+                
                 onClose();
                 break;
             case FrameType.Binary:
                 onBinary(data);
                 break;
             case FrameType.Text:
-                var encoding = new UTF8Encoding(false, true);
-                try
-                {
-                    var message = encoding.GetString(data);
-                    onMessage(message);
-                }
-                catch(ArgumentException)
-                {
-                    throw new WebSocketException(WebSocketStatusCodes.InvalidFramePayloadData);
-                }
+                onMessage(ReadUTF8PayloadData(data));
                 break;
             default:
                 FleckLog.Debug("Received unhandled " + frameType);
@@ -183,6 +179,19 @@ namespace Fleck.Handlers
             var bytes = SHA1.Create().ComputeHash(Encoding.ASCII.GetBytes(combined));
 
             return Convert.ToBase64String(bytes);
+        }
+        
+        private static string ReadUTF8PayloadData(byte[] bytes)
+        {
+            var encoding = new UTF8Encoding(false, true);
+            try
+            {
+                return encoding.GetString(bytes);
+            }
+            catch(ArgumentException)
+            {
+                throw new WebSocketException(WebSocketStatusCodes.InvalidFramePayloadData);
+            }
         }
     }
 

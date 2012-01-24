@@ -2,6 +2,7 @@
 using System.Text;
 using Fleck.Handlers;
 using NUnit.Framework;
+using System.Linq;
 
 namespace Fleck.Tests
 {
@@ -200,13 +201,14 @@ namespace Fleck.Tests
         [Test]
         public void ShouldCloseOnCloseFromText()
         {
+            var payload = 1000.ToBigEndianBytes<ushort>().Concat(Encoding.UTF8.GetBytes("Reason")).ToArray();
             var frame = new Hybi14DataFrame
                 {
                     FrameType = FrameType.Close,
                     IsFinal = true,
                     IsMasked = true,
                     MaskKey = 5232,
-                    Payload = Encoding.UTF8.GetBytes("Just right")
+                    Payload = payload
                 };
 
             var hit = false;
@@ -247,6 +249,23 @@ namespace Fleck.Tests
             var ex = Assert.Throws<WebSocketException>(() => _handler.Receive(frame.ToBytes()));
             Assert.AreEqual(WebSocketStatusCodes.ProtocolError, ex.StatusCode);
         }
+        
+        [Test]
+        public void ShouldThrowOnInvalidFrameType()
+        {
+            var frame = new Hybi14DataFrame
+                {
+                    FrameType = (FrameType)11,
+                    IsFinal = true,
+                    IsMasked = true,
+                    MaskKey = 5232,
+                    Payload = 1000.ToBigEndianBytes<ushort>()
+                };
+
+            var ex = Assert.Throws<WebSocketException>(() => _handler.Receive(frame.ToBytes()));
+            Assert.AreEqual(WebSocketStatusCodes.ProtocolError, ex.StatusCode);
+        }
+        
 
         [Test]
         public void ShouldCallOnMessageWhenRecievingTextFrameOver125Bytes()
