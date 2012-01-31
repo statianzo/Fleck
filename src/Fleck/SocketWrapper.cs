@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace Fleck
 {
@@ -13,7 +14,9 @@ namespace Fleck
     {
         private readonly Socket _socket;
         private Stream _stream;
-
+        private CancellationTokenSource _tokenSource;
+        private TaskFactory _taskFactory;
+        
         public string RemoteIpAddress
         {
             get
@@ -25,6 +28,8 @@ namespace Fleck
 
         public SocketWrapper(Socket socket)
         {
+            _tokenSource = new CancellationTokenSource();
+            _taskFactory = new TaskFactory(_tokenSource.Token);
             _socket = socket;
             if (_socket.Connected)
                 _stream = new NetworkStream(_socket);
@@ -79,9 +84,12 @@ namespace Fleck
 
         public Task<ISocket> Accept(Action<ISocket> callback, Action<Exception> error)
         {
-            Func<IAsyncResult, ISocket> end = r => new SocketWrapper(_socket.EndAccept(r));
-            var task = Task.Factory.FromAsync(_socket.BeginAccept, end, null);
-            task.ContinueWith(t => callback(t.Result), TaskContinuationOptions.NotOnFaulted)
+            Func<IAsyncResult, ISocket> end = r => {
+                _tokenSource.Token.ThrowIfCancellationRequested();
+                return new SocketWrapper(_socket.EndAccept(r));
+            };
+            var task = _taskFactory.FromAsync(_socket.BeginAccept, end, null);
+            task.ContinueWith(t => callback(t.Result), TaskContinuationOptions.OnlyOnRanToCompletion)
                 .ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
             task.ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
             return task;
@@ -89,12 +97,14 @@ namespace Fleck
 
         public void Dispose()
         {
+            _tokenSource.Cancel();
             if (_stream != null) _stream.Dispose();
             if (_socket != null) _socket.Dispose();
         }
 
         public void Close()
         {
+            _tokenSource.Cancel();
             if (_stream != null) _stream.Close();
             if (_socket != null) _socket.Close();
         }
