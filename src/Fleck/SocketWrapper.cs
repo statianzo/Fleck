@@ -73,13 +73,26 @@ namespace Fleck
         public Task<int> Receive(byte[] buffer, Action<int> callback, Action<Exception> error, int offset)
         {
             Func<AsyncCallback, object, IAsyncResult> begin =
-                (cb, s) => _stream.BeginRead(buffer, offset, buffer.Length, cb, s);
+                (cb, s) => BeginRead(buffer, offset, s, cb);
 
             Task<int> task = Task.Factory.FromAsync<int>(begin, _stream.EndRead, null);
             task.ContinueWith(t => callback(t.Result), TaskContinuationOptions.NotOnFaulted)
                 .ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
             task.ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
             return task;
+        }
+
+        private IAsyncResult BeginRead(byte[] buffer, int offset, object s, AsyncCallback cb)
+        {
+            try
+            {
+                return _stream.BeginRead(buffer, offset, buffer.Length, cb, s);
+            }
+            catch (Exception e)
+            {
+                FleckLog.Error("_stream.BeginRead error: \n" + e);
+                return null;
+            }
         }
 
         public Task<ISocket> Accept(Action<ISocket> callback, Action<Exception> error)
@@ -118,13 +131,26 @@ namespace Fleck
         public Task Send(byte[] buffer, Action callback, Action<Exception> error)
         {
             Func<AsyncCallback, object, IAsyncResult> begin =
-                (cb, s) => _stream.BeginWrite(buffer, 0, buffer.Length, cb, s);
+                (cb, s) => BeginWrite(buffer, s, cb);
 
             Task task = Task.Factory.FromAsync(begin, _stream.EndWrite, null);
             task.ContinueWith(t => callback(), TaskContinuationOptions.NotOnFaulted)
                 .ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
             task.ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
             return task;
+        }
+
+        private IAsyncResult BeginWrite(byte[] buffer, object s, AsyncCallback cb)
+        {
+            try
+            {
+                return _stream.BeginWrite(buffer, 0, buffer.Length, cb, s);
+            }
+            catch (Exception e)
+            {
+                FleckLog.Error("_stream.BeginWrite error: \n" + e);
+                return null;
+            }
         }
     }
 }
