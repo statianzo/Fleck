@@ -14,7 +14,7 @@ CLR_TOOLS_VERSION = 'v4.0.30319'
 BUILD_RUNNER = Platform.nix? ? 'xbuild' : 'msbuild'
 ARCHIVE_DIR = 'artifacts'
 RESULTS_DIR = 'artifacts/test-reports'
-VERSION = IO.read(File.expand_path('../VERSION', __FILE__))
+VERSION = IO.read(File.expand_path('../VERSION', __FILE__)).chomp
 
 desc 'Compiles and runs unit tests'
 task :all => [:default]
