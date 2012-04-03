@@ -14,7 +14,7 @@ CLR_TOOLS_VERSION = 'v4.0.30319'
 BUILD_RUNNER = Platform.nix? ? 'xbuild' : 'msbuild'
 ARCHIVE_DIR = 'artifacts'
 RESULTS_DIR = 'artifacts/test-reports'
-VERSION = IO.read(File.expand_path('../VERSION', __FILE__)).chomp
+APP_VERSION = IO.read(File.expand_path('../VERSION', __FILE__)).chomp
 
 desc 'Compiles and runs unit tests'
 task :all => [:default]
@@ -29,15 +29,15 @@ end
 
 desc 'Tag and push to remote'
 task :release do
-  sh "git tag -a -m 'Bump to version #{VERSION}' #{VERSION}"
+  sh "git tag -a -m 'Bump to version #{APP_VERSION}' #{APP_VERSION}"
   sh "git push origin master"
-  sh "git push origin #{VERSION}"
+  sh "git push origin #{APP_VERSION}"
 end
 
 desc 'Update the version information for the build'
 assemblyinfo :version do |asm|
   tc_build_number = ENV['BUILD_NUMBER']
-  asm_version = "#{VERSION}.#{tc_build_number || 0}"
+  asm_version = "#{APP_VERSION}.#{tc_build_number || 0}"
 
   commit = `git log -1 --pretty=format:%H` rescue 'git unavailable'
 
