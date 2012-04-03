@@ -41,7 +41,7 @@ private key
 
 ```cs
 var server = new WebSocketServer("wss://localhost:8431");
-server.Certificate = "MyCert.cer";
+server.Certificate = new X509Certificate2("MyCert.pfx");
 server.Start(socket =>
   {
     //...use as normal
