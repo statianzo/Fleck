@@ -54,8 +54,8 @@ end
 desc 'Prepares the working directory for a new build'
 task :clean do
   Rake::Task["clean:#{BUILD_RUNNER}"].execute
-  rm_r ARCHIVE_DIR if Dir.exists?(ARCHIVE_DIR)
-  rm_r RESULTS_DIR if Dir.exists?(RESULTS_DIR)
+  rm_r ARCHIVE_DIR if File.exists?(ARCHIVE_DIR)
+  rm_r RESULTS_DIR if File.exists?(RESULTS_DIR)
   mkdir_p ARCHIVE_DIR
   mkdir_p RESULTS_DIR
 end
