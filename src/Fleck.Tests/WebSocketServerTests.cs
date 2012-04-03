@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using Moq;
 using NUnit.Framework;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Fleck.Tests
 {
@@ -34,7 +35,7 @@ namespace Fleck.Tests
         public void ShouldBeSecureWithWssAndCertificate()
         {
             var server = new WebSocketServer("wss://secureplace.com:8000");
-            server.Certificate = "MyCert.cer";
+            server.Certificate = new X509Certificate2();
             Assert.IsTrue(server.IsSecure);
         }
 
@@ -49,7 +50,7 @@ namespace Fleck.Tests
         public void ShouldNotBeSecureWithoutWssAndCertificate()
         {
             var server = new WebSocketServer("ws://secureplace.com:8000");
-            server.Certificate = "MyCert.cer";
+            server.Certificate = new X509Certificate2();
             Assert.IsFalse(server.IsSecure);
         }
     }

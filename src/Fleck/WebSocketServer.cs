@@ -9,7 +9,6 @@ namespace Fleck
     {
         private readonly string _scheme;
         private Action<IWebSocketConnection> _config;
-        private X509Certificate2 _x509Certificate;
 
         public WebSocketServer(string location)
             : this(8181, location)
@@ -29,7 +28,7 @@ namespace Fleck
         public ISocket ListenerSocket { get; set; }
         public string Location { get; private set; }
         public int Port { get; private set; }
-        public string Certificate { get; set; }
+        public X509Certificate2 Certificate { get; set; }
 
         public bool IsSecure
         {
@@ -54,7 +53,6 @@ namespace Fleck
                     FleckLog.Error("Scheme cannot be 'wss' without a Certificate");
                     return;
                 }
-                _x509Certificate = new X509Certificate2(Certificate);
             }
             ListenForClients();
             _config = config;
@@ -85,7 +83,7 @@ namespace Fleck
             {
                 FleckLog.Debug("Authenticating Secure Connection");
                 clientSocket
-                    .Authenticate(_x509Certificate,
+                    .Authenticate(Certificate,
                                   connection.StartReceiving,
                                   e => FleckLog.Warn("Failed to Authenticate", e));
             }
