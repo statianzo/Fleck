@@ -103,13 +103,13 @@ task :nuget => ['nuget:pack', 'nuget:push']
 namespace :nuget do
   desc 'Create a nuget package'
   task :pack do
-    sh "nuget pack -OutputDirectory #{ARCHIVE_DIR} -Properties Configuration=#{COMPILE_TARGET} src/#{ROOT_NAMESPACE}/#{ROOT_NAMESPACE}.csproj"
+    sh "support/nuget pack -OutputDirectory #{ARCHIVE_DIR} -Properties Configuration=#{COMPILE_TARGET} src/#{ROOT_NAMESPACE}/#{ROOT_NAMESPACE}.csproj"
   end
 
   desc 'Publish the nuget package'
   task :push do
     basename = "#{ROOT_NAMESPACE}.#{BUILD_VERSION}.nupkg"
-    sh "nuget push #{File.join(ARCHIVE_DIR,basename)} #{ENV['NUGET_KEY']}"
+    sh "support/nuget push #{File.join(ARCHIVE_DIR,basename)} #{ENV['NUGET_KEY']}"
   end
 end
 
