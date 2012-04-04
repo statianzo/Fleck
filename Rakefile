@@ -15,6 +15,7 @@ BUILD_RUNNER = Platform.nix? ? 'xbuild' : 'msbuild'
 ARCHIVE_DIR = 'artifacts'
 RESULTS_DIR = 'artifacts/test-reports'
 APP_VERSION = IO.read(File.expand_path('../VERSION', __FILE__)).chomp
+BUILD_VERSION = "#{APP_VERSION}.#{ENV['BUILD_NUMBER'] || 0}"
 
 desc 'Compiles and runs unit tests'
 task :all => [:default]
@@ -36,17 +37,14 @@ end
 
 desc 'Update the version information for the build'
 assemblyinfo :version do |asm|
-  tc_build_number = ENV['BUILD_NUMBER']
-  asm_version = "#{APP_VERSION}.#{tc_build_number || 0}"
-
   commit = `git log -1 --pretty=format:%H` rescue 'git unavailable'
 
   asm.trademark = commit
   asm.product_name = PRODUCT
   asm.description = DESCRIPTION
-  asm.version = asm_version
-  asm.file_version = asm_version
-  asm.custom_attributes :AssemblyInformationalVersion => asm_version
+  asm.version = BUILD_VERSION
+  asm.file_version = BUILD_VERSION
+  asm.custom_attributes :AssemblyInformationalVersion => BUILD_VERSION
   asm.copyright = COPYRIGHT
   asm.output_file = COMMON_ASSEMBLY_INFO
 end
@@ -99,9 +97,20 @@ namespace :compile do
   end
 end
 
-desc 'Build the nuget package'
-task :nuget => [:build] do
-  sh "nuget pack -OutputDirectory #{ARCHIVE_DIR} -Properties Configuration=#{COMPILE_TARGET} src/#{ROOT_NAMESPACE}/#{ROOT_NAMESPACE}.csproj"
+desc 'Create and publish to Nuget'
+task :nuget => ['nuget:pack', 'nuget:push']
+
+namespace :nuget do
+  desc 'Create a nuget package'
+  task :pack do
+    sh "nuget pack -OutputDirectory #{ARCHIVE_DIR} -Properties Configuration=#{COMPILE_TARGET} src/#{ROOT_NAMESPACE}/#{ROOT_NAMESPACE}.csproj"
+  end
+
+  desc 'Publish the nuget package'
+  task :push do
+    basename = "#{ROOT_NAMESPACE}.#{BUILD_VERSION}.nupkg"
+    sh "nuget push #{File.join(ARCHIVE_DIR,basename)} #{ENV['NUGET_KEY']}"
+  end
 end
 
 desc 'Run tests'
