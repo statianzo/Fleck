@@ -73,7 +73,7 @@ namespace Fleck
         public Task<int> Receive(byte[] buffer, Action<int> callback, Action<Exception> error, int offset)
         {
             Func<AsyncCallback, object, IAsyncResult> begin =
-                (cb, s) => _stream.BeginRead(buffer, offset, buffer.Length, cb, s);
+                (cb, s) => CallbackOnError(() => _stream.BeginRead(buffer, offset, buffer.Length, cb, s), error);
 
             Task<int> task = Task.Factory.FromAsync<int>(begin, _stream.EndRead, null);
             task.ContinueWith(t => callback(t.Result), TaskContinuationOptions.NotOnFaulted)
@@ -118,13 +118,27 @@ namespace Fleck
         public Task Send(byte[] buffer, Action callback, Action<Exception> error)
         {
             Func<AsyncCallback, object, IAsyncResult> begin =
-                (cb, s) => _stream.BeginWrite(buffer, 0, buffer.Length, cb, s);
+                (cb, s) => CallbackOnError(() => _stream.BeginWrite(buffer, 0, buffer.Length, cb, s), error);
 
             Task task = Task.Factory.FromAsync(begin, _stream.EndWrite, null);
             task.ContinueWith(t => callback(), TaskContinuationOptions.NotOnFaulted)
                 .ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
             task.ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
+
             return task;
+        }
+
+        private T CallbackOnError<T>(Func<T> func, Action<Exception> error)
+        {
+            try
+            {
+                return func();
+            }
+            catch (Exception e)
+            {
+                error(e);
+                return default(T);
+            }
         }
     }
 }

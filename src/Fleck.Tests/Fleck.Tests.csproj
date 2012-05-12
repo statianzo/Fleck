@@ -70,6 +70,7 @@
     <Compile Include="Draft76HandlerTests.cs" />
     <Compile Include="Hybi13HandlerTests.cs" />
     <Compile Include="Hybi14DataFrame.cs" />
+    <Compile Include="SocketWrapperTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Fleck\Fleck.csproj">
