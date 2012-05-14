@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System;
 
 namespace Fleck.Tests
 {
@@ -60,6 +61,14 @@ namespace Fleck.Tests
             var info = WebSocketConnectionInfo.Create(request, null);
             Assert.AreEqual(info.Cookies["chocolate"], "tasty");
             Assert.AreEqual(info.Cookies["cabbage"], "not so much");
+        }
+
+        [Test]
+        public void ShouldHaveId()
+        {
+            var request = new WebSocketHttpRequest();
+            var info = WebSocketConnectionInfo.Create(request, null);
+            Assert.AreNotEqual(default(Guid), info.Id);
         }
     }
 }

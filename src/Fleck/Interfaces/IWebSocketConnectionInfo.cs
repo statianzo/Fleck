@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System;
 
 namespace Fleck
 {
@@ -10,5 +11,6 @@ namespace Fleck
         string Path { get; }
         string ClientIpAddress { get; }
         IDictionary<string, string> Cookies { get; }
+        Guid Id { get; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System;
 
 namespace Fleck
 {
@@ -40,6 +41,7 @@ namespace Fleck
         WebSocketConnectionInfo()
         {
             Cookies = new Dictionary<string, string>();
+            Id = Guid.NewGuid();
         }
 
         public string SubProtocol { get; private set; }
@@ -47,6 +49,7 @@ namespace Fleck
         public string Host { get; private set; }
         public string Path { get; private set; }
         public string ClientIpAddress { get; set; }
+        public Guid Id { get; set; }
 
         public IDictionary<string, string> Cookies { get; private set; }
     }
