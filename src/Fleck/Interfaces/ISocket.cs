@@ -11,6 +11,7 @@ namespace Fleck
         bool Connected { get; }
         string RemoteIpAddress { get; }
         Stream Stream { get; }
+        bool NoDelay { get; set; }
 
         Task<ISocket> Accept(Action<ISocket> callback, Action<Exception> error);
         Task Send(byte[] buffer, Action callback, Action<Exception> error);

@@ -70,6 +70,12 @@ namespace Fleck
             get { return _stream; }
         }
 
+        public bool NoDelay
+        {
+            get { return _socket.NoDelay; }
+            set { _socket.NoDelay = value; }
+        }
+
         public Task<int> Receive(byte[] buffer, Action<int> callback, Action<Exception> error, int offset)
         {
             Func<AsyncCallback, object, IAsyncResult> begin =
