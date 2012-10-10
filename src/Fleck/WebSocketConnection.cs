@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 
 namespace Fleck
 {
@@ -146,6 +147,11 @@ namespace Fleck
                 FleckLog.Debug("Error while reading", e);
                 Close(((WebSocketException)e).StatusCode);
             }
+            else if (e is IOException)
+            {
+                FleckLog.Debug("Error while reading", e);
+                Close(WebSocketStatusCodes.AbnormalClosure);
+            }
             else
             {
                 FleckLog.Error("Application Error", e);
@@ -163,7 +169,10 @@ namespace Fleck
             },
             e =>
             {
-                FleckLog.Info("Failed to send. Disconnecting.", e);
+                if (e is IOException)
+                    FleckLog.Debug("Failed to send. Disconnecting.", e);
+                else
+                    FleckLog.Info("Failed to send. Disconnecting.", e);
                 CloseSocket();
             });
         }
