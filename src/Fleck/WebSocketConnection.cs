@@ -93,6 +93,23 @@ namespace Fleck
                 SendBytes(bytes, CloseSocket);
         }
 
+        public void CreateHandler(IEnumerable<byte> data)
+        {
+            var request = _parseRequest(data.ToArray());
+            if (request == null)
+                return;
+            Handler = _handlerFactory(request);
+            if (Handler == null)
+                return;
+            ConnectionInfo = WebSocketConnectionInfo.Create(request, Socket.RemoteIpAddress);
+
+            _initialize(this);
+
+            var handshake = Handler.CreateHandshake();
+            SendBytes(handshake, OnOpen);
+        }
+
+
         private void Read(List<byte> data, byte[] buffer)
         {
             if (_closed || !Socket.Connected)
@@ -175,22 +192,6 @@ namespace Fleck
                     FleckLog.Info("Failed to send. Disconnecting.", e);
                 CloseSocket();
             });
-        }
-
-        private void CreateHandler(IEnumerable<byte> data)
-        {
-            var request = _parseRequest(data.ToArray());
-            if (request == null)
-                return;
-            Handler = _handlerFactory(request);
-            if (Handler == null)
-                return;
-            ConnectionInfo = WebSocketConnectionInfo.Create(request, Socket.RemoteIpAddress);
-
-            _initialize(this);
-
-            var handshake = Handler.CreateHandshake();
-            SendBytes(handshake, OnOpen);
         }
 
         private void CloseSocket()
