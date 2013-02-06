@@ -14,6 +14,8 @@ namespace Fleck.Tests
             const string subprotocol = "Submarine!";
             const string path = "/path/to/page";
             const string clientIp = "127.0.0.1";
+            const int clientPort = 0;
+
             var request =
                 new WebSocketHttpRequest
                     {
@@ -25,7 +27,7 @@ namespace Fleck.Tests
                             },
                         Path = path
                     };
-            var info = WebSocketConnectionInfo.Create(request, clientIp);
+            var info = WebSocketConnectionInfo.Create(request, clientIp, clientPort);
 
             Assert.AreEqual(origin, info.Origin);
             Assert.AreEqual(host, info.Host);
@@ -43,7 +45,7 @@ namespace Fleck.Tests
                     {
                         Headers = { {"Sec-WebSocket-Origin", origin} }
                     };
-            var info = WebSocketConnectionInfo.Create(request, null);
+            var info = WebSocketConnectionInfo.Create(request, null, 1);
 
             Assert.AreEqual(origin, info.Origin);
         }
@@ -58,7 +60,7 @@ namespace Fleck.Tests
                         Headers = { {"Cookie", cookie} }
                     };
 
-            var info = WebSocketConnectionInfo.Create(request, null);
+            var info = WebSocketConnectionInfo.Create(request, null, 1);
             Assert.AreEqual(info.Cookies["chocolate"], "tasty");
             Assert.AreEqual(info.Cookies["cabbage"], "not so much");
         }
@@ -67,7 +69,7 @@ namespace Fleck.Tests
         public void ShouldHaveId()
         {
             var request = new WebSocketHttpRequest();
-            var info = WebSocketConnectionInfo.Create(request, null);
+            var info = WebSocketConnectionInfo.Create(request, null, 1);
             Assert.AreNotEqual(default(Guid), info.Id);
         }
     }

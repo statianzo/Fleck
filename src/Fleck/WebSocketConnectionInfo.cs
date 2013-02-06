@@ -9,7 +9,7 @@ namespace Fleck
         const string CookiePattern = @"((;\s)*(?<cookie_name>[^=]+)=(?<cookie_value>[^\;]+))+";
         private static readonly Regex CookieRegex = new Regex(CookiePattern, RegexOptions.Compiled);
 
-        public static WebSocketConnectionInfo Create(WebSocketHttpRequest request, string clientIp)
+        public static WebSocketConnectionInfo Create(WebSocketHttpRequest request, string clientIp, int clientPort)
         {
             var info = new WebSocketConnectionInfo
                            {
@@ -17,7 +17,8 @@ namespace Fleck
                                Host = request["Host"],
                                SubProtocol = request["Sec-WebSocket-Protocol"],
                                Path = request.Path,
-                               ClientIpAddress = clientIp
+                               ClientIpAddress = clientIp,
+                               ClientPort = clientPort
                            };
             var cookieHeader = request["Cookie"];
 
@@ -49,6 +50,7 @@ namespace Fleck
         public string Host { get; private set; }
         public string Path { get; private set; }
         public string ClientIpAddress { get; set; }
+        public int    ClientPort { get; set; }
         public Guid Id { get; set; }
 
         public IDictionary<string, string> Cookies { get; private set; }
