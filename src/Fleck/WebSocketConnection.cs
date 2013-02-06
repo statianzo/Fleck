@@ -101,7 +101,7 @@ namespace Fleck
             Handler = _handlerFactory(request);
             if (Handler == null)
                 return;
-            ConnectionInfo = WebSocketConnectionInfo.Create(request, Socket.RemoteIpAddress);
+            ConnectionInfo = WebSocketConnectionInfo.Create(request, Socket.RemoteIpAddress, Socket.RemotePort);
 
             _initialize(this);
 
