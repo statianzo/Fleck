@@ -10,6 +10,7 @@ namespace Fleck
     {
         bool Connected { get; }
         string RemoteIpAddress { get; }
+        int RemotePort { get; }
         Stream Stream { get; }
         bool NoDelay { get; set; }
 
