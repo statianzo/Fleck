@@ -5,25 +5,44 @@ namespace Fleck
 {
     public class RequestParser
     {
+        // mjb
+        //const string pattern = @"^(?<method>[^\s]+)\s(?<path>[^\s]+)\sHTTP\/1\.1\r\n" + // request line
+        //                       @"((?<field_name>[^:\r\n]+):\s(?<field_value>[^\r\n]+)\r\n)+" + //headers
+        //                       @"\r\n" + //newline
+        //                       @"(?<body>.+)?";
         const string pattern = @"^(?<method>[^\s]+)\s(?<path>[^\s]+)\sHTTP\/1\.1\r\n" + // request line
-                               @"((?<field_name>[^:\r\n]+):\s(?<field_value>[^\r\n]+)\r\n)+" + //headers
-                               @"\r\n" + //newline
-                               @"(?<body>.+)?";
+                               @"((?<field_name>[^:\r\n]+):\s(?<field_value>[^\r\n]+)\r\n)+"; //headers
 
         private static readonly Regex _regex = new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         public static WebSocketHttpRequest Parse(byte[] bytes)
         {
-            return Parse(bytes, "ws");
+            // mjb 
+            //return Parse(bytes, "ws");
+            return Parse(bytes, "ws", null, null);
         }
 
-        public static WebSocketHttpRequest Parse(byte[] bytes, string scheme)
+        // mjb public static WebSocketHttpRequest Parse(byte[] bytes, string scheme)
+        public static WebSocketHttpRequest Parse(byte[] bytes, string scheme, AccessPolicyServer AccessPolicyServer, ISocket clientSocket)
         {
             var body = Encoding.UTF8.GetString(bytes);
             Match match = _regex.Match(body);
 
+            // mjb
+            //if (!match.Success)
+            //    return null;
             if (!match.Success)
+            {
+                if (body == "<policy-file-request/>\0")
+                {
+                    if (AccessPolicyServer != null)
+                    {
+                        AccessPolicyServer.SendResponse(clientSocket.Socket);
+                    }
+                }
+
                 return null;
+            }
 
             var request = new WebSocketHttpRequest
             {

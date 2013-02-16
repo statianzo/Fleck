@@ -65,6 +65,7 @@
     </When>
   </Choose>
   <ItemGroup>
+    <Compile Include="AccessPolicyServer.cs" />
     <Compile Include="Handlers\ComposableHandler.cs" />
     <Compile Include="Handlers\Draft76Handler.cs" />
     <Compile Include="Handlers\Hybi13Handler.cs" />
@@ -74,6 +75,7 @@
     <Compile Include="Interfaces\IWebSocketServer.cs" />
     <Compile Include="Interfaces\IWebSocketConnectionInfo.cs" />
     <Compile Include="SocketWrapper.cs" />
+    <Compile Include="TcpServer.cs" />
     <Compile Include="WebSocketConnectionInfo.cs" />
     <Compile Include="WebSocketServer.cs" />
     <Compile Include="WebSocketHttpRequest.cs" />

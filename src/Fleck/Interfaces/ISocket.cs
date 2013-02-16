@@ -3,6 +3,7 @@ using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using System.IO;
+using System.Net.Sockets;
 
 namespace Fleck
 {
@@ -24,5 +25,8 @@ namespace Fleck
 
         void Bind(EndPoint ipLocal);
         void Listen(int backlog);
+
+        // mjb 
+        Socket Socket { get; }
     }
 }

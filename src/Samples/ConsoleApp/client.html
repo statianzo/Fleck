@@ -2,48 +2,88 @@
 <html>
 <head>
     <title>websocket client</title>
+  
+  <!-- Include these three JS files: -->
+  <script type="text/javascript" src="swfobject.js"></script>
+  <script type="text/javascript" src="web_socket.js"></script>
+
+
     <script type="text/javascript">
-        var start = function () {
+
+        // Set URL of your WebSocketMain.swf here:
+        WEB_SOCKET_SWF_LOCATION = "WebSocketMain.swf";
+        // Set this to dump debug message from Flash to console.log:
+        WEB_SOCKET_DEBUG = true;
+
+        var start = function ()
+        {
             var inc = document.getElementById('incomming');
-            var wsImpl = window.WebSocket || window.MozWebSocket;
+            //var wsImpl = window.WebSocket || window.MozWebSocket;
             var form = document.getElementById('sendForm');
             var input = document.getElementById('sendText');
-            
+
             inc.innerHTML += "connecting to server ..<br/>";
 
             // create a new websocket and connect
-            window.ws = new wsImpl('ws://localhost:8181/consoleappsample', 'my-protocol');
+            var url;
+            url = "wss://dev.astros.com:11234/consoleappsample";
+            //url = "ws://dev.astros.com:11234/consoleappsample";
+            //window.ws = new wsImpl('ws://localhost:8181/consoleappsample', 'my-protocol');
+            //window.ws = new wsImpl(url, 'my-protocol');
+            window.ws = new WebSocket(url);
 
             // when data is comming from the server, this metod is called
-            ws.onmessage = function (evt) {
+            ws.onmessage = function (evt)
+            {
                 inc.innerHTML += evt.data + '<br/>';
             };
 
             // when the connection is established, this method is called
-            ws.onopen = function () {
+            ws.onopen = function ()
+            {
                 inc.innerHTML += '.. connection open<br/>';
             };
 
             // when the connection is closed, this method is called
-            ws.onclose = function () {
+            ws.onclose = function ()
+            {
                 inc.innerHTML += '.. connection closed<br/>';
             }
-            
-			form.addEventListener('submit', function(e){
-				e.preventDefault();
-				var val = input.value;
-				ws.send(val);
-				input.value = "";
-			});
-            
+
         }
         window.onload = start;
+
+        //form.addEventListener('submit', function (e)
+        var onSubmit = function (e)
+        {
+            var sendText = document.getElementById("sendText");
+            //e.preventDefault();
+            var val = sendText.value;
+            ws.send(val);
+            sendText.value = "";
+        };
+
+        var btnLargeDataTest_click = function ()
+        {
+            var data = "";
+            var size = 1024;
+            size = 1024 * 1024; // 1 MB
+
+            for (var i = 0; i < size; i++)
+            {
+                data += "x";
+            }
+
+            ws.send(data);
+        };
+
     </script>
 </head>
 <body>
-	<form id="sendForm">
+	<form id="sendForm" onsubmit="javascript: onSubmit(); return false;">
 		<input id="sendText" placeholder="Text to send" />
 	</form>
+    <button id="btnLargeDataTest" onclick="javascript: btnLargeDataTest_click();">Large Data Test</button>
     <pre id="incomming"></pre>
 </body>
 </html>
