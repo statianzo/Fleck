@@ -16,7 +16,16 @@ namespace Fleck
         private Stream _stream;
         private CancellationTokenSource _tokenSource;
         private TaskFactory _taskFactory;
-        
+
+        // mjb
+        public Socket Socket
+        {
+            get
+            {
+                return _socket;
+            }
+        }
+
         public string RemoteIpAddress
         {
             get

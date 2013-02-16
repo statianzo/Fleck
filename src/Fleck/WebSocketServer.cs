@@ -37,8 +37,19 @@ namespace Fleck
 
         public void Dispose()
         {
+            // mjb
+            if ((AccessPolicyServer != null) && (FlashAccessPolicyEnabled))
+            {
+                AccessPolicyServer.Stop();
+                AccessPolicyServer = null;
+            }
+
             ListenerSocket.Dispose();
         }
+
+        // mjb
+        internal AccessPolicyServer AccessPolicyServer = null;
+        public bool FlashAccessPolicyEnabled = true;
 
         public void Start(Action<IWebSocketConnection> config)
         {
@@ -56,6 +67,18 @@ namespace Fleck
             }
             ListenForClients();
             _config = config;
+
+            // mjb
+            if (AccessPolicyServer == null)
+            {
+                AccessPolicyServer = new AccessPolicyServer(IPAddress.Any, string.Empty, Port);
+
+                if (FlashAccessPolicyEnabled)
+                {
+                    AccessPolicyServer.Start();
+                }
+            }
+
         }
 
         private void ListenForClients()
@@ -69,11 +92,11 @@ namespace Fleck
             ListenForClients();
 
             WebSocketConnection connection = null;
-
+            
             connection = new WebSocketConnection(
                 clientSocket,
                 _config,
-                bytes => RequestParser.Parse(bytes, _scheme),
+                bytes => RequestParser.Parse(bytes, _scheme, AccessPolicyServer, clientSocket),
                 r => HandlerFactory.BuildHandler(r,
                                                  s => connection.OnMessage(s),
                                                  connection.Close,
