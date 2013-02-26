@@ -80,6 +80,7 @@ namespace Fleck
 
         public void Close(int code)
         {
+            _closed = true;
             if (Handler == null)
             {
                 CloseSocket();
@@ -197,7 +198,6 @@ namespace Fleck
         private void CloseSocket()
         {
             OnClose();
-            _closed = true;
             Socket.Close();
             Socket.Dispose();
         }
