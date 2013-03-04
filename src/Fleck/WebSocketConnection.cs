@@ -197,6 +197,7 @@ namespace Fleck
 
         private void CloseSocket()
         {
+            _closed = true;
             OnClose();
             Socket.Close();
             Socket.Dispose();
