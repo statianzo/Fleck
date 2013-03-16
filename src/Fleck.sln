@@ -50,6 +50,8 @@ Global
 		Policies = $0
 		$0.TextStylePolicy = $1
 		$1.FileWidth = 120
+		$1.TabWidth = 2
+		$1.IndentWidth = 2
 		$1.NoTabsAfterNonTabs = True
 		$1.EolMarker = Windows
 		$1.inheritsSet = VisualStudio

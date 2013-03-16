@@ -96,6 +96,27 @@ namespace Fleck.Tests
       Assert.IsNull(RequestParser.Parse(bytes));
     }
     
+   [Test]
+    public void EmptyHeaderValuesShouldParse()
+    {
+      const string emptyCookieRequest =
+                "GET /demo HTTP/1.1\r\n" +
+        "Host: example.com\r\n" +
+        "Connection: Upgrade\r\n" +
+        "Sec-WebSocket-Key2: 12998 5 Y3 1  .P00\r\n" +
+        "Sec-WebSocket-Protocol: sample\r\n" +
+        "Upgrade: WebSocket\r\n" +
+        "Sec-WebSocket-Key1: 4 @1  46546xW%0l 1 5\r\n" +
+        "Origin: http://example.com\r\n" +
+        "Cookie: \r\n" +
+        "\r\n" +
+        "^n:ds[4U";
+      var bytes = RequestArray(emptyCookieRequest);
+      var request = RequestParser.Parse(bytes);
+      Assert.IsNotNull(request);
+      Assert.AreEqual("", request.Headers["Cookie"]);
+    }
+
     public byte[] ValidRequestArray()
     {
       return RequestArray(validRequest);
