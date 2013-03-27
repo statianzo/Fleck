@@ -44,12 +44,15 @@ namespace Fleck.Tests
         }
 
         [Test]
-        public void ShouldHandleObjectDisposedOnSend()
+        public void ShouldNotWriteToClosedSocketIfCancelled()
         {
             Exception ex = null;
             _wrapper.Dispose();
-            _wrapper.Send(new byte[1], () => {}, e => {ex = e;});
-            Assert.IsInstanceOf<ObjectDisposedException>(ex);
+            
+            var task = _wrapper.Send(new byte[1], () => {}, e => {ex = e;});
+            
+            Assert.IsNull(task);
+            Assert.IsNull(ex);
         }
         [Test]
         public void ShouldHandleObjectDisposedOnReceive()
