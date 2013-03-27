@@ -141,6 +141,9 @@ namespace Fleck
 
         public Task Send(byte[] buffer, Action callback, Action<Exception> error)
         {
+            if (_tokenSource.IsCancellationRequested)
+                return null;
+
             try
             {
                 Func<AsyncCallback, object, IAsyncResult> begin =

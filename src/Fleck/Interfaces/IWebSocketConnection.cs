@@ -13,5 +13,6 @@ namespace Fleck
         void Send(byte[] message);
         void Close();
         IWebSocketConnectionInfo ConnectionInfo { get; }
+        bool IsAvailable { get; }
     }
 }
