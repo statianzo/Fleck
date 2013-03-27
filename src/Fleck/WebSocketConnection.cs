@@ -26,6 +26,7 @@ namespace Fleck
         private readonly Func<WebSocketHttpRequest, IHandler> _handlerFactory;
         readonly Func<byte[], WebSocketHttpRequest> _parseRequest;
         public IHandler Handler { get; set; }
+        private bool _closing;
         private bool _closed;
         private const int ReadSize = 1024 * 4;
 
@@ -35,15 +36,19 @@ namespace Fleck
         public Action<byte[]> OnBinary { get; set; }
         public Action<Exception> OnError { get; set; }
         public IWebSocketConnectionInfo ConnectionInfo { get; private set; }
+        public bool IsAvailable 
+        {
+            get { return !_closing && !_closed && Socket.Connected; }
+        }
 
         public void Send(string message)
         {
             if (Handler == null)
                 throw new InvalidOperationException("Cannot send before handshake");
 
-            if (_closed || !Socket.Connected)
+            if (!IsAvailable)
             {
-                FleckLog.Warn("Data sent after close. Ignoring.");
+                FleckLog.Warn("Data sent while closing or after close. Ignoring.");
                 return;
             }
 
@@ -56,9 +61,9 @@ namespace Fleck
             if (Handler == null)
                 throw new InvalidOperationException("Cannot send before handshake");
 
-            if (_closed || !Socket.Connected)
+            if (!IsAvailable)
             {
-                FleckLog.Warn("Data sent after close. Ignoring.");
+                FleckLog.Warn("Data sent while closing or after close. Ignoring.");
                 return;
             }
 
@@ -80,6 +85,11 @@ namespace Fleck
 
         public void Close(int code)
         {
+            if(!IsAvailable)
+                return;
+
+            _closing = true;
+
             if (Handler == null)
             {
                 CloseSocket();
@@ -112,8 +122,9 @@ namespace Fleck
 
         private void Read(List<byte> data, byte[] buffer)
         {
-            if (_closed || !Socket.Connected)
+            if (!IsAvailable)
                 return;
+
             Socket.Receive(buffer, r =>
             {
                 if (r <= 0)
@@ -147,12 +158,13 @@ namespace Fleck
                 HandleReadError(agg.InnerException);
                 return;
             }
-            else if (e is ObjectDisposedException)
+
+            if (e is ObjectDisposedException)
             {
                 FleckLog.Debug("Swallowing ObjectDisposedException", e);
                 return;
             }
-            
+
             OnError(e);
             
             if (e is HandshakeException)
@@ -196,10 +208,12 @@ namespace Fleck
 
         private void CloseSocket()
         {
+            _closing = true;
             OnClose();
             _closed = true;
             Socket.Close();
             Socket.Dispose();
+            _closing = false;
         }
     }
 }
