@@ -70,6 +70,7 @@ namespace Fleck.Tests
                                                   r => _handlerMock.Object);
 
             _socketMock.SetupGet(x => x.Connected).Returns(true);
+            _handlerMock.Setup(x => x.CreateHandshake()).Returns(() => Tuple.Create("", new byte[0]));
             SetupReadLengths(1, 0);
             connection.StartReceiving();
 

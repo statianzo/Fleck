@@ -36,6 +36,7 @@ namespace Fleck
         public Action<byte[]> OnBinary { get; set; }
         public Action<Exception> OnError { get; set; }
         public IWebSocketConnectionInfo ConnectionInfo { get; private set; }
+        public string SubProtocol { get; private set; }
         public bool IsAvailable 
         {
             get { return !_closing && !_closed && Socket.Connected; }
@@ -113,10 +114,12 @@ namespace Fleck
                 return;
             ConnectionInfo = WebSocketConnectionInfo.Create(request, Socket.RemoteIpAddress, Socket.RemotePort);
 
+            var handshake = Handler.CreateHandshake();
+            SubProtocol = handshake.Item1;
+            
             _initialize(this);
 
-            var handshake = Handler.CreateHandshake();
-            SendBytes(handshake, OnOpen);
+            SendBytes(handshake.Item2, OnOpen);
         }
 
 

@@ -12,6 +12,7 @@ namespace Fleck.Samples.ConsoleApp
             FleckLog.Level = LogLevel.Debug;
             var allSockets = new List<IWebSocketConnection>();
             var server = new WebSocketServer("ws://localhost:8181");
+            var supportedSubProtocols = new HashSet<string>() { "my-protocol" };
             server.Start(socket =>
                 {
                     socket.OnOpen = () =>
@@ -29,7 +30,8 @@ namespace Fleck.Samples.ConsoleApp
                             Console.WriteLine(message);
                             allSockets.ToList().ForEach(s => s.Send("Echo: " + message));
                         };
-                });
+                },
+                supportedSubProtocols);
 
 
             var input = Console.ReadLine();

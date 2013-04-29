@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using Fleck.Handlers;
 using NUnit.Framework;
@@ -14,6 +15,7 @@ namespace Fleck.Tests
         private Action<string> _onMessage;
         private Action<byte[]> _onBinary;
         private Action _onClose;
+        private ISet<string> _supportedSubProtocols;
 
         [SetUp]
         public void Setup()
@@ -22,8 +24,8 @@ namespace Fleck.Tests
             _onClose = delegate { };
             _onMessage = delegate { };
             _onBinary = delegate { };
-
-            _handler = Hybi13Handler.Create(_request, s => _onMessage(s), () => _onClose(), b => _onBinary(b));
+            _supportedSubProtocols = new HashSet<string>() { "chat" };
+            _handler = Hybi13Handler.Create(_request, s => _onMessage(s), () => _onClose(), b => _onBinary(b), _supportedSubProtocols);
         }
 
         [Test]
@@ -54,7 +56,50 @@ namespace Fleck.Tests
 
             var result = _handler.CreateHandshake();
 
-            Assert.AreEqual(ExampleResponse, Encoding.ASCII.GetString(result));
+            Assert.AreEqual(ExampleResponse, Encoding.ASCII.GetString(result.Item2));
+        }
+
+        [Test]
+        public void ShouldRespondWithSubProtocolCorrectly()
+        {
+            _request.Method = "GET";
+            _request.Path = "/chat";
+            _request.Body = "";
+            _request.Headers["Host"] = "server.example.com";
+            _request.Headers["Upgrade"] = "websocket";
+            _request.Headers["Connection"] = "Upgrade";
+            _request.Headers["Sec-WebSocket-Key"] = "dGhlIHNhbXBsZSBub25jZQ==";
+            _request.Headers["Origin"] = "http://example.com";
+            _request.Headers["Sec-WebSocket-Protocol"] = "chat, superchat";
+            _request.Headers["Sec-WebSocket-Version"] = "13";
+            _request.Bytes = Encoding.ASCII.GetBytes(ExampleRequest);
+
+            var _newHandler = Hybi13Handler.Create(_request, s => _onMessage(s), () => _onClose(), b => _onBinary(b), new HashSet<string>());
+
+            var result = _newHandler.CreateHandshake();
+
+            Assert.AreEqual(ExampleResponseNoProtocol, Encoding.ASCII.GetString(result.Item2));
+        }
+
+        [Test]
+        public void ShouldRespondWithNoSubProtocolCorrectly()
+        {
+            _request.Method = "GET";
+            _request.Path = "/chat";
+            _request.Body = "";
+            _request.Headers["Host"] = "server.example.com";
+            _request.Headers["Upgrade"] = "websocket";
+            _request.Headers["Connection"] = "Upgrade";
+            _request.Headers["Sec-WebSocket-Key"] = "dGhlIHNhbXBsZSBub25jZQ==";
+            _request.Headers["Origin"] = "http://example.com";
+            _request.Headers["Sec-WebSocket-Version"] = "13";
+            _request.Bytes = Encoding.ASCII.GetBytes(ExampleRequestNoProtocol);
+
+            var _newHandler = Hybi13Handler.Create(_request, s => _onMessage(s), () => _onClose(), b => _onBinary(b), new HashSet<string>());
+
+            var result = _newHandler.CreateHandshake();
+
+            Assert.AreEqual(ExampleResponseNoProtocol, Encoding.ASCII.GetString(result.Item2));
         }
 
         [Test]
@@ -355,6 +400,24 @@ namespace Fleck.Tests
 "\r\n";
 
         private const string ExampleResponse =
+"HTTP/1.1 101 Switching Protocols\r\n" +
+"Upgrade: websocket\r\n" +
+"Connection: Upgrade\r\n" +
+"Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=\r\n" +
+"Sec-WebSocket-Protocol: chat\r\n" +
+"\r\n";
+
+        private const string ExampleRequestNoProtocol =
+"GET /chat HTTP/1.1\r\n" +
+"Host: server.example.com\r\n" +
+"Upgrade: websocket\r\n" +
+"Connection: Upgrade\r\n" +
+"Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n" +
+"Origin: http://example.com\r\n" +
+"Sec-WebSocket-Version: 13\r\n" +
+"\r\n";
+
+        private const string ExampleResponseNoProtocol =
 "HTTP/1.1 101 Switching Protocols\r\n" +
 "Upgrade: websocket\r\n" +
 "Connection: Upgrade\r\n" +

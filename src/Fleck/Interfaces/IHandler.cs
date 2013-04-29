@@ -1,10 +1,11 @@
+using System;
 using System.Collections.Generic;
 
 namespace Fleck
 {
     public interface IHandler
     {
-        byte[] CreateHandshake();
+        Tuple<string, byte[]> CreateHandshake();
         void Receive(IEnumerable<byte> data);
         byte[] FrameText(string text);
         byte[] FrameBinary(byte[] bytes);

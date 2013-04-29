@@ -65,7 +65,7 @@ namespace Fleck.Tests
 
             var responseBytes = _handler.CreateHandshake();
 
-            var response = Encoding.ASCII.GetString(responseBytes);
+            var response = Encoding.ASCII.GetString(responseBytes.Item2);
 
             Assert.AreEqual(ExampleResponse, response);
 

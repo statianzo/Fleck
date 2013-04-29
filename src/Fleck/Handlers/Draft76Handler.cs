@@ -57,7 +57,7 @@ namespace Fleck.Handlers
             return wrappedBytes;
         }
         
-        public static byte[] Handshake(WebSocketHttpRequest request)
+        public static Tuple<string, byte[]> Handshake(WebSocketHttpRequest request)
         {
             FleckLog.Debug("Building Draft76 Response");
             
@@ -84,7 +84,7 @@ namespace Fleck.Handlers
             Array.Resize(ref byteResponse, byteResponseLength + answerBytes.Length);
             Array.Copy(answerBytes, 0, byteResponse, byteResponseLength, answerBytes.Length);
             
-            return byteResponse;
+            return Tuple.Create("", byteResponse);
         }
         
         public static byte[] CalculateAnswerBytes(string key1, string key2, ArraySegment<byte> challenge)
