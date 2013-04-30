@@ -5,6 +5,6 @@ namespace Fleck
 {
     public interface IWebSocketServer : IDisposable
     {
-        void Start(Action<IWebSocketConnection> config, IEnumerable<string> supportedSubProtocols);
+        void Start(Action<IWebSocketConnection> defaultInitializer, IDictionary<string, Action<IWebSocketConnection>> subProtocolInitializers);
     }
 }

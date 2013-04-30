@@ -9,8 +9,8 @@ namespace Fleck
     public class WebSocketServer : IWebSocketServer
     {
         private readonly string _scheme;
-        private Action<IWebSocketConnection> _config;
-        private IEnumerable<string> _supportedSubProtocols;
+        private IDictionary<string, Action<IWebSocketConnection>> _subProtocolInitializers;
+        private Action<IWebSocketConnection> _defaultInitializer;
 
         public WebSocketServer(string location)
             : this(8181, location)
@@ -42,7 +42,7 @@ namespace Fleck
             ListenerSocket.Dispose();
         }
 
-        public void Start(Action<IWebSocketConnection> config, IEnumerable<string> supportedSubProtocols)
+        public void Start(Action<IWebSocketConnection> defaultInitializer, IDictionary<string, Action<IWebSocketConnection>> subProtocolInitializers)
         {
             var ipLocal = new IPEndPoint(IPAddress.Any, Port);
             ListenerSocket.Bind(ipLocal);
@@ -57,8 +57,8 @@ namespace Fleck
                 }
             }
             ListenForClients();
-            _config = config;
-            _supportedSubProtocols = supportedSubProtocols;
+            _subProtocolInitializers = subProtocolInitializers;
+            _defaultInitializer = defaultInitializer;
         }
 
         private void ListenForClients()
@@ -75,13 +75,14 @@ namespace Fleck
 
             connection = new WebSocketConnection(
                 clientSocket,
-                _config,
+                _defaultInitializer,
+                _subProtocolInitializers,
                 bytes => RequestParser.Parse(bytes, _scheme),
                 r => HandlerFactory.BuildHandler(r,
                                                  s => connection.OnMessage(s),
                                                  connection.Close,
                                                  b => connection.OnBinary(b),
-                                                 _supportedSubProtocols));
+                                                 _subProtocolInitializers.Keys));
 
             if (IsSecure)
             {

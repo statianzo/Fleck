@@ -6,7 +6,7 @@ namespace Fleck
 {
     public class HandlerFactory
     {
-        public static IHandler BuildHandler(WebSocketHttpRequest request, Action<string> onMessage, Action onClose, Action<byte[]> onBinary, IEnumerable<string> supportedSubProtocols)
+        public static IHandler BuildHandler(WebSocketHttpRequest request, Action<string> onMessage, Action onClose, Action<byte[]> onBinary, IEnumerable<string> subProtocols)
         {
             var version = GetVersion(request);
             
@@ -17,7 +17,7 @@ namespace Fleck
                 case "7":
                 case "8":
                 case "13":
-                    return Hybi13Handler.Create(request, onMessage, onClose, onBinary, supportedSubProtocols);
+                    return Hybi13Handler.Create(request, onMessage, onClose, onBinary, subProtocols);
             }
             
             throw new WebSocketException(WebSocketStatusCodes.UnsupportedDataType);

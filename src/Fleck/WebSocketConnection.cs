@@ -7,7 +7,7 @@ namespace Fleck
 {
     public class WebSocketConnection : IWebSocketConnection
     {
-        public WebSocketConnection(ISocket socket, Action<IWebSocketConnection> initialize, Func<byte[], WebSocketHttpRequest> parseRequest, Func<WebSocketHttpRequest, IHandler> handlerFactory)
+        public WebSocketConnection(ISocket socket, Action<IWebSocketConnection> defaultInitializer, IDictionary<string, Action<IWebSocketConnection>> subProtocolInitializers, Func<byte[], WebSocketHttpRequest> parseRequest, Func<WebSocketHttpRequest, IHandler> handlerFactory)
         {
             Socket = socket;
             OnOpen = () => { };
@@ -15,14 +15,16 @@ namespace Fleck
             OnMessage = x => { };
             OnBinary = x => { };
             OnError = x => { };
-            _initialize = initialize;
+            _defaultInitializer = defaultInitializer;
+            _subProtocolInitializers = subProtocolInitializers;
             _handlerFactory = handlerFactory;
             _parseRequest = parseRequest;
         }
 
         public ISocket Socket { get; set; }
 
-        private readonly Action<IWebSocketConnection> _initialize;
+        private readonly Action<IWebSocketConnection> _defaultInitializer;
+        private readonly IDictionary<string, Action<IWebSocketConnection>> _subProtocolInitializers;
         private readonly Func<WebSocketHttpRequest, IHandler> _handlerFactory;
         readonly Func<byte[], WebSocketHttpRequest> _parseRequest;
         public IHandler Handler { get; set; }
@@ -116,8 +118,11 @@ namespace Fleck
 
             var handshake = Handler.CreateHandshake();
             SubProtocol = handshake.Item1;
-            
-            _initialize(this);
+
+            if (_subProtocolInitializers.ContainsKey(SubProtocol))
+                _subProtocolInitializers[SubProtocol](this);
+            else
+                _defaultInitializer(this);
 
             SendBytes(handshake.Item2, OnOpen);
         }

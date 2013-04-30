@@ -9,12 +9,12 @@ namespace Fleck.Handlers
 {
     public static class Hybi13Handler
     {
-        public static IHandler Create(WebSocketHttpRequest request, Action<string> onMessage, Action onClose, Action<byte[]> onBinary, IEnumerable<string> supportedSubProtocols)
+        public static IHandler Create(WebSocketHttpRequest request, Action<string> onMessage, Action onClose, Action<byte[]> onBinary, IEnumerable<string> subProtocols)
         {
             var readState = new ReadState();
             return new ComposableHandler
             {
-                Handshake = () => Hybi13Handler.BuildHandshake(request, supportedSubProtocols),
+                Handshake = () => Hybi13Handler.BuildHandshake(request, subProtocols),
                 TextFrame = s => Hybi13Handler.FrameData(Encoding.UTF8.GetBytes(s), FrameType.Text),
                 BinaryFrame = s => Hybi13Handler.FrameData(s, FrameType.Binary),
                 CloseFrame = i => Hybi13Handler.FrameData(i.ToBigEndianBytes<ushort>(), FrameType.Close),
