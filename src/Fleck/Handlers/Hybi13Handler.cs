@@ -9,7 +9,7 @@ namespace Fleck.Handlers
 {
     public static class Hybi13Handler
     {
-        public static IHandler Create(WebSocketHttpRequest request, Action<string> onMessage, Action onClose, Action<byte[]> onBinary, ISet<string> supportedSubProtocols)
+        public static IHandler Create(WebSocketHttpRequest request, Action<string> onMessage, Action onClose, Action<byte[]> onBinary, IEnumerable<string> supportedSubProtocols)
         {
             var readState = new ReadState();
             return new ComposableHandler
@@ -153,7 +153,7 @@ namespace Fleck.Handlers
         }
 
 
-        public static Tuple<string, byte[]> BuildHandshake(WebSocketHttpRequest request, ISet<string> supportedSubProtocols)
+        public static Tuple<string, byte[]> BuildHandshake(WebSocketHttpRequest request, IEnumerable<string> supportedSubProtocols)
         {
             FleckLog.Debug("Building Hybi-14 Response");
 

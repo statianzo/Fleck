@@ -10,7 +10,7 @@ namespace Fleck
     {
         private readonly string _scheme;
         private Action<IWebSocketConnection> _config;
-        private ISet<string> _supportedSubProtocols;
+        private IEnumerable<string> _supportedSubProtocols;
 
         public WebSocketServer(string location)
             : this(8181, location)
@@ -42,7 +42,7 @@ namespace Fleck
             ListenerSocket.Dispose();
         }
 
-        public void Start(Action<IWebSocketConnection> config, ISet<string> supportedSubProtocols)
+        public void Start(Action<IWebSocketConnection> config, IEnumerable<string> supportedSubProtocols)
         {
             var ipLocal = new IPEndPoint(IPAddress.Any, Port);
             ListenerSocket.Bind(ipLocal);
