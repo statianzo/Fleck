@@ -7,7 +7,7 @@ namespace Fleck
 {
     public class WebSocketConnection : IWebSocketConnection
     {
-        public WebSocketConnection(ISocket socket, Action<IWebSocketConnection> initialize, Func<byte[], WebSocketHttpRequest> parseRequest, Func<WebSocketHttpRequest, IHandler> handlerFactory)
+        public WebSocketConnection(ISocket socket, Action<IWebSocketConnection> defaultInitializer, IDictionary<string, Action<IWebSocketConnection>> subProtocolInitializers, Func<byte[], WebSocketHttpRequest> parseRequest, Func<WebSocketHttpRequest, IHandler> handlerFactory)
         {
             Socket = socket;
             OnOpen = () => { };
@@ -15,14 +15,16 @@ namespace Fleck
             OnMessage = x => { };
             OnBinary = x => { };
             OnError = x => { };
-            _initialize = initialize;
+            _defaultInitializer = defaultInitializer;
+            _subProtocolInitializers = subProtocolInitializers;
             _handlerFactory = handlerFactory;
             _parseRequest = parseRequest;
         }
 
         public ISocket Socket { get; set; }
 
-        private readonly Action<IWebSocketConnection> _initialize;
+        private readonly Action<IWebSocketConnection> _defaultInitializer;
+        private readonly IDictionary<string, Action<IWebSocketConnection>> _subProtocolInitializers;
         private readonly Func<WebSocketHttpRequest, IHandler> _handlerFactory;
         readonly Func<byte[], WebSocketHttpRequest> _parseRequest;
         public IHandler Handler { get; set; }
@@ -36,6 +38,7 @@ namespace Fleck
         public Action<byte[]> OnBinary { get; set; }
         public Action<Exception> OnError { get; set; }
         public IWebSocketConnectionInfo ConnectionInfo { get; private set; }
+        public string SubProtocol { get; private set; }
         public bool IsAvailable 
         {
             get { return !_closing && !_closed && Socket.Connected; }
@@ -113,10 +116,15 @@ namespace Fleck
                 return;
             ConnectionInfo = WebSocketConnectionInfo.Create(request, Socket.RemoteIpAddress, Socket.RemotePort);
 
-            _initialize(this);
-
             var handshake = Handler.CreateHandshake();
-            SendBytes(handshake, OnOpen);
+            SubProtocol = handshake.Item1;
+
+            if (_subProtocolInitializers.ContainsKey(SubProtocol))
+                _subProtocolInitializers[SubProtocol](this);
+            else
+                _defaultInitializer(this);
+
+            SendBytes(handshake.Item2, OnOpen);
         }
 
 

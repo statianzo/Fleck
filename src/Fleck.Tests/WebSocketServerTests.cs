@@ -25,7 +25,7 @@ namespace Fleck.Tests
             var socketMock = _repository.Create<ISocket>();
 
             _server.ListenerSocket = socketMock.Object;
-            _server.Start(connection => { });
+            _server.Start(connection => { }, null);
 
             socketMock.Verify(s => s.Bind(It.Is<IPEndPoint>(i => i.Port == 8000)));
             socketMock.Verify(s => s.Accept(It.IsAny<Action<ISocket>>(), It.IsAny<Action<Exception>>()));
