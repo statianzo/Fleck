@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
@@ -9,8 +10,8 @@ namespace Fleck
     public class WebSocketServer : IWebSocketServer
     {
         private readonly string _scheme;
-        private IDictionary<string, Action<IWebSocketConnection>> _subProtocolInitializers;
-        private Action<IWebSocketConnection> _defaultInitializer;
+        private IEnumerable<ISubProtocolHandler> _subProtocolInitializers;
+        private ISubProtocolHandler _defaultInitializer;
 
         public WebSocketServer(string location)
             : this(8181, location)
@@ -42,7 +43,7 @@ namespace Fleck
             ListenerSocket.Dispose();
         }
 
-        public void Start(Action<IWebSocketConnection> defaultInitializer, IDictionary<string, Action<IWebSocketConnection>> subProtocolInitializers)
+        public void Start(ISubProtocolHandler defaultInitializer, IEnumerable<ISubProtocolHandler> subProtocolInitializers)
         {
             var ipLocal = new IPEndPoint(IPAddress.Any, Port);
             ListenerSocket.Bind(ipLocal);
@@ -82,7 +83,7 @@ namespace Fleck
                                                  s => connection.OnMessage(s),
                                                  connection.Close,
                                                  b => connection.OnBinary(b),
-                                                 _subProtocolInitializers.Keys));
+                                                 _subProtocolInitializers.Select(x => x.Identifier)));
 
             if (IsSecure)
             {

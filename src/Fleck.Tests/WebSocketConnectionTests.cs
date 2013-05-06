@@ -11,17 +11,22 @@ namespace Fleck.Tests
         private Mock<ISocket> _socketMock;
         private WebSocketConnection _connection;
         private Mock<IHandler> _handlerMock;
+        private Mock<ISubProtocolHandler> _defaultSubProtocolHandlerMock;
+        private Mock<ISubProtocolHandler> _subProtocolHandlerMock;
 
         [SetUp]
         public void Setup()
         {
             _socketMock = new Mock<ISocket>();
             _handlerMock = new Mock<IHandler>();
+            _defaultSubProtocolHandlerMock = new Mock<ISubProtocolHandler>();
+            _defaultSubProtocolHandlerMock.SetupGet(x => x.SubProtocolInitializer).Returns(connection => { });
             _connection = new WebSocketConnection(_socketMock.Object,
-                                                  connection => { },
-                                                  new Dictionary<string, Action<IWebSocketConnection>>(),
+                                                  _defaultSubProtocolHandlerMock.Object,
+                                                  new List<ISubProtocolHandler>(),
                                                   b => new WebSocketHttpRequest(),
                                                   r => _handlerMock.Object);
+            _subProtocolHandlerMock = new Mock<ISubProtocolHandler>();
         }
 
         [Test]
@@ -66,9 +71,11 @@ namespace Fleck.Tests
         public void ShouldRaiseInitializeOnFirstRead()
         {
             bool initializeRaised = false;
+            var defaultSubProtocolHandler = new Mock<ISubProtocolHandler>();
+            defaultSubProtocolHandler.SetupGet(x => x.SubProtocolInitializer).Returns(conn => { initializeRaised = true; });
             var connection = new WebSocketConnection(_socketMock.Object,
-                                                  conn => { initializeRaised = true; },
-                                                  new Dictionary<string, Action<IWebSocketConnection>>(),
+                                                  defaultSubProtocolHandler.Object,
+                                                  new List<ISubProtocolHandler>(),
                                                   b => new WebSocketHttpRequest(),
                                                   r => _handlerMock.Object);
 
@@ -84,9 +91,11 @@ namespace Fleck.Tests
         public void ShouldNotRaiseInitializeIfParseRequestReturnsNull()
         {
             bool initializeRaised = false;
+            var defaultSubProtocolHandler = new Mock<ISubProtocolHandler>();
+            defaultSubProtocolHandler.SetupGet(x => x.SubProtocolInitializer).Returns(conn => { initializeRaised = true; });
             var connection = new WebSocketConnection(_socketMock.Object,
-                                                  conn => { initializeRaised = true; },
-                                                  new Dictionary<string, Action<IWebSocketConnection>>(),
+                                                  defaultSubProtocolHandler.Object,
+                                                  new List<ISubProtocolHandler>(),
                                                   b => null,
                                                   r => _handlerMock.Object);
 
@@ -101,9 +110,11 @@ namespace Fleck.Tests
         public void ShouldNotRaiseInitializeIfHandlerFactoryReturnsNull()
         {
             bool initializeRaised = false;
+            var defaultSubProtocolHandler = new Mock<ISubProtocolHandler>();
+            defaultSubProtocolHandler.SetupGet(x => x.SubProtocolInitializer).Returns(conn => { initializeRaised = true; });
             var connection = new WebSocketConnection(_socketMock.Object,
-                                                  conn => { initializeRaised = true; },
-                                                  new Dictionary<string, Action<IWebSocketConnection>>(),
+                                                  defaultSubProtocolHandler.Object,
+                                                  new List<ISubProtocolHandler>(),
                                                   b => new WebSocketHttpRequest(),
                                                   r => null);
 
@@ -119,9 +130,14 @@ namespace Fleck.Tests
         {
             bool defaultInitializeRaised = false;
             bool subProtocolInitializeRaised = false;
+            _subProtocolHandlerMock.SetupGet(x => x.Identifier).Returns("testSubProtocol");
+            _subProtocolHandlerMock.SetupGet(x => x.SubProtocolInitializer).Returns(socket => subProtocolInitializeRaised = true);
+            var defaultSubProtocolHandler = new Mock<ISubProtocolHandler>();
+            defaultSubProtocolHandler.SetupGet(x => x.SubProtocolInitializer).Returns(conn => { defaultInitializeRaised = true; });
+
             var connection = new WebSocketConnection(_socketMock.Object,
-                                                  conn => { defaultInitializeRaised = true; },
-                                                  new Dictionary<string, Action<IWebSocketConnection>>() { { "testSubProtocol", socket => subProtocolInitializeRaised = true } },
+                                                  defaultSubProtocolHandler.Object,
+                                                  new List<ISubProtocolHandler>() { _subProtocolHandlerMock.Object },
                                                   b => new WebSocketHttpRequest(),
                                                   r => _handlerMock.Object);
 
@@ -139,9 +155,14 @@ namespace Fleck.Tests
         {
             bool defaultInitializeRaised = false;
             bool subProtocolInitializeRaised = false;
+            _subProtocolHandlerMock.SetupGet(x => x.Identifier).Returns("testSubProtocol");
+            _subProtocolHandlerMock.SetupGet(x => x.SubProtocolInitializer).Returns(socket => subProtocolInitializeRaised = true);
+            var defaultSubProtocolHandler = new Mock<ISubProtocolHandler>();
+            defaultSubProtocolHandler.SetupGet(x => x.SubProtocolInitializer).Returns(conn => { defaultInitializeRaised = true; });
+
             var connection = new WebSocketConnection(_socketMock.Object,
-                                                  conn => { defaultInitializeRaised = true; },
-                                                  new Dictionary<string, Action<IWebSocketConnection>>() { { "testSubProtocol", socket => subProtocolInitializeRaised = true } },
+                                                  defaultSubProtocolHandler.Object,
+                                                  new List<ISubProtocolHandler>() { _subProtocolHandlerMock.Object },
                                                   b => new WebSocketHttpRequest(),
                                                   r => _handlerMock.Object);
 

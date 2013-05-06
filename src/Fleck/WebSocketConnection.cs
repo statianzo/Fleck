@@ -7,7 +7,7 @@ namespace Fleck
 {
     public class WebSocketConnection : IWebSocketConnection
     {
-        public WebSocketConnection(ISocket socket, Action<IWebSocketConnection> defaultInitializer, IDictionary<string, Action<IWebSocketConnection>> subProtocolInitializers, Func<byte[], WebSocketHttpRequest> parseRequest, Func<WebSocketHttpRequest, IHandler> handlerFactory)
+        public WebSocketConnection(ISocket socket, ISubProtocolHandler defaultInitializer, IEnumerable<ISubProtocolHandler> subProtocolInitializers, Func<byte[], WebSocketHttpRequest> parseRequest, Func<WebSocketHttpRequest, IHandler> handlerFactory)
         {
             Socket = socket;
             OnOpen = () => { };
@@ -23,8 +23,8 @@ namespace Fleck
 
         public ISocket Socket { get; set; }
 
-        private readonly Action<IWebSocketConnection> _defaultInitializer;
-        private readonly IDictionary<string, Action<IWebSocketConnection>> _subProtocolInitializers;
+        private readonly ISubProtocolHandler _defaultInitializer;
+        private readonly IEnumerable<ISubProtocolHandler> _subProtocolInitializers;
         private readonly Func<WebSocketHttpRequest, IHandler> _handlerFactory;
         readonly Func<byte[], WebSocketHttpRequest> _parseRequest;
         public IHandler Handler { get; set; }
@@ -119,10 +119,12 @@ namespace Fleck
             var handshake = Handler.CreateHandshake();
             SubProtocol = handshake.Item1;
 
-            if (_subProtocolInitializers.ContainsKey(SubProtocol))
-                _subProtocolInitializers[SubProtocol](this);
+            var subProtocolInitializer = _subProtocolInitializers.FirstOrDefault(x => x.Identifier == SubProtocol);
+
+            if (subProtocolInitializer != default(ISubProtocolHandler))
+                subProtocolInitializer.SubProtocolInitializer(this);
             else
-                _defaultInitializer(this);
+                _defaultInitializer.SubProtocolInitializer(this);
 
             SendBytes(handshake.Item2, OnOpen);
         }

@@ -23,9 +23,10 @@ namespace Fleck.Tests
         public void ShouldStart()
         {
             var socketMock = _repository.Create<ISocket>();
+            var defaultSubProtocolMock = _repository.Create<ISubProtocolHandler>();
 
             _server.ListenerSocket = socketMock.Object;
-            _server.Start(connection => { }, null);
+            _server.Start(defaultSubProtocolMock.Object, null);
 
             socketMock.Verify(s => s.Bind(It.Is<IPEndPoint>(i => i.Port == 8000)));
             socketMock.Verify(s => s.Accept(It.IsAny<Action<ISocket>>(), It.IsAny<Action<Exception>>()));
