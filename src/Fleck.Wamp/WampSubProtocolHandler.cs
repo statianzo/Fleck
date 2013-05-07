@@ -20,7 +20,7 @@ namespace Fleck
         Event
     }
 
-    public class WampSubProtocolHandler : ISubProtocolHandler
+    public class WampSubProtocolHandler : IWampSubProtocolHandler
     {
         private const int ProtocolVersion = 1;
         private readonly string _serverIdentity;
