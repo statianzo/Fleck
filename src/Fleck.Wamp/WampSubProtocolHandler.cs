@@ -37,7 +37,7 @@ namespace Fleck
         public Action<IWebSocketConnection> OnWelcomeMessage { get; set; }
         public Action<IWebSocketConnection, string, string> OnPrefixMessage { get; set; }
         public Action<IWebSocketConnection, string, Uri, string> OnCallMessage { get; set; }
-        public Action<IWebSocketConnection, string, string> OnCallResultMessage { get; set; }
+        public Action<IWebSocketConnection, string, object> OnCallResultMessage { get; set; }
         public Action<IWebSocketConnection, string, Uri, string, string> OnCallErrorMessage { get; set; }
         public Action<IWebSocketConnection, Uri> OnSubscribeMessage { get; set; }
         public Action<IWebSocketConnection, Uri> OnUnsubscribeMessage { get; set; }
@@ -145,7 +145,7 @@ namespace Fleck
             OnWelcomeMessage(connection);
         }
 
-        public void SendCallResultMessage(IWebSocketConnection connection, string callId, string result)
+        public void SendCallResultMessage(IWebSocketConnection connection, string callId, object result)
         {
             var parameters = new object[]
             {
