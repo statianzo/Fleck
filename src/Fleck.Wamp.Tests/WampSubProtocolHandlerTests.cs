@@ -206,7 +206,7 @@ namespace Fleck.Wamp.Tests
             Uri publishMessageReturnedUri = null;
             const string intendedEvent = "Hello, world!";
             var message = String.Format("[7, \"{0}\", \"{1}\"]", intendedUri, intendedEvent);
-            var eventMessageReturnedEvent = String.Empty;
+            object eventMessageReturnedEvent = null;
             var publishMessageReturnedEvent = String.Empty;
 
             _webSocketConnection.SetupAllProperties();

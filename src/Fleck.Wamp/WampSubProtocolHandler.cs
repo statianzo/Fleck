@@ -42,7 +42,7 @@ namespace Fleck
         public Action<IWebSocketConnection, Uri> OnSubscribeMessage { get; set; }
         public Action<IWebSocketConnection, Uri> OnUnsubscribeMessage { get; set; }
         public Action<IWebSocketConnection, Uri, string, IEnumerable<Guid>, IEnumerable<Guid>> OnPublishMessage { get; set; }
-        public Action<IWebSocketConnection, Uri, string> OnEventMessage { get; set; }
+        public Action<IWebSocketConnection, Uri, object> OnEventMessage { get; set; }
 
         public IDictionary<Uri, IList<Guid>> Subscriptions
         {
@@ -191,11 +191,11 @@ namespace Fleck
             OnCallErrorMessage(connection, callId, errorUri, errorDescription, errorDetails);
         }
 
-        public void SendEventMessage(IWebSocketConnection connection, Uri topicUri, string eventId)
+        public void SendEventMessage(IWebSocketConnection connection, Uri topicUri, object eventId)
         {
             var uri = ExpandPrefix(connection, topicUri.ToString());
 
-            var parameters = new object[]
+            var parameters = new []
             {
                 WampMessageTypeId.Event,
                 uri.ToString(),
