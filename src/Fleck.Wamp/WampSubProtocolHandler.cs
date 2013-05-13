@@ -147,7 +147,7 @@ namespace Fleck
 
         public void SendCallResultMessage(IWebSocketConnection connection, string callId, object result)
         {
-            var parameters = new object[]
+            var parameters = new[]
             {
                 WampMessageTypeId.CallResult,
                 callId,
