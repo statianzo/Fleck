@@ -21,7 +21,6 @@ namespace Fleck
         void DeregisterDelegateForMessage(Uri uri);
         void SendCallResultMessage(IWebSocketConnection connection, string callId, object result);
         void SendCallErrorMessage(IWebSocketConnection connection, string callId, Uri errorUri, string errorDescription, string errorDetails = null);
-        void SendEventMessage(IWebSocketConnection connection, Uri topicUri, object eventId);
-
+        void SendEventMessage(IWebSocketConnection connection, Uri topicUri, object eventId, IList<Guid> includes, IList<Guid> excludes);
     }
 }

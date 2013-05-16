@@ -191,7 +191,7 @@ namespace Fleck
             OnCallErrorMessage(connection, callId, errorUri, errorDescription, errorDetails);
         }
 
-        public void SendEventMessage(IWebSocketConnection connection, Uri topicUri, object eventId)
+        public void SendEventMessage(IWebSocketConnection connection, Uri topicUri, object eventId, IList<Guid> includes, IList<Guid> excludes)
         {
             var uri = ExpandPrefix(connection, topicUri.ToString());
 
@@ -205,15 +205,21 @@ namespace Fleck
 
             if (_subscriptions.ContainsKey(uri))
             {
-                _subscriptions[uri].ToList()
-                                   .ForEach(guid =>
-                                       {
-                                           if (_connections.ContainsKey(guid))
-                                               _connections[guid].Send(eventMessage);
-                                       });
+                var listToSend = includes ?? _subscriptions[uri];
+                var listToSkip = excludes ?? new List<Guid>();
+
+                listToSend.ToList()
+                        .ForEach(guid =>
+                            {
+                                if (_connections.ContainsKey(guid) && !listToSkip.Contains(guid))
+                                    _connections[guid].Send(eventMessage);
+                            });
+                FleckLog.Debug(String.Format("Sent Event message: {0} to {1}, skipping {2}", 
+                    eventMessage, 
+                    listToSend.ToList().Aggregate("", (s, guid) => s += (guid.ToString() + " ")),
+                    listToSkip.ToList().Aggregate("", (s, guid) => s += (guid.ToString() + " "))));
+                OnEventMessage(connection, uri, eventId);
             }
-            FleckLog.Debug(String.Format("Sent Event message: {0}", eventMessage));
-            OnEventMessage(connection, uri, eventId);
         }
         #endregion
 
@@ -357,7 +363,7 @@ namespace Fleck
                                       if (!_connections.ContainsKey(guid)) return;
                                       var connection = _connections[guid];
 
-                                      SendEventMessage(connection, topicUri, eventId);
+                                      SendEventMessage(connection, topicUri, eventId, null, null);
                                   });
 
                 FleckLog.Info(String.Format("Published message for topic {0}, event {1}", topicUri, eventId));
