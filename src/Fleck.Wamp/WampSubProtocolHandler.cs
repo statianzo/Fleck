@@ -193,7 +193,7 @@ namespace Fleck
 
         public void SendEventMessage(IWebSocketConnection connection, Uri topicUri, object eventId, IList<Guid> includes, IList<Guid> excludes)
         {
-            var uri = ExpandPrefix(connection, topicUri.ToString());
+            var uri = connection != null ? ExpandPrefix(connection, topicUri.ToString()) : topicUri;
 
             var parameters = new []
             {
@@ -203,23 +203,23 @@ namespace Fleck
             };
             var eventMessage = JsonConvert.SerializeObject(parameters);
 
-            if (_subscriptions.ContainsKey(uri))
-            {
-                var listToSend = includes ?? _subscriptions[uri];
-                var listToSkip = excludes ?? new List<Guid>();
+            if (!_subscriptions.ContainsKey(uri)) return;
+            var listToSend = includes ?? _subscriptions[uri];
+            var listToSkip = excludes ?? new List<Guid>();
 
-                listToSend.ToList()
-                        .ForEach(guid =>
-                            {
-                                if (_connections.ContainsKey(guid) && !listToSkip.Contains(guid))
-                                    _connections[guid].Send(eventMessage);
-                            });
-                FleckLog.Debug(String.Format("Sent Event message: {0} to {1}, skipping {2}", 
-                    eventMessage, 
-                    listToSend.ToList().Aggregate("", (s, guid) => s += (guid.ToString() + " ")),
-                    listToSkip.ToList().Aggregate("", (s, guid) => s += (guid.ToString() + " "))));
+            listToSend.ToList()
+                      .ForEach(guid =>
+                          {
+                              if (_connections.ContainsKey(guid) && !listToSkip.Contains(guid))
+                                  _connections[guid].Send(eventMessage);
+                          });
+            FleckLog.Debug(String.Format("Sent Event message: {0} to {1}, skipping {2}", 
+                                         eventMessage, 
+                                         listToSend.ToList().Aggregate("", (s, guid) => s += (guid.ToString() + " ")),
+                                         listToSkip.ToList().Aggregate("", (s, guid) => s += (guid.ToString() + " "))));
+            
+            if (connection != null) 
                 OnEventMessage(connection, uri, eventId);
-            }
         }
         #endregion
 
