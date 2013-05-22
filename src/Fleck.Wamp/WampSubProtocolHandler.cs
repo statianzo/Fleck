@@ -224,7 +224,7 @@ namespace Fleck
         #endregion
 
         #region Message Handlers
-        private void HandlePrefixMessage(IWebSocketConnection conn, object[] parameters)
+        public void HandlePrefixMessage(IWebSocketConnection conn, object[] parameters)
         {
             if (parameters.Length != 3)
             {
@@ -246,7 +246,7 @@ namespace Fleck
             OnPrefixMessage(conn, prefix, uri);
         }
 
-        private void HandleCallMessage(IWebSocketConnection conn, object[] parameters)
+        public void HandleCallMessage(IWebSocketConnection conn, object[] parameters)
         {
             if (parameters.Length != 4)
             {
@@ -272,7 +272,7 @@ namespace Fleck
             OnCallMessage(conn, callId, topicUri, callParameters);
         }
 
-        private void HandleSubscribeMessage(IWebSocketConnection conn, object[] parameters)
+        public void HandleSubscribeMessage(IWebSocketConnection conn, object[] parameters)
         {
             if (parameters.Length != 2)
             {
@@ -290,7 +290,7 @@ namespace Fleck
             OnSubscribeMessage(conn, topicUri);
         }
 
-        private void HandleUnsubscribeMessage(IWebSocketConnection conn, object[] parameters)
+        public void HandleUnsubscribeMessage(IWebSocketConnection conn, object[] parameters)
         {
             if (parameters.Length != 2)
             {
@@ -313,7 +313,7 @@ namespace Fleck
             FleckLog.Info(String.Format("Last subscription for topic {0} removed. Removing topic", topicUri));
         }
 
-        private void HandlePublishMessage(IWebSocketConnection conn, object[] parameters)
+        public void HandlePublishMessage(IWebSocketConnection conn, object[] parameters)
         {
             if (parameters.Length < 3 || parameters.Length > 5)
             {
