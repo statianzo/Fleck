@@ -85,7 +85,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Fleck\Fleck.csproj">
       <Project>{8B12D929-AFA9-4307-BEFF-2ED0F1070FEE}</Project>
-      <Name>Fleck</Name>
+      <Name>Fleck %28external\Fleck\Fleck%29</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
