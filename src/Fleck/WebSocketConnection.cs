@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Linq;
 using System.IO;
 
@@ -124,6 +125,23 @@ namespace Fleck
         {
             if (!IsAvailable)
                 return;
+
+            var body = Encoding.UTF8.GetString(buffer);
+            if (body.StartsWith("<policy-file-request/>"))
+            {
+                FleckLog.Debug("Reveived Flash Policy File Request");
+
+                var policyFile = @"<?xml version=""1.0""?><!DOCTYPE cross-domain-policy SYSTEM ""http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd""><cross-domain-policy><allow-access-from domain=""*"" to-ports=""*""/></cross-domain-policy>";
+                byte[] bytes = new System.Text.UTF8Encoding().GetBytes(policyFile);
+
+                Socket.Stream.Write(bytes, 0, bytes.Length);
+                Socket.Stream.WriteByte(0);
+                Socket.Stream.WriteByte(13);
+
+                FleckLog.Debug("Flash Policy File Sent");
+
+                return;
+            }
 
             Socket.Receive(buffer, r =>
             {
