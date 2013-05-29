@@ -9,19 +9,19 @@ namespace Fleck.Handlers
 {
     public static class Hybi13Handler
     {
-        public static IHandler Create(WebSocketHttpRequest request, Action<string> onMessage, Action onClose, Action<byte[]> onBinary)
+        public static IHandler Create(WebSocketHttpRequest request, Action<string> onMessage, Action onClose, Action<byte[]> onBinary, IEnumerable<string> subProtocols)
         {
             var readState = new ReadState();
             return new ComposableHandler
             {
-                Handshake = () => Hybi13Handler.BuildHandshake(request),
+                Handshake = () => Hybi13Handler.BuildHandshake(request, subProtocols),
                 TextFrame = s => Hybi13Handler.FrameData(Encoding.UTF8.GetBytes(s), FrameType.Text),
                 BinaryFrame = s => Hybi13Handler.FrameData(s, FrameType.Binary),
                 CloseFrame = i => Hybi13Handler.FrameData(i.ToBigEndianBytes<ushort>(), FrameType.Close),
                 ReceiveData = d => Hybi13Handler.ReceiveData(d, readState, (op, data) => Hybi13Handler.ProcessFrame(op, data, onMessage, onClose, onBinary))
             };
         }
-        
+
         public static byte[] FrameData(byte[] payload, FrameType frameType)
         {
             var memoryStream = new MemoryStream();
@@ -151,12 +151,33 @@ namespace Fleck.Handlers
                 break;
             }
         }
-        
-        
-        public static byte[] BuildHandshake(WebSocketHttpRequest request)
+
+
+        public static Tuple<string, byte[]> BuildHandshake(WebSocketHttpRequest request, IEnumerable<string> supportedSubProtocols)
         {
             FleckLog.Debug("Building Hybi-14 Response");
-            
+
+            string subProtocol = String.Empty;
+
+            if (!String.IsNullOrWhiteSpace(request["Sec-WebSocket-Protocol"]))
+            {
+                var requestedSubProtocols = request["Sec-WebSocket-Protocol"].Split(',');
+
+                if (requestedSubProtocols.Length != 0)
+                {
+                    var matchingSubProtocols = requestedSubProtocols.Join(supportedSubProtocols,
+                                                                          o => o,
+                                                                          i => i,
+                                                                          (protocol, inner) => protocol);
+
+                    if (matchingSubProtocols.Count() > 0)
+                    {
+                        subProtocol = matchingSubProtocols.First();
+                        FleckLog.Debug(String.Format("Negotiated sub protocol: {0}", subProtocol));
+                    }
+                }
+            }
+
             var builder = new StringBuilder();
 
             builder.Append("HTTP/1.1 101 Switching Protocols\r\n");
@@ -165,9 +186,11 @@ namespace Fleck.Handlers
 
             var responseKey =  CreateResponseKey(request["Sec-WebSocket-Key"]);
             builder.AppendFormat("Sec-WebSocket-Accept: {0}\r\n", responseKey);
+            if (!String.IsNullOrWhiteSpace(subProtocol))
+                builder.AppendFormat("Sec-WebSocket-Protocol: {0}\r\n", subProtocol);
             builder.Append("\r\n");
 
-            return Encoding.ASCII.GetBytes(builder.ToString());
+            return Tuple.Create(subProtocol, Encoding.ASCII.GetBytes(builder.ToString()));
         }
 
         private const string WebSocketResponseGuid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";

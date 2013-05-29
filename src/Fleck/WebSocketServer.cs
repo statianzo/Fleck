@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
@@ -8,7 +10,8 @@ namespace Fleck
     public class WebSocketServer : IWebSocketServer
     {
         private readonly string _scheme;
-        private Action<IWebSocketConnection> _config;
+        private IEnumerable<ISubProtocolHandler> _subProtocolInitializers;
+        private ISubProtocolHandler _defaultInitializer;
 
         public WebSocketServer(string location)
             : this(8181, location)
@@ -40,7 +43,7 @@ namespace Fleck
             ListenerSocket.Dispose();
         }
 
-        public void Start(Action<IWebSocketConnection> config)
+        public void Start(ISubProtocolHandler defaultInitializer, IEnumerable<ISubProtocolHandler> subProtocolInitializers)
         {
             var ipLocal = new IPEndPoint(IPAddress.Any, Port);
             ListenerSocket.Bind(ipLocal);
@@ -55,7 +58,8 @@ namespace Fleck
                 }
             }
             ListenForClients();
-            _config = config;
+            _subProtocolInitializers = subProtocolInitializers;
+            _defaultInitializer = defaultInitializer;
         }
 
         private void ListenForClients()
@@ -72,12 +76,14 @@ namespace Fleck
 
             connection = new WebSocketConnection(
                 clientSocket,
-                _config,
+                _defaultInitializer,
+                _subProtocolInitializers,
                 bytes => RequestParser.Parse(bytes, _scheme),
                 r => HandlerFactory.BuildHandler(r,
                                                  s => connection.OnMessage(s),
                                                  connection.Close,
-                                                 b => connection.OnBinary(b)));
+                                                 b => connection.OnBinary(b),
+                                                 _subProtocolInitializers.Select(x => x.Identifier)));
 
             if (IsSecure)
             {

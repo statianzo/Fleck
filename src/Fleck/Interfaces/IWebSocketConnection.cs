@@ -14,5 +14,6 @@ namespace Fleck
         void Close();
         IWebSocketConnectionInfo ConnectionInfo { get; }
         bool IsAvailable { get; }
+        string SubProtocol { get; }
     }
 }
