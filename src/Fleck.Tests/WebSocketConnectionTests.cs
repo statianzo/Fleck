@@ -19,7 +19,8 @@ namespace Fleck.Tests
             _connection = new WebSocketConnection(_socketMock.Object,
                                                   connection => { },
                                                   b => new WebSocketHttpRequest(),
-                                                  r => _handlerMock.Object);
+                                                  r => _handlerMock.Object,
+                                                  s => default(string));
         }
 
         [Test]
@@ -67,7 +68,8 @@ namespace Fleck.Tests
             var connection = new WebSocketConnection(_socketMock.Object,
                                                   conn => { initializeRaised = true; },
                                                   b => new WebSocketHttpRequest(),
-                                                  r => _handlerMock.Object);
+                                                  r => _handlerMock.Object,
+                                                  s => default(string));
 
             _socketMock.SetupGet(x => x.Connected).Returns(true);
             SetupReadLengths(1, 0);
@@ -83,7 +85,8 @@ namespace Fleck.Tests
             var connection = new WebSocketConnection(_socketMock.Object,
                                                   conn => { initializeRaised = true; },
                                                   b => null,
-                                                  r => _handlerMock.Object);
+                                                  r => _handlerMock.Object,
+                                                  s => default(string));
 
             _socketMock.SetupGet(x => x.Connected).Returns(true);
             SetupReadLengths(1, 0);
@@ -99,7 +102,8 @@ namespace Fleck.Tests
             var connection = new WebSocketConnection(_socketMock.Object,
                                                   conn => { initializeRaised = true; },
                                                   b => new WebSocketHttpRequest(),
-                                                  r => null);
+                                                  r => null,
+                                                  s => null);
 
             _socketMock.SetupGet(x => x.Connected).Returns(true);
             SetupReadLengths(1, 0);

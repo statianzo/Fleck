@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System;
 
 namespace Fleck
 {
@@ -32,7 +33,16 @@ namespace Fleck
                 return _headers;
             }
         }
-
+        
+        public string[] SubProtocols {
+          get
+          {
+            string value;
+          return _headers.TryGetValue("Sec-WebSocket-Protocol", out value)
+              ? value.Split(new []{',', ' '}, StringSplitOptions.RemoveEmptyEntries)
+              : new string[0];
+          }
+        }
     }
 }
 

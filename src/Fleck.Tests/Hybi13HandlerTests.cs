@@ -52,7 +52,7 @@ namespace Fleck.Tests
             _request.Headers["Sec-WebSocket-Version"] = "13";
             _request.Bytes = Encoding.ASCII.GetBytes(ExampleRequest);
 
-            var result = _handler.CreateHandshake();
+            var result = _handler.CreateHandshake("superchat");
 
             Assert.AreEqual(ExampleResponse, Encoding.ASCII.GetString(result));
         }
@@ -358,6 +358,7 @@ namespace Fleck.Tests
 "HTTP/1.1 101 Switching Protocols\r\n" +
 "Upgrade: websocket\r\n" +
 "Connection: Upgrade\r\n" +
+"Sec-WebSocket-Protocol: superchat\r\n" +
 "Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=\r\n" +
 "\r\n";
     }

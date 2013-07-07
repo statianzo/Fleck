@@ -14,7 +14,7 @@ namespace Fleck.Handlers
             var readState = new ReadState();
             return new ComposableHandler
             {
-                Handshake = () => Hybi13Handler.BuildHandshake(request),
+                Handshake = sub => Hybi13Handler.BuildHandshake(request, sub),
                 TextFrame = s => Hybi13Handler.FrameData(Encoding.UTF8.GetBytes(s), FrameType.Text),
                 BinaryFrame = s => Hybi13Handler.FrameData(s, FrameType.Binary),
                 CloseFrame = i => Hybi13Handler.FrameData(i.ToBigEndianBytes<ushort>(), FrameType.Close),
@@ -153,7 +153,7 @@ namespace Fleck.Handlers
         }
         
         
-        public static byte[] BuildHandshake(WebSocketHttpRequest request)
+        public static byte[] BuildHandshake(WebSocketHttpRequest request, string subProtocol)
         {
             FleckLog.Debug("Building Hybi-14 Response");
             
@@ -162,6 +162,8 @@ namespace Fleck.Handlers
             builder.Append("HTTP/1.1 101 Switching Protocols\r\n");
             builder.Append("Upgrade: websocket\r\n");
             builder.Append("Connection: Upgrade\r\n");
+            if (subProtocol != null)
+              builder.AppendFormat("Sec-WebSocket-Protocol: {0}\r\n", subProtocol);
 
             var responseKey =  CreateResponseKey(request["Sec-WebSocket-Key"]);
             builder.AppendFormat("Sec-WebSocket-Accept: {0}\r\n", responseKey);

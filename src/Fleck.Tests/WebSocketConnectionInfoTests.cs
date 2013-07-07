@@ -15,6 +15,7 @@ namespace Fleck.Tests
             const string path = "/path/to/page";
             const string clientIp = "127.0.0.1";
             const int clientPort = 0;
+            const string negotiatedSubProtocol = "Negotiated";
 
             var request =
                 new WebSocketHttpRequest
@@ -27,13 +28,14 @@ namespace Fleck.Tests
                             },
                         Path = path
                     };
-            var info = WebSocketConnectionInfo.Create(request, clientIp, clientPort);
+            var info = WebSocketConnectionInfo.Create(request, clientIp, clientPort, negotiatedSubProtocol);
 
             Assert.AreEqual(origin, info.Origin);
             Assert.AreEqual(host, info.Host);
             Assert.AreEqual(subprotocol, info.SubProtocol);
             Assert.AreEqual(path, info.Path);
             Assert.AreEqual(clientIp, info.ClientIpAddress);
+            Assert.AreEqual(negotiatedSubProtocol, info.NegotiatedSubProtocol);
         }
 
         [Test]
@@ -45,7 +47,7 @@ namespace Fleck.Tests
                     {
                         Headers = { {"Sec-WebSocket-Origin", origin} }
                     };
-            var info = WebSocketConnectionInfo.Create(request, null, 1);
+            var info = WebSocketConnectionInfo.Create(request, null, 1, null);
 
             Assert.AreEqual(origin, info.Origin);
         }
@@ -60,7 +62,7 @@ namespace Fleck.Tests
                         Headers = { {"Cookie", cookie} }
                     };
 
-            var info = WebSocketConnectionInfo.Create(request, null, 1);
+            var info = WebSocketConnectionInfo.Create(request, null, 1, null);
             Assert.AreEqual(info.Cookies["chocolate"], "tasty");
             Assert.AreEqual(info.Cookies["cabbage"], "not so much");
         }
@@ -69,7 +71,7 @@ namespace Fleck.Tests
         public void ShouldHaveId()
         {
             var request = new WebSocketHttpRequest();
-            var info = WebSocketConnectionInfo.Create(request, null, 1);
+            var info = WebSocketConnectionInfo.Create(request, null, 1, null);
             Assert.AreNotEqual(default(Guid), info.Id);
         }
     }

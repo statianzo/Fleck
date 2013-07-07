@@ -35,7 +35,7 @@ namespace Fleck.Tests
         {
             var server = new string[] { "a", "b", "c"};
             var client = new string[] { "z"};
-            Assert.Throws<WebSocketException>(() => SubProtocolNegotiator.Negotiate(server, client));
+            Assert.Throws<SubProtocolNegotiationFailureException>(() => SubProtocolNegotiator.Negotiate(server, client));
         }
     }
 }

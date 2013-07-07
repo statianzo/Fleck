@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
+using System.Collections.Generic;
 
 namespace Fleck
 {
@@ -23,12 +24,14 @@ namespace Fleck
             _scheme = uri.Scheme;
             var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
             ListenerSocket = new SocketWrapper(socket);
+            SupportedSubProtocols = new string[0];
         }
 
         public ISocket ListenerSocket { get; set; }
         public string Location { get; private set; }
         public int Port { get; private set; }
         public X509Certificate2 Certificate { get; set; }
+        public IEnumerable<string> SupportedSubProtocols { get; set; }
 
         public bool IsSecure
         {
@@ -77,7 +80,8 @@ namespace Fleck
                 r => HandlerFactory.BuildHandler(r,
                                                  s => connection.OnMessage(s),
                                                  connection.Close,
-                                                 b => connection.OnBinary(b)));
+                                                 b => connection.OnBinary(b)),
+                s => SubProtocolNegotiator.Negotiate(SupportedSubProtocols, s));
 
             if (IsSecure)
             {

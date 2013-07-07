@@ -63,7 +63,7 @@ namespace Fleck.Tests
             _request.Path = "/demo";
             _request.Bytes = Encoding.UTF8.GetBytes(ExampleRequest);
 
-            var responseBytes = _handler.CreateHandshake();
+            var responseBytes = _handler.CreateHandshake("sample");
 
             var response = Encoding.ASCII.GetString(responseBytes);
 

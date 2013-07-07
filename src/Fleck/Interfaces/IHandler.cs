@@ -4,7 +4,7 @@ namespace Fleck
 {
     public interface IHandler
     {
-        byte[] CreateHandshake();
+        byte[] CreateHandshake(string subProtocol = null);
         void Receive(IEnumerable<byte> data);
         byte[] FrameText(string text);
         byte[] FrameBinary(byte[] bytes);

@@ -5,7 +5,7 @@ namespace Fleck.Handlers
 {
     public class ComposableHandler : IHandler
     {
-        public Func<byte[]> Handshake = () => new byte[0];
+        public Func<string, byte[]> Handshake = s => new byte[0];
         public Func<string, byte[]> TextFrame = x => new byte[0];
         public Func<byte[], byte[]> BinaryFrame = x => new byte[0];
         public Action<List<byte>> ReceiveData = delegate { };
@@ -13,9 +13,9 @@ namespace Fleck.Handlers
         
         private readonly List<byte> _data = new List<byte>();
 
-        public byte[] CreateHandshake()
+        public byte[] CreateHandshake(string subProtocol = null)
         {
-            return Handshake();
+            return Handshake(subProtocol);
         }
 
         public void Receive(IEnumerable<byte> data)

@@ -88,6 +88,7 @@
     <Compile Include="Interfaces\IHandler.cs" />
     <Compile Include="WebSocketStatusCodes.cs" />
     <Compile Include="SubProtocolNegotiator.cs" />
+    <Compile Include="SubProtocolNegotiationFailureException.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

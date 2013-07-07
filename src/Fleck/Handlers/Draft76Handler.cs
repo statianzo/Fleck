@@ -17,7 +17,7 @@ namespace Fleck.Handlers
             return new ComposableHandler
             {
                 TextFrame = Draft76Handler.FrameText,
-                Handshake = () => Draft76Handler.Handshake(request),
+                Handshake = sub => Draft76Handler.Handshake(request, sub),
                 ReceiveData = data => ReceiveData(onMessage, data)
             };
         }
@@ -57,7 +57,7 @@ namespace Fleck.Handlers
             return wrappedBytes;
         }
         
-        public static byte[] Handshake(WebSocketHttpRequest request)
+        public static byte[] Handshake(WebSocketHttpRequest request, string subProtocol)
         {
             FleckLog.Debug("Building Draft76 Response");
             
@@ -68,8 +68,8 @@ namespace Fleck.Handlers
             builder.AppendFormat("Sec-WebSocket-Origin: {0}\r\n",  request["Origin"]);
             builder.AppendFormat("Sec-WebSocket-Location: {0}://{1}{2}\r\n", request.Scheme, request["Host"], request.Path);
 
-            if (request.Headers.ContainsKey("Sec-WebSocket-Protocol"))
-                builder.AppendFormat("Sec-WebSocket-Protocol: {0}\r\n", request["Sec-WebSocket-Protocol"]);
+            if (subProtocol != null)
+              builder.AppendFormat("Sec-WebSocket-Protocol: {0}\r\n", subProtocol);
                 
             builder.Append("\r\n");
             
