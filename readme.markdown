@@ -48,12 +48,31 @@ server.Start(socket =>
   });
 ```
 
+SubProtocol Negotiation
+---
+
+To enable negotiation of subprotocols, specify the supported protocols on
+the `WebSocketServer.SupportedSubProtocols` property. The negotiated
+subprotocol will be available on the socket's `ConnectionInfo.NegotiatedSubProtocol`.
+
+If no supported subprotocols are found on the client request (the
+Sec-WebSocket-Protocol header), the connection will be closed.
+
+```cs
+var server = new WebSocketServer("ws://localhost:8181");
+server.SupportedSubProtocols = new []{ "superchat", "chat" };
+server.Start(socket =>
+{
+  //socket.ConnectionInfo.NegotiatedSubProtocol is populated
+});
+```
+
 License
 ---
 
 The MIT License
 
-Copyright (c) 2010-2012 Jason Staten
+Copyright (c) 2010-2013 Jason Staten
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
