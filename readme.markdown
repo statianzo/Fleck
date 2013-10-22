@@ -1,4 +1,4 @@
-Fleck ![project-status](http://stillmaintained.com/statianzo/Fleck.png)
+Fleck ![project-status](http://stillmaintained.com/statianzo/Fleck.png?1)
 ===
 
 Fleck is a WebSocket server implementation in C#. Branched from the
@@ -14,11 +14,11 @@ The following is an example that will echo to a client.
 
 var server = new WebSocketServer("ws://localhost:8181");
 server.Start(socket =>
-  {
-    socket.OnOpen = () => Console.WriteLine("Open!");
-    socket.OnClose = () => Console.WriteLine("Close!");
-    socket.OnMessage = message => socket.Send(message);
-  });
+{
+  socket.OnOpen = () => Console.WriteLine("Open!");
+  socket.OnClose = () => Console.WriteLine("Close!");
+  socket.OnMessage = message => socket.Send(message);
+});
         
 ```
 
@@ -43,9 +43,9 @@ private key
 var server = new WebSocketServer("wss://localhost:8431");
 server.Certificate = new X509Certificate2("MyCert.pfx");
 server.Start(socket =>
-  {
-    //...use as normal
-  });
+{
+  //...use as normal
+});
 ```
 
 SubProtocol Negotiation
