@@ -6,9 +6,6 @@ namespace Fleck
 {
     public class WebSocketConnectionInfo : IWebSocketConnectionInfo
     {
-        const string CookiePattern = @"((;\s)*(?<cookie_name>[^=]+)=(?<cookie_value>[^\;]+))+";
-        private static readonly Regex CookieRegex = new Regex(CookiePattern, RegexOptions.Compiled);
-
         public static WebSocketConnectionInfo Create(WebSocketHttpRequest request, string clientIp, int clientPort, string negotiatedSubprotocol)
         {
             var info = new WebSocketConnectionInfo
@@ -25,14 +22,14 @@ namespace Fleck
 
             if (cookieHeader != null)
             {
-                var match = CookieRegex.Match(cookieHeader);
-                var fields = match.Groups["cookie_name"].Captures;
-                var values = match.Groups["cookie_value"].Captures;
-                for (var i = 0; i < fields.Count; i++)
+                var cookies = cookieHeader.Split(';');
+                foreach (var cookie in cookies)
                 {
-                    var name = fields[i].ToString();
-                    var value = values[i].ToString();
-                    info.Cookies[name] = value;
+                    var parts = cookie.Split('=');
+                    if (parts.Length == 2)
+                    {
+                        info.Cookies.Add(parts[0], parts[1]);
+                    }
                 }
             }
 
