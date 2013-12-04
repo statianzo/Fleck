@@ -9,7 +9,7 @@ namespace Fleck.Tests
         public void ShouldReturnHandlerForValidHeaders()
         {
             var request = new WebSocketHttpRequest {Headers = {{"Sec-WebSocket-Key1", "BLAH"}}};
-            var handler = HandlerFactory.BuildHandler(request, x => { }, () => { }, x => { });
+            var handler = HandlerFactory.BuildHandler(request, x => { }, () => { }, x => { }, x => { }, x => { });
             
             Assert.IsNotNull(handler);
         }
@@ -19,7 +19,7 @@ namespace Fleck.Tests
         {
             
             var request = new WebSocketHttpRequest {Headers = {{"Bad", "Request"}}};
-            Assert.Throws<WebSocketException>(() => HandlerFactory.BuildHandler(request, x => {}, () => {}, x => { }));
+            Assert.Throws<WebSocketException>(() => HandlerFactory.BuildHandler(request, x => {}, () => {}, x => { }, x => { }, x => { }));
             
         }
     }

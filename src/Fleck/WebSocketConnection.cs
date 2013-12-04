@@ -14,6 +14,8 @@ namespace Fleck
       OnClose = () => { };
       OnMessage = x => { };
       OnBinary = x => { };
+      OnPing = SendPong;
+      OnPong = x => { };
       OnError = x => { };
       _initialize = initialize;
       _handlerFactory = handlerFactory;
@@ -42,6 +44,10 @@ namespace Fleck
 
     public Action<byte[]> OnBinary { get; set; }
 
+    public Action<byte[]> OnPing { get; set; }
+
+    public Action<byte[]> OnPong { get; set; }
+
     public Action<Exception> OnError { get; set; }
 
     public IWebSocketConnectionInfo ConnectionInfo { get; private set; }
@@ -52,19 +58,25 @@ namespace Fleck
 
     public void Send(string message)
     {
-      if (Handler == null)
-        throw new InvalidOperationException("Cannot send before handshake");
-
-      if (!IsAvailable) {
-        FleckLog.Warn("Data sent while closing or after close. Ignoring.");
-        return;
-      }
-
-      var bytes = Handler.FrameText(message);
-      SendBytes(bytes);
+      Send(message, Handler.FrameText);
     }
 
     public void Send(byte[] message)
+    {
+      Send(message, Handler.FrameBinary);
+    }
+
+    public void SendPing(byte[] message)
+    {
+      Send(message, Handler.FramePing);
+    }
+
+    public void SendPong(byte[] message)
+    {
+      Send(message, Handler.FramePong);
+    }
+
+    private void Send<T>(T message, Func<T, byte[]> createFrame)
     {
       if (Handler == null)
         throw new InvalidOperationException("Cannot send before handshake");
@@ -74,7 +86,7 @@ namespace Fleck
         return;
       }
 
-      var bytes = Handler.FrameBinary(message);
+      var bytes = createFrame(message);
       SendBytes(bytes);
     }
 
@@ -211,5 +223,6 @@ namespace Fleck
       Socket.Dispose();
       _closing = false;
     }
+
   }
 }

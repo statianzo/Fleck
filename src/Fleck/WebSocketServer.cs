@@ -80,7 +80,9 @@ namespace Fleck
                 r => HandlerFactory.BuildHandler(r,
                                                  s => connection.OnMessage(s),
                                                  connection.Close,
-                                                 b => connection.OnBinary(b)),
+                                                 b => connection.OnBinary(b),
+                                                 b => connection.OnPing(b),
+                                                 b => connection.OnPong(b)),
                 s => SubProtocolNegotiator.Negotiate(SupportedSubProtocols, s));
 
             if (IsSecure)

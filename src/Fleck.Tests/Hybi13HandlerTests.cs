@@ -13,6 +13,8 @@ namespace Fleck.Tests
         private WebSocketHttpRequest _request;
         private Action<string> _onMessage;
         private Action<byte[]> _onBinary;
+        private Action<byte[]> _onPing;
+        private Action<byte[]> _onPong;
         private Action _onClose;
 
         [SetUp]
@@ -22,8 +24,10 @@ namespace Fleck.Tests
             _onClose = delegate { };
             _onMessage = delegate { };
             _onBinary = delegate { };
+            _onPing = delegate { };
+            _onPong = delegate { };
 
-            _handler = Hybi13Handler.Create(_request, s => _onMessage(s), () => _onClose(), b => _onBinary(b));
+            _handler = Hybi13Handler.Create(_request, s => _onMessage(s), () => _onClose(), b => _onBinary(b), b => _onPing(b), b => _onPong(b));
         }
 
         [Test]
@@ -338,6 +342,46 @@ namespace Fleck.Tests
 
             byte[] result = null;
             _onBinary = b => result = b;
+            _handler.Receive(frame.ToBytes());
+
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void ShouldCallOnPingWhenPingFrame()
+        {
+            var expected = new byte[] {1, 2, byte.MaxValue, byte.MinValue};
+            var frame = new Hybi14DataFrame
+                {
+                    FrameType = FrameType.Ping,
+                    IsFinal = true,
+                    IsMasked = true,
+                    MaskKey = 234234,
+                    Payload = expected
+                };
+
+            byte[] result = null;
+            _onPing = b => result = b;
+            _handler.Receive(frame.ToBytes());
+
+            Assert.AreEqual(expected, result);
+        }
+
+        [Test]
+        public void ShouldCallOnPongWhenPongFrame()
+        {
+            var expected = new byte[] {1, 2, byte.MaxValue, byte.MinValue};
+            var frame = new Hybi14DataFrame
+                {
+                    FrameType = FrameType.Pong,
+                    IsFinal = true,
+                    IsMasked = true,
+                    MaskKey = 234234,
+                    Payload = expected
+                };
+
+            byte[] result = null;
+            _onPong = b => result = b;
             _handler.Receive(frame.ToBytes());
 
             Assert.AreEqual(expected, result);
