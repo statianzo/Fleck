@@ -9,7 +9,7 @@ namespace Fleck.Handlers
 {
     public static class Hybi13Handler
     {
-        public static IHandler Create(WebSocketHttpRequest request, Action<string> onMessage, Action onClose, Action<byte[]> onBinary)
+        public static IHandler Create(WebSocketHttpRequest request, Action<string> onMessage, Action onClose, Action<byte[]> onBinary, Action<byte[]> onPing, Action<byte[]> onPong)
         {
             var readState = new ReadState();
             return new ComposableHandler
@@ -17,8 +17,10 @@ namespace Fleck.Handlers
                 Handshake = sub => Hybi13Handler.BuildHandshake(request, sub),
                 TextFrame = s => Hybi13Handler.FrameData(Encoding.UTF8.GetBytes(s), FrameType.Text),
                 BinaryFrame = s => Hybi13Handler.FrameData(s, FrameType.Binary),
+                PingFrame = s => Hybi13Handler.FrameData(s, FrameType.Ping),
+                PongFrame = s => Hybi13Handler.FrameData(s, FrameType.Pong),
                 CloseFrame = i => Hybi13Handler.FrameData(i.ToBigEndianBytes<ushort>(), FrameType.Close),
-                ReceiveData = d => Hybi13Handler.ReceiveData(d, readState, (op, data) => Hybi13Handler.ProcessFrame(op, data, onMessage, onClose, onBinary))
+                ReceiveData = d => Hybi13Handler.ReceiveData(d, readState, (op, data) => Hybi13Handler.ProcessFrame(op, data, onMessage, onClose, onBinary, onPing, onPong))
             };
         }
         
@@ -120,7 +122,7 @@ namespace Fleck.Handlers
             }
         }
         
-        public static void ProcessFrame(FrameType frameType, byte[] data, Action<string> onMessage, Action onClose, Action<byte[]> onBinary)
+        public static void ProcessFrame(FrameType frameType, byte[] data, Action<string> onMessage, Action onClose, Action<byte[]> onBinary, Action<byte[]> onPing, Action<byte[]> onPong)
         {
             switch (frameType)
             {
@@ -142,6 +144,12 @@ namespace Fleck.Handlers
                 break;
             case FrameType.Binary:
                 onBinary(data);
+                break;
+            case FrameType.Ping:
+                onPing(data);
+                break;
+            case FrameType.Pong:
+                onPong(data);
                 break;
             case FrameType.Text:
                 onMessage(ReadUTF8PayloadData(data));
