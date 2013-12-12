@@ -14,7 +14,7 @@ namespace Fleck
       OnClose = () => { };
       OnMessage = x => { };
       OnBinary = x => { };
-      OnPing = SendPong;
+      OnPing = x => SendPong(x);
       OnPong = x => { };
       OnError = x => { };
       _initialize = initialize;
@@ -56,27 +56,27 @@ namespace Fleck
       get { return !_closing && !_closed && Socket.Connected; }
     }
 
-    public void Send(string message)
+    public void Send(string message, Action onSent = null)
     {
-      Send(message, Handler.FrameText);
+      Send(message, Handler.FrameText, onSent);
     }
 
-    public void Send(byte[] message)
+    public void Send(byte[] message, Action onSent = null)
     {
-      Send(message, Handler.FrameBinary);
+      Send(message, Handler.FrameBinary, onSent);
     }
 
-    public void SendPing(byte[] message)
+    public void SendPing(byte[] message, Action onSent = null)
     {
-      Send(message, Handler.FramePing);
+      Send(message, Handler.FramePing, onSent);
     }
 
-    public void SendPong(byte[] message)
+    public void SendPong(byte[] message, Action onSent = null)
     {
-      Send(message, Handler.FramePong);
+      Send(message, Handler.FramePong, onSent);
     }
 
-    private void Send<T>(T message, Func<T, byte[]> createFrame)
+    private void Send<T>(T message, Func<T, byte[]> createFrame, Action onSent)
     {
       if (Handler == null)
         throw new InvalidOperationException("Cannot send before handshake");
@@ -87,7 +87,7 @@ namespace Fleck
       }
 
       var bytes = createFrame(message);
-      SendBytes(bytes);
+      SendBytes(bytes, onSent);
     }
 
     public void StartReceiving()
