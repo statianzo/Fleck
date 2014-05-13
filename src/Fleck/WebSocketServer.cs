@@ -45,7 +45,8 @@ namespace Fleck
 
         public void Start(Action<IWebSocketConnection> config)
         {
-            var ipLocal = new IPEndPoint(IPAddress.Any, Port);
+            var uri = new Uri(Location);
+            var ipLocal = new IPEndPoint(IPAddress.Parse(uri.Host), Port);
             ListenerSocket.Bind(ipLocal);
             ListenerSocket.Listen(100);
             FleckLog.Info("Server started at " + Location);
