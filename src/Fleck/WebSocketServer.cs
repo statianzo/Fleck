@@ -22,7 +22,7 @@ namespace Fleck
             var uri = new Uri(location);
             Port = uri.Port > 0 ? uri.Port : port;
             Location = location;
-            _locationIP = IPAddress.Parse(uri.Host);
+            _locationIP = ParseIPAddress(uri);
             _scheme = uri.Scheme;
             var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
             ListenerSocket = new SocketWrapper(socket);
@@ -43,6 +43,21 @@ namespace Fleck
         public void Dispose()
         {
             ListenerSocket.Dispose();
+        }
+
+        private IPAddress ParseIPAddress(Uri uri)
+        {
+            string ipStr = uri.Host;
+
+            if (ipStr == "0.0.0.0") {
+                return IPAddress.Any;
+            } else {
+                try {
+                    return IPAddress.Parse(ipStr);
+                } catch (Exception ex) {
+                    throw new FormatException("Failed to parse the IP address part of the location. Please make sure you specify a valid IP address. Use 0.0.0.0 to listen on all interfaces.", ex);
+                }
+            }
         }
 
         public void Start(Action<IWebSocketConnection> config)
