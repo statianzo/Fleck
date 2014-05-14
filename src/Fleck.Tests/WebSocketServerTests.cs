@@ -16,7 +16,7 @@ namespace Fleck.Tests
         public void Setup()
         {
             _repository = new MockRepository(MockBehavior.Default);
-            _server = new WebSocketServer("ws://localhost:8000");
+            _server = new WebSocketServer("ws://0.0.0.0:8000");
         }
 
         [Test]
@@ -32,9 +32,17 @@ namespace Fleck.Tests
         }
 
         [Test]
+        public void ShouldFailToParseIPAddressOfLocation()
+        {
+            Assert.Throws(typeof(FormatException), () => {
+                new WebSocketServer("ws://localhost:8000");
+            });
+        }
+
+        [Test]
         public void ShouldBeSecureWithWssAndCertificate()
         {
-            var server = new WebSocketServer("wss://secureplace.com:8000");
+            var server = new WebSocketServer("wss://0.0.0.0:8000");
             server.Certificate = new X509Certificate2();
             Assert.IsTrue(server.IsSecure);
         }
@@ -42,14 +50,14 @@ namespace Fleck.Tests
         [Test]
         public void ShouldNotBeSecureWithWssAndNoCertificate()
         {
-            var server = new WebSocketServer("wss://secureplace.com:8000");
+            var server = new WebSocketServer("wss://0.0.0.0:8000");
             Assert.IsFalse(server.IsSecure);
         }
 
         [Test]
         public void ShouldNotBeSecureWithoutWssAndCertificate()
         {
-            var server = new WebSocketServer("ws://secureplace.com:8000");
+            var server = new WebSocketServer("ws://0.0.0.0:8000");
             server.Certificate = new X509Certificate2();
             Assert.IsFalse(server.IsSecure);
         }

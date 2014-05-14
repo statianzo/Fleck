@@ -11,7 +11,7 @@ namespace Fleck.Samples.ConsoleApp
         {
             FleckLog.Level = LogLevel.Debug;
             var allSockets = new List<IWebSocketConnection>();
-            var server = new WebSocketServer("ws://localhost:8181");
+            var server = new WebSocketServer("ws://0.0.0.0:8181");
             server.Start(socket =>
                 {
                     socket.OnOpen = () =>

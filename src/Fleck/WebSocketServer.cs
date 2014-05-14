@@ -9,6 +9,7 @@ namespace Fleck
     public class WebSocketServer : IWebSocketServer
     {
         private readonly string _scheme;
+        private readonly IPAddress _locationIP;
         private Action<IWebSocketConnection> _config;
 
         public WebSocketServer(string location)
@@ -21,6 +22,7 @@ namespace Fleck
             var uri = new Uri(location);
             Port = uri.Port > 0 ? uri.Port : port;
             Location = location;
+            _locationIP = ParseIPAddress(uri);
             _scheme = uri.Scheme;
             var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
             ListenerSocket = new SocketWrapper(socket);
@@ -43,9 +45,24 @@ namespace Fleck
             ListenerSocket.Dispose();
         }
 
+        private IPAddress ParseIPAddress(Uri uri)
+        {
+            string ipStr = uri.Host;
+
+            if (ipStr == "0.0.0.0") {
+                return IPAddress.Any;
+            } else {
+                try {
+                    return IPAddress.Parse(ipStr);
+                } catch (Exception ex) {
+                    throw new FormatException("Failed to parse the IP address part of the location. Please make sure you specify a valid IP address. Use 0.0.0.0 to listen on all interfaces.", ex);
+                }
+            }
+        }
+
         public void Start(Action<IWebSocketConnection> config)
         {
-            var ipLocal = new IPEndPoint(IPAddress.Any, Port);
+            var ipLocal = new IPEndPoint(_locationIP, Port);
             ListenerSocket.Bind(ipLocal);
             ListenerSocket.Listen(100);
             FleckLog.Info("Server started at " + Location);

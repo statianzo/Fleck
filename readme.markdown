@@ -12,7 +12,7 @@ The following is an example that will echo to a client.
 
 ```c#
 
-var server = new WebSocketServer("ws://localhost:8181");
+var server = new WebSocketServer("ws://0.0.0.0:8181");
 server.Start(socket =>
 {
   socket.OnOpen = () => Console.WriteLine("Open!");
@@ -40,7 +40,7 @@ of `ws`, and pointing Fleck to an x509 certificate containing a public and
 private key
 
 ```cs
-var server = new WebSocketServer("wss://localhost:8431");
+var server = new WebSocketServer("wss://0.0.0.0:8431");
 server.Certificate = new X509Certificate2("MyCert.pfx");
 server.Start(socket =>
 {
@@ -59,7 +59,7 @@ If no supported subprotocols are found on the client request (the
 Sec-WebSocket-Protocol header), the connection will be closed.
 
 ```cs
-var server = new WebSocketServer("ws://localhost:8181");
+var server = new WebSocketServer("ws://0.0.0.0:8181");
 server.SupportedSubProtocols = new []{ "superchat", "chat" };
 server.Start(socket =>
 {
