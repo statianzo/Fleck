@@ -5,7 +5,7 @@ load 'support/platform.rb'
 
 ROOT_NAMESPACE = 'Fleck'
 PRODUCT = ROOT_NAMESPACE
-COPYRIGHT = 'Copyright Jason Staten 2010-2011. All rights reserved.'
+COPYRIGHT = 'Copyright Jason Staten 2010-2014. All rights reserved.'
 DESCRIPTION = 'C# WebSocket Implementation'
 COMMON_ASSEMBLY_INFO = 'src/CommonAssemblyInfo.cs'
 COMPILE_TARGET = ENV['COMPILE_TARGET'] || 'Release'
