@@ -198,7 +198,7 @@ namespace Fleck
 
     private void SendBytes(byte[] bytes, Action callback = null)
     {
-      Socket.Send(bytes, () =>
+      System.Threading.Tasks.Task task = Socket.Send(bytes, () =>
       {
         FleckLog.Debug("Sent " + bytes.Length + " bytes");
         if (callback != null)
@@ -212,6 +212,7 @@ namespace Fleck
           FleckLog.Info("Failed to send. Disconnecting.", e);
         CloseSocket();
       });
+      task.Wait();
     }
 
     private void CloseSocket()
