@@ -24,7 +24,7 @@ namespace Fleck
             Location = location;
             _locationIP = ParseIPAddress(uri);
             _scheme = uri.Scheme;
-            var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
+            var socket = new Socket(_locationIP.AddressFamily, SocketType.Stream, ProtocolType.IP);
             ListenerSocket = new SocketWrapper(socket);
             SupportedSubProtocols = new string[0];
         }
