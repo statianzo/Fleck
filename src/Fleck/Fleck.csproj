@@ -89,6 +89,7 @@
     <Compile Include="WebSocketStatusCodes.cs" />
     <Compile Include="SubProtocolNegotiator.cs" />
     <Compile Include="SubProtocolNegotiationFailureException.cs" />
+    <Compile Include="QueuedStream.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
