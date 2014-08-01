@@ -167,8 +167,7 @@ namespace Fleck
                         {
                             _pendingWrite--;
                             data.AsyncResult.Exception = exc;
-                            callback(data.AsyncResult);
-                            return;
+                            data.Callback(data.AsyncResult);
                         }
                     }
                     callback(queued.AsyncResult);
