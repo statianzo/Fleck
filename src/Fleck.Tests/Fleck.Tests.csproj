@@ -61,6 +61,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="AssemblyTests.cs" />
+    <Compile Include="QueuedStreamTests.cs" />
     <Compile Include="WebSocketConnectionInfoTests.cs" />
     <Compile Include="WebSocketConnectionTests.cs" />
     <Compile Include="WebSocketServerTests.cs" />
