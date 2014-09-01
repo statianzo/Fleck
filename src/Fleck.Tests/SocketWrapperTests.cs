@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using System.Net.Sockets;
 using System.Net;
@@ -7,6 +8,35 @@ using System.Threading;
 
 namespace Fleck.Tests
 {
+    [TestFixture]
+    public class SocketWrapperDisposeTest
+    {
+        private Socket _client;
+        private EndPoint _endpoint;
+        private SocketWrapper _wrapper;
+
+        [SetUp]
+        public void Setup()
+        {
+            _endpoint = new IPEndPoint(IPAddress.Loopback, 45982);
+            _client = new Socket(_endpoint.AddressFamily, SocketType.Stream, ProtocolType.IP);
+
+            _wrapper = new SocketWrapper(_client);
+            _wrapper.Bind(_endpoint);
+            _wrapper.Listen(100);
+        }
+
+        [Test]
+        public void ShouldCompleteAcceptTaskOnDispose()
+        {
+            Task task = _wrapper.Accept(socket => { }, exception => { });
+            _wrapper.Dispose();
+
+            Assert.DoesNotThrow(task.Wait);
+            Assert.IsTrue(task.IsCompleted);
+        }
+    }
+
     [TestFixture]
     public class SocketWrapperTests
     {
