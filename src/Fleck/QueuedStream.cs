@@ -173,7 +173,11 @@ namespace Fleck
                     callback(queued.AsyncResult);
                 }
             }, state);
-            return result;
+
+            // always return the wrapped async result.
+            // this is especially important if the underlying stream completed the operation synchronously (hence "result.CompletedSynchronously" is true!)
+            queued.AsyncResult.ActualResult = result;
+            return queued.AsyncResult;
         }
 
         #region Nested type: WriteData
