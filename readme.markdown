@@ -67,6 +67,33 @@ server.Start(socket =>
 });
 ```
 
+Custom Logging
+---
+
+Fleck can log into Log4Net or any other third party logging system. Just override the `FleckLog.LogAction` property with the desired behavior.
+
+```cs
+ILog logger = LogManager.GetLogger(typeof(FleckLog));
+
+FleckLog.LogAction = (level, message, ex) => {
+  switch(level) {
+    case LogLevel.Debug:
+      logger.Debug(message, ex);
+      break;
+    case LogLevel.Error:
+      logger.Error(message, ex);
+      break;
+    case LogLevel.Warn:
+      logger.Warn(message, ex);
+      break;
+    default:
+      logger.Info(message, ex);
+      break;
+  }
+};
+
+```
+
 License
 ---
 
