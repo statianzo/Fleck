@@ -39,6 +39,44 @@ namespace Fleck.Tests
         }
 
         [Test]
+        public void ShouldProvideAdditionalHeaders()
+        {
+            const string origin = "http://blah.com/path/to/page";
+            const string host = "blah.com";
+            const string subprotocol = "Submarine!";
+            const string username = "Username";
+            const string secret = "Secret";
+            const string clientIp = "127.0.0.1";
+            const string cookies = "chocolate=yummy; oatmeal=alsoyummy";
+            const int clientPort = 0;
+            const string negotiatedSubProtocol = "Negotiated";
+
+            var request =
+                new WebSocketHttpRequest
+                {
+                    Headers =
+                    {
+                        {"Origin", origin},
+                        {"Host", host},
+                        {"Sec-WebSocket-Protocol", subprotocol},
+                        {"Username", username},
+                        {"Cookie", cookies}
+                    }
+                };
+
+            var info = WebSocketConnectionInfo.Create(request, clientIp, clientPort, negotiatedSubProtocol);
+
+            var headers = info.Headers;
+            string usernameValue = null;
+
+            Assert.IsNotNull(headers);
+            Assert.AreEqual(5,headers.Count);
+            Assert.True(headers.TryGetValue("Username", out usernameValue));
+            Assert.True(usernameValue.Equals(username));
+            Assert.True(headers.ContainsKey("Cookie"));
+        }
+
+        [Test]
         public void ShouldReadSecWebSocketOrigin()
         {
             const string origin = "http://example.com/myPath";

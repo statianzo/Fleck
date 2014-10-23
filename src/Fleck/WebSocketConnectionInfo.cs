@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
-using System;
 
 namespace Fleck
 {
@@ -19,7 +20,8 @@ namespace Fleck
                                Path = request.Path,
                                ClientIpAddress = clientIp,
                                ClientPort = clientPort,
-                               NegotiatedSubProtocol = negotiatedSubprotocol
+                               NegotiatedSubProtocol = negotiatedSubprotocol,
+                               Headers = new Dictionary<string, string>(request.Headers, System.StringComparer.InvariantCultureIgnoreCase)
                            };
             var cookieHeader = request["Cookie"];
 
@@ -56,5 +58,6 @@ namespace Fleck
         public Guid Id { get; set; }
 
         public IDictionary<string, string> Cookies { get; private set; }
+        public IDictionary<string, string> Headers { get; private set; }
     }
 }
