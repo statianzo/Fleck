@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
-using System;
 
 namespace Fleck
 {
@@ -8,6 +9,14 @@ namespace Fleck
     {
         const string CookiePattern = @"((;\s)*(?<cookie_name>[^=]+)=(?<cookie_value>[^\;]+))+";
         private static readonly Regex CookieRegex = new Regex(CookiePattern, RegexOptions.Compiled);
+
+        private static readonly IList<string> HeaderFilter = new List<string>
+        {
+            "Origin",
+            "Host",
+            "Sec-WebSocket-Protocol",
+            "Sec-WebSocket-Origin"
+        };
 
         public static WebSocketConnectionInfo Create(WebSocketHttpRequest request, string clientIp, int clientPort, string negotiatedSubprotocol)
         {
@@ -19,7 +28,9 @@ namespace Fleck
                                Path = request.Path,
                                ClientIpAddress = clientIp,
                                ClientPort = clientPort,
-                               NegotiatedSubProtocol = negotiatedSubprotocol
+                               NegotiatedSubProtocol = negotiatedSubprotocol,
+                               Headers = request.Headers.Where(p => !HeaderFilter.Contains(p.Key))
+                                    .ToDictionary(p => p.Key, p => p.Value)
                            };
             var cookieHeader = request["Cookie"];
 
@@ -56,5 +67,6 @@ namespace Fleck
         public Guid Id { get; set; }
 
         public IDictionary<string, string> Cookies { get; private set; }
+        public IDictionary<string, string> Headers { get; private set; }
     }
 }

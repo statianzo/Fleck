@@ -12,6 +12,7 @@ namespace Fleck
         string ClientIpAddress { get; }
         int    ClientPort { get; }
         IDictionary<string, string> Cookies { get; }
+        IDictionary<string, string> Headers { get; }
         Guid Id { get; }
         string NegotiatedSubProtocol { get; }
     }
