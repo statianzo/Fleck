@@ -15,7 +15,8 @@ namespace Fleck
             "Origin",
             "Host",
             "Sec-WebSocket-Protocol",
-            "Sec-WebSocket-Origin"
+            "Sec-WebSocket-Origin",
+            "Cookie"
         };
 
         public static WebSocketConnectionInfo Create(WebSocketHttpRequest request, string clientIp, int clientPort, string negotiatedSubprotocol)

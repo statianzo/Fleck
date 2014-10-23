@@ -47,6 +47,7 @@ namespace Fleck.Tests
             const string username = "Username";
             const string secret = "Secret";
             const string clientIp = "127.0.0.1";
+            const string cookies = "chocolate=yummy; oatmeal=alsoyummy";
             const int clientPort = 0;
             const string negotiatedSubProtocol = "Negotiated";
 
@@ -59,7 +60,8 @@ namespace Fleck.Tests
                         {"Host", host},
                         {"Sec-WebSocket-Protocol", subprotocol},
                         {"Username", username},
-                        {"Secret", secret}
+                        {"Secret", secret},
+                        {"Cookie", cookies}
                     }
                 };
 
@@ -76,6 +78,7 @@ namespace Fleck.Tests
             Assert.True(usernameValue.Equals(username));
             Assert.False(headers.ContainsKey("Origin"));
             Assert.False(headers.ContainsKey("Host"));
+            Assert.False(headers.ContainsKey("Cookie"));
         }
 
         [Test]
