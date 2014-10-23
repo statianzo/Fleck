@@ -60,7 +60,6 @@ namespace Fleck.Tests
                         {"Host", host},
                         {"Sec-WebSocket-Protocol", subprotocol},
                         {"Username", username},
-                        {"Secret", secret},
                         {"Cookie", cookies}
                     }
                 };
@@ -68,17 +67,13 @@ namespace Fleck.Tests
             var info = WebSocketConnectionInfo.Create(request, clientIp, clientPort, negotiatedSubProtocol);
 
             var headers = info.Headers;
-            string secretValue = null;
             string usernameValue = null;
 
             Assert.IsNotNull(headers);
+            Assert.AreEqual(5,headers.Count);
             Assert.True(headers.TryGetValue("Username", out usernameValue));
-            Assert.True(headers.TryGetValue("Secret", out secretValue));
-            Assert.True(secretValue.Equals(secret));
             Assert.True(usernameValue.Equals(username));
-            Assert.False(headers.ContainsKey("Origin"));
-            Assert.False(headers.ContainsKey("Host"));
-            Assert.False(headers.ContainsKey("Cookie"));
+            Assert.True(headers.ContainsKey("Cookie"));
         }
 
         [Test]
