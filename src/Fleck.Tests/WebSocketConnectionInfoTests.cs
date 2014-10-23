@@ -68,6 +68,21 @@ namespace Fleck.Tests
         }
 
         [Test]
+        public void ShouldParseCookiesWithoutSpaces()
+        {
+            const string cookie = "chocolate=tasty;cabbage=not so much;";
+            var request =
+                new WebSocketHttpRequest
+                {
+                    Headers = { { "Cookie", cookie } }
+                };
+
+            var info = WebSocketConnectionInfo.Create(request, null, 1, null);
+            Assert.AreEqual(info.Cookies["chocolate"], "tasty");
+            Assert.AreEqual(info.Cookies["cabbage"], "not so much");
+        }
+
+        [Test]
         public void ShouldHaveId()
         {
             var request = new WebSocketHttpRequest();
