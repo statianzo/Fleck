@@ -6,7 +6,7 @@ namespace Fleck
 {
     public class WebSocketConnectionInfo : IWebSocketConnectionInfo
     {
-        const string CookiePattern = @"((;\s)*(?<cookie_name>[^=]+)=(?<cookie_value>[^\;]+))+";
+        const string CookiePattern = @"((;)*(\s)*(?<cookie_name>[^=]+)=(?<cookie_value>[^\;]+))+";
         private static readonly Regex CookieRegex = new Regex(CookiePattern, RegexOptions.Compiled);
 
         public static WebSocketConnectionInfo Create(WebSocketHttpRequest request, string clientIp, int clientPort, string negotiatedSubprotocol)
