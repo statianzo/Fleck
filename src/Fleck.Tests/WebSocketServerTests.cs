@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using System.Net.Sockets;
 using Moq;
 using NUnit.Framework;
 using System.Security.Cryptography.X509Certificates;
@@ -10,6 +11,7 @@ namespace Fleck.Tests
     public class WebSocketServerTests
     {
         private WebSocketServer _server;
+        private Socket _socket;
         private MockRepository _repository;
 
         [SetUp]
@@ -60,6 +62,22 @@ namespace Fleck.Tests
             var server = new WebSocketServer("ws://0.0.0.0:8000");
             server.Certificate = new X509Certificate2();
             Assert.IsFalse(server.IsSecure);
+        }
+
+        [Test]
+        public void ShouldSupportDualStackAllInterfaces()
+        {
+            _server.Start(connection => { });
+            var v6Address = IPAddress.Parse("::1");
+            _socket = new Socket(v6Address.AddressFamily, SocketType.Stream, ProtocolType.IP);
+            _socket.Connect(v6Address, 8000);
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            _socket.Dispose();
+            _server.Dispose();
         }
     }
 }
