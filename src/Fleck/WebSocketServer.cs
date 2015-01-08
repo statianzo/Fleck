@@ -50,7 +50,7 @@ namespace Fleck
             string ipStr = uri.Host;
 
             if (ipStr == "0.0.0.0") {
-                return IPAddress.Any;
+                return IPAddress.IPv6Any;
             } else {
                 try {
                     return IPAddress.Parse(ipStr);
