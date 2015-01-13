@@ -25,6 +25,7 @@ namespace Fleck
             _locationIP = ParseIPAddress(uri);
             _scheme = uri.Scheme;
             var socket = new Socket(_locationIP.AddressFamily, SocketType.Stream, ProtocolType.IP);
+            socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
             ListenerSocket = new SocketWrapper(socket);
             SupportedSubProtocols = new string[0];
         }
@@ -49,8 +50,8 @@ namespace Fleck
         {
             string ipStr = uri.Host;
 
-            if (ipStr == "0.0.0.0") {
-                return IPAddress.Any;
+            if (ipStr == "0.0.0.0" || ipStr == "[::]") {
+                return IPAddress.IPv6Any;
             } else {
                 try {
                     return IPAddress.Parse(ipStr);
