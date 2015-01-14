@@ -56,7 +56,7 @@ namespace Fleck
                 try {
                     return IPAddress.Parse(ipStr);
                 } catch (Exception ex) {
-                    throw new FormatException("Failed to parse the IP address part of the location. Please make sure you specify a valid IP address. Use 0.0.0.0 to listen on all interfaces.", ex);
+                    throw new FormatException("Failed to parse the IP address part of the location. Please make sure you specify a valid IP address. Use 0.0.0.0 or [::] to listen on all interfaces.", ex);
                 }
             }
         }
