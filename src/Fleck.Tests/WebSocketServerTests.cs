@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using System.Net.Sockets;
 using Moq;
 using NUnit.Framework;
 using System.Security.Cryptography.X509Certificates;
@@ -12,11 +13,23 @@ namespace Fleck.Tests
         private WebSocketServer _server;
         private MockRepository _repository;
 
+        private IPAddress _ipV4Address;
+        private IPAddress _ipV6Address;
+
+        private Socket _ipV4Socket;
+        private Socket _ipV6Socket;
+
         [SetUp]
         public void Setup()
         {
             _repository = new MockRepository(MockBehavior.Default);
             _server = new WebSocketServer("ws://0.0.0.0:8000");
+
+            _ipV4Address = IPAddress.Parse("127.0.0.1");
+            _ipV6Address = IPAddress.Parse("::1");
+
+            _ipV4Socket = new Socket(_ipV4Address.AddressFamily, SocketType.Stream, ProtocolType.IP);
+            _ipV6Socket = new Socket(_ipV6Address.AddressFamily, SocketType.Stream, ProtocolType.IP);
         }
 
         [Test]
@@ -60,6 +73,32 @@ namespace Fleck.Tests
             var server = new WebSocketServer("ws://0.0.0.0:8000");
             server.Certificate = new X509Certificate2();
             Assert.IsFalse(server.IsSecure);
+        }
+
+        [Test]
+        public void ShouldSupportDualStackListenWhenServerV4All()
+        {
+            _server = new WebSocketServer("ws://0.0.0.0:8000");
+            _server.Start(connection => { });
+            _ipV4Socket.Connect(_ipV4Address, 8000);
+            _ipV6Socket.Connect(_ipV6Address, 8000);
+        }
+
+        [Test]
+        public void ShouldSupportDualStackListenWhenServerV6All()
+        {
+            _server = new WebSocketServer("ws://[::]:8000");
+            _server.Start(connection => { });
+            _ipV4Socket.Connect(_ipV4Address, 8000);
+            _ipV6Socket.Connect(_ipV6Address, 8000);
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            _ipV4Socket.Dispose();
+            _ipV6Socket.Dispose();
+            _server.Dispose();
         }
     }
 }
