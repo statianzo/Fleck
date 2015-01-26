@@ -84,14 +84,20 @@ namespace Fleck.Tests
             _ipV6Socket.Connect(_ipV6Address, 8000);
         }
 
-        [Test]
-        public void ShouldSupportDualStackListenWhenServerV6All()
-        {
-            _server = new WebSocketServer("ws://[::]:8000");
-            _server.Start(connection => { });
-            _ipV4Socket.Connect(_ipV4Address, 8000);
-            _ipV6Socket.Connect(_ipV6Address, 8000);
-        }
+        #if __MonoCS__
+          // None
+        #else
+
+            [Test]
+            public void ShouldSupportDualStackListenWhenServerV6All()
+            {
+                _server = new WebSocketServer("ws://[::]:8000");
+                _server.Start(connection => { });
+                _ipV4Socket.Connect(_ipV4Address, 8000);
+                _ipV6Socket.Connect(_ipV6Address, 8000);
+            }
+
+        #endif
 
         [TearDown]
         public void TearDown()
