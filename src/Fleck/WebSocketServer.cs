@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Collections.Generic;
+using Fleck.Helpers;
 
 namespace Fleck
 {
@@ -25,11 +26,12 @@ namespace Fleck
             _locationIP = ParseIPAddress(uri);
             _scheme = uri.Scheme;
             var socket = new Socket(_locationIP.AddressFamily, SocketType.Stream, ProtocolType.IP);
-            #if __MonoCS__
-              // None
-            #else
-              socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
-            #endif
+            if(!MonoHelper.IsRunningOnMono()){
+                  #if __MonoCS__
+                  #else
+                    socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
+                  #endif
+            }
             ListenerSocket = new SocketWrapper(socket);
             SupportedSubProtocols = new string[0];
         }
