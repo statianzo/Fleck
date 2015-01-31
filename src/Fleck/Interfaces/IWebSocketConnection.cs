@@ -11,10 +11,10 @@ namespace Fleck
         Action<byte[]> OnPing { get; set; }
         Action<byte[]> OnPong { get; set; }
         Action<Exception> OnError { get; set; }
-        void Send(string message);
-        void Send(byte[] message);
-        void SendPing(byte[] message);
-        void SendPong(byte[] message);
+        void Send(string message, Action onSent = null);
+        void Send(byte[] message, Action onSent = null);
+        void SendPing(byte[] message, Action onSent = null);
+        void SendPong(byte[] message, Action onSent = null);
         void Close();
         IWebSocketConnectionInfo ConnectionInfo { get; }
         bool IsAvailable { get; }
