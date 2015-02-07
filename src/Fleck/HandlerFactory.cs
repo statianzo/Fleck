@@ -17,6 +17,8 @@ namespace Fleck
                 case "8":
                 case "13":
                     return Hybi13Handler.Create(request, onMessage, onClose, onBinary, onPing, onPong);
+                case "policy-file-request":
+                    return FlashSocketPolicyRequestHandler.Create(request);
             }
             
             throw new WebSocketException(WebSocketStatusCodes.UnsupportedDataType);
@@ -34,6 +36,9 @@ namespace Fleck
             if (request.Headers.ContainsKey("Sec-WebSocket-Key1"))
                 return "76";
             
+            if (request.Body.ToLower().Contains("policy-file-request"))
+                return "policy-file-request";
+
             return "75";
         }
     }
