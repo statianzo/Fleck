@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Fleck
 {
@@ -44,7 +45,7 @@ namespace Fleck
 
     public Action<byte[]> OnBinary { get; set; }
 
-    public Action<byte[]> OnPing { get; set; }
+    public Func<byte[], Task> OnPing { get; set; }
 
     public Action<byte[]> OnPong { get; set; }
 
@@ -56,38 +57,38 @@ namespace Fleck
       get { return !_closing && !_closed && Socket.Connected; }
     }
 
-    public void Send(string message)
+    public Task Send(string message)
     {
-      Send(message, Handler.FrameText);
+      return Send(message, Handler.FrameText);
     }
 
-    public void Send(byte[] message)
+    public Task Send(byte[] message)
     {
-      Send(message, Handler.FrameBinary);
+        return Send(message, Handler.FrameBinary);
     }
 
-    public void SendPing(byte[] message)
+    public Task SendPing(byte[] message)
     {
-      Send(message, Handler.FramePing);
+        return Send(message, Handler.FramePing);
     }
 
-    public void SendPong(byte[] message)
+    public Task SendPong(byte[] message)
     {
-      Send(message, Handler.FramePong);
+        return Send(message, Handler.FramePong);
     }
 
-    private void Send<T>(T message, Func<T, byte[]> createFrame)
+    private Task Send<T>(T message, Func<T, byte[]> createFrame)
     {
       if (Handler == null)
         throw new InvalidOperationException("Cannot send before handshake");
 
       if (!IsAvailable) {
         FleckLog.Warn("Data sent while closing or after close. Ignoring.");
-        return;
+        return null;
       }
 
       var bytes = createFrame(message);
-      SendBytes(bytes);
+      return SendBytes(bytes);
     }
 
     public void StartReceiving()
@@ -196,9 +197,9 @@ namespace Fleck
       }
     }
 
-    private void SendBytes(byte[] bytes, Action callback = null)
+    private Task SendBytes(byte[] bytes, Action callback = null)
     {
-      Socket.Send(bytes, () =>
+      return Socket.Send(bytes, () =>
       {
         FleckLog.Debug("Sent " + bytes.Length + " bytes");
         if (callback != null)
