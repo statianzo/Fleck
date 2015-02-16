@@ -15,7 +15,7 @@ namespace Fleck
       OnClose = () => { };
       OnMessage = x => { };
       OnBinary = x => { };
-      OnPing = SendPong;
+      OnPing = x => SendPong(x);
       OnPong = x => { };
       OnError = x => { };
       _initialize = initialize;
@@ -45,7 +45,7 @@ namespace Fleck
 
     public Action<byte[]> OnBinary { get; set; }
 
-    public Func<byte[], Task> OnPing { get; set; }
+    public Action<byte[]> OnPing { get; set; }
 
     public Action<byte[]> OnPong { get; set; }
 

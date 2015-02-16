@@ -9,7 +9,7 @@ namespace Fleck
         Action OnClose { get; set; }
         Action<string> OnMessage { get; set; }
         Action<byte[]> OnBinary { get; set; }
-        Func<byte[], Task> OnPing { get; set; }
+        Action<byte[]> OnPing { get; set; }
         Action<byte[]> OnPong { get; set; }
         Action<Exception> OnError { get; set; }
         Task Send(string message);
