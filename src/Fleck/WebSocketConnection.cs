@@ -82,9 +82,11 @@ namespace Fleck
       if (Handler == null)
         throw new InvalidOperationException("Cannot send before handshake");
 
-      if (!IsAvailable) {
-        FleckLog.Warn("Data sent while closing or after close. Ignoring.");
-        return null;
+      if (!IsAvailable)
+      {
+          const string errorMessage = "Data sent while closing or after close. Ignoring.";
+          FleckLog.Warn(errorMessage);
+          return Task.Factory.StartNew(() => { throw new ConnectionNotAvailableException(errorMessage); });
       }
 
       var bytes = createFrame(message);

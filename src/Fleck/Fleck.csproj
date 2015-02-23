@@ -65,6 +65,7 @@
     </When>
   </Choose>
   <ItemGroup>
+    <Compile Include="ConnectionNotAvailableException.cs" />
     <Compile Include="Handlers\ComposableHandler.cs" />
     <Compile Include="Handlers\Draft76Handler.cs" />
     <Compile Include="Handlers\Hybi13Handler.cs" />
