@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Fleck
 {
@@ -14,7 +15,7 @@ namespace Fleck
       OnClose = () => { };
       OnMessage = x => { };
       OnBinary = x => { };
-      OnPing = SendPong;
+      OnPing = x => SendPong(x);
       OnPong = x => { };
       OnError = x => { };
       _initialize = initialize;
@@ -56,38 +57,40 @@ namespace Fleck
       get { return !_closing && !_closed && Socket.Connected; }
     }
 
-    public void Send(string message)
+    public Task Send(string message)
     {
-      Send(message, Handler.FrameText);
+      return Send(message, Handler.FrameText);
     }
 
-    public void Send(byte[] message)
+    public Task Send(byte[] message)
     {
-      Send(message, Handler.FrameBinary);
+        return Send(message, Handler.FrameBinary);
     }
 
-    public void SendPing(byte[] message)
+    public Task SendPing(byte[] message)
     {
-      Send(message, Handler.FramePing);
+        return Send(message, Handler.FramePing);
     }
 
-    public void SendPong(byte[] message)
+    public Task SendPong(byte[] message)
     {
-      Send(message, Handler.FramePong);
+        return Send(message, Handler.FramePong);
     }
 
-    private void Send<T>(T message, Func<T, byte[]> createFrame)
+    private Task Send<T>(T message, Func<T, byte[]> createFrame)
     {
       if (Handler == null)
         throw new InvalidOperationException("Cannot send before handshake");
 
-      if (!IsAvailable) {
-        FleckLog.Warn("Data sent while closing or after close. Ignoring.");
-        return;
+      if (!IsAvailable)
+      {
+          const string errorMessage = "Data sent while closing or after close. Ignoring.";
+          FleckLog.Warn(errorMessage);
+          return Task.Factory.StartNew(() => { throw new ConnectionNotAvailableException(errorMessage); });
       }
 
       var bytes = createFrame(message);
-      SendBytes(bytes);
+      return SendBytes(bytes);
     }
 
     public void StartReceiving()
@@ -196,9 +199,9 @@ namespace Fleck
       }
     }
 
-    private void SendBytes(byte[] bytes, Action callback = null)
+    private Task SendBytes(byte[] bytes, Action callback = null)
     {
-      Socket.Send(bytes, () =>
+      return Socket.Send(bytes, () =>
       {
         FleckLog.Debug("Sent " + bytes.Length + " bytes");
         if (callback != null)
