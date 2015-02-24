@@ -86,7 +86,10 @@ namespace Fleck
       {
           const string errorMessage = "Data sent while closing or after close. Ignoring.";
           FleckLog.Warn(errorMessage);
-          return Task.Factory.StartNew(() => { throw new ConnectionNotAvailableException(errorMessage); });
+          
+          var taskForException = new TaskCompletionSource<object>();
+          taskForException.SetException(new ConnectionNotAvailableException(errorMessage));
+          return taskForException.Task;
       }
 
       var bytes = createFrame(message);
