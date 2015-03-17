@@ -68,6 +68,7 @@
     <Compile Include="ConnectionNotAvailableException.cs" />
     <Compile Include="Handlers\ComposableHandler.cs" />
     <Compile Include="Handlers\Draft76Handler.cs" />
+    <Compile Include="Handlers\FlashSocketPolicyRequestHandler.cs" />
     <Compile Include="Handlers\Hybi13Handler.cs" />
     <Compile Include="Interfaces\ISocket.cs" />
     <Compile Include="Interfaces\IWebSocketConnection.cs" />
