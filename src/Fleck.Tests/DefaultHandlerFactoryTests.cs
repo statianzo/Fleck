@@ -8,7 +8,7 @@ namespace Fleck.Tests
         [Test]
         public void ShouldReturnHandlerForValidHeaders()
         {
-            var request = new WebSocketHttpRequest {Headers = {{"Sec-WebSocket-Key1", "BLAH"}}};
+			var request = new WebSocketHttpRequest { Headers = { { "Sec-WebSocket-Key1", "BLAH" } }, Body = "" };
             var handler = HandlerFactory.BuildHandler(request, x => { }, () => { }, x => { }, x => { }, x => { });
             
             Assert.IsNotNull(handler);
@@ -17,8 +17,8 @@ namespace Fleck.Tests
         [Test]
         public void ShouldThrowWhenUnsupportedType()
         {
-            
-            var request = new WebSocketHttpRequest {Headers = {{"Bad", "Request"}}};
+
+	        var request = new WebSocketHttpRequest {Headers = {{"Bad", "Request"}}, Body = ""};
             Assert.Throws<WebSocketException>(() => HandlerFactory.BuildHandler(request, x => {}, () => {}, x => { }, x => { }, x => { }));
             
         }
