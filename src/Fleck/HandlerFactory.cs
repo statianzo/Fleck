@@ -36,7 +36,7 @@ namespace Fleck
             if (request.Headers.ContainsKey("Sec-WebSocket-Key1"))
                 return "76";
             
-            if (request.Body.ToLower().Contains("policy-file-request"))
+            if ((request.Body != null) && request.Body.ToLower().Contains("policy-file-request"))
                 return "policy-file-request";
 
             return "75";
