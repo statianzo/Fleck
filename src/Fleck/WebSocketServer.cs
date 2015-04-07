@@ -86,9 +86,9 @@ namespace Fleck
             _config = config;
         }
 
-        private void ListenForClients()
+        private void ListenForClients(int retryCount = 0)
         {
-            ListenerSocket.Accept(OnClientConnect, e => FleckLog.Error("Listener socket is closed", e));
+			ListenerSocket.Accept(OnClientConnect, (e => ListenForClientsExceptionHandler(e, retryCount)));
         }
 
         private void OnClientConnect(ISocket clientSocket)
@@ -96,7 +96,8 @@ namespace Fleck
             if (clientSocket == null) return; // socket closed
 
             FleckLog.Debug(String.Format("Client connected from {0}:{1}", clientSocket.RemoteIpAddress, clientSocket.RemotePort.ToString()));
-            ListenForClients();
+
+			ListenForClients();
 
             WebSocketConnection connection = null;
 
@@ -125,5 +126,14 @@ namespace Fleck
                 connection.StartReceiving();
             }
         }
+
+		private void ListenForClientsExceptionHandler(Exception e, int retryCount)
+		{
+			FleckLog.Error("Listener socket is closed", e);
+			if (retryCount > 1000)
+				return;
+			FleckLog.Info("Trying to open listener socket for the " + retryCount + ". time");
+			ListenForClients(retryCount + 1);
+		}
     }
 }
