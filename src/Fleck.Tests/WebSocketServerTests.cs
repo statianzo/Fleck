@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Authentication;
 using Moq;
 using NUnit.Framework;
 using System.Security.Cryptography.X509Certificates;
@@ -58,6 +59,14 @@ namespace Fleck.Tests
             var server = new WebSocketServer("wss://0.0.0.0:8000");
             server.Certificate = new X509Certificate2();
             Assert.IsTrue(server.IsSecure);
+        }
+
+        [Test]
+        public void ShouldDefaultToNoneWithWssAndCertificate()
+        {
+            var server = new WebSocketServer("wss://0.0.0.0:8000");
+            server.Certificate = new X509Certificate2();
+            Assert.AreEqual(server.EnabledSslProtocols, SslProtocols.None);
         }
 
         [Test]

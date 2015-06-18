@@ -45,12 +45,12 @@ namespace Fleck
                 _stream = new NetworkStream(_socket);
         }
 
-        public Task Authenticate(X509Certificate2 certificate, Action callback, Action<Exception> error)
+        public Task Authenticate(X509Certificate2 certificate, SslProtocols enabledSslProtocols, Action callback, Action<Exception> error)
         {
             var ssl = new SslStream(_stream, false);
             _stream = new QueuedStream(ssl);
             Func<AsyncCallback, object, IAsyncResult> begin =
-                (cb, s) => ssl.BeginAuthenticateAsServer(certificate, false, SslProtocols.Tls, false, cb, s);
+                (cb, s) => ssl.BeginAuthenticateAsServer(certificate, false, enabledSslProtocols, false, cb, s);
                 
             Task task = Task.Factory.FromAsync(begin, ssl.EndAuthenticateAsServer, null);
             task.ContinueWith(t => callback(), TaskContinuationOptions.NotOnFaulted)

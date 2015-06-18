@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Collections.Generic;
+using System.Security.Authentication;
 using Fleck.Helpers;
 
 namespace Fleck
@@ -40,6 +41,7 @@ namespace Fleck
         public string Location { get; private set; }
         public int Port { get; private set; }
         public X509Certificate2 Certificate { get; set; }
+        public SslProtocols EnabledSslProtocols { get; set; }
         public IEnumerable<string> SupportedSubProtocols { get; set; }
 
         public bool IsSecure
@@ -81,6 +83,12 @@ namespace Fleck
                     FleckLog.Error("Scheme cannot be 'wss' without a Certificate");
                     return;
                 }
+
+                if (EnabledSslProtocols == SslProtocols.None)
+                {
+                    EnabledSslProtocols = SslProtocols.Tls;
+                    FleckLog.Debug("Using default TLS 1.0 security protocol.");
+                }
             }
             ListenForClients();
             _config = config;
@@ -117,6 +125,7 @@ namespace Fleck
                 FleckLog.Debug("Authenticating Secure Connection");
                 clientSocket
                     .Authenticate(Certificate,
+                                  EnabledSslProtocols,
                                   connection.StartReceiving,
                                   e => FleckLog.Warn("Failed to Authenticate", e));
             }
