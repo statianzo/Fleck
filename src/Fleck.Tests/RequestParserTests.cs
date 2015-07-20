@@ -120,6 +120,7 @@ namespace Fleck.Tests
                 "Sec-WebSocket-Key1: 4 @1  46546xW%0l 1 5\r\n" +
                 "Origin: http://example.com\r\n" +
                 "Cookie: \r\n" +
+                "User-Agent:\r\n" +     //no space after colon
                 "\r\n" +
                 "^n:ds[4U";
             var bytes = RequestArray(emptyCookieRequest);
