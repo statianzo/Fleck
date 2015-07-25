@@ -23,7 +23,7 @@ namespace Fleck.Handlers
                 ReceiveData = d => Hybi13Handler.ReceiveData(d, readState, (op, data) => Hybi13Handler.ProcessFrame(op, data, onMessage, onClose, onBinary, onPing, onPong))
             };
         }
-        
+
         public static byte[] FrameData(byte[] payload, FrameType frameType)
         {
             var memoryStream = new MemoryStream();
@@ -58,6 +58,7 @@ namespace Fleck.Handlers
                 var frameType = (FrameType)(data[0] & 15);
                 var isMasked = (data[1] & 128) != 0;
                 var length = (data[1] & 127);
+                var isControlFrame = (data[0]&15) >= 0x08 && (data[0]&15) <= 0x0F;
                 
                 
                 if (!isMasked
@@ -70,11 +71,11 @@ namespace Fleck.Handlers
                 int payloadLength;
 
                 // control frame types may only have a maximum payload length of 125 (autobahn test case 2.5)
-                if ((int)frameType >= 0x08 && (int)frameType <= 0x0F && length > 125)
+                if (isControlFrame && length > 125)
                     throw new WebSocketException(WebSocketStatusCodes.ProtocolError);
 
                 // control frames must not be fragmented (autobahn test case 5.1)
-                if ((int)frameType >= 0x08 && (int)frameType <= 0x0F && !isFinal)
+                if (isControlFrame && !isFinal)
                     throw new WebSocketException(WebSocketStatusCodes.ProtocolError);
                 
                 if (length == 127)
@@ -112,21 +113,30 @@ namespace Fleck.Handlers
                                 .Take(payloadLength)
                                 .Select((x, i) => (byte)(x ^ maskBytes[i % 4]));
                  
-                 
-                readState.Data.AddRange(payload);
-                data.RemoveRange(0, index + payloadLength);
-                
-                if (frameType != FrameType.Continuation)
-                    readState.FrameType = frameType;
-                
-                if (isFinal && readState.FrameType.HasValue)
+                // control frames are processed immediatly (since they cannot be fragmented) and can be receive in between
+                // and can be received and processed between a fragmented frame (autobahn test case 5.6)
+                if (isControlFrame)
                 {
-                    var stateData = readState.Data.ToArray();
-                    var stateFrameType = readState.FrameType;
-                    readState.Clear();
-                    
-                    processFrame(stateFrameType.Value, stateData);
+                    processFrame(frameType, payload.ToArray());
+                    data.RemoveRange(0, index + payloadLength);
                 }
+                else
+                {
+                    readState.Data.AddRange(payload);
+                    data.RemoveRange(0, index + payloadLength);
+
+                    if (frameType != FrameType.Continuation)
+                        readState.FrameType = frameType;
+
+                    if (isFinal && readState.FrameType.HasValue)
+                    {
+                        var stateData = readState.Data.ToArray();
+                        var stateFrameType = readState.FrameType;
+                        readState.Clear();
+
+                        processFrame(stateFrameType.Value, stateData);
+                    }
+                }    
             }
         }
         
