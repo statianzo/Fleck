@@ -76,6 +76,10 @@ namespace Fleck.Handlers
                 // control frames must not be fragmented (autobahn test case 5.1)
                 if (isControlFrame && !isFinal)
                     throw new WebSocketException(WebSocketStatusCodes.ProtocolError);
+
+                // a close frame MAY contain data, but if it does, it must be at least 2 bytes (autobahn test case 7.3.2)
+                if (frameType == FrameType.Close && length == 1)
+                    throw new WebSocketException(WebSocketStatusCodes.ProtocolError);
                 
                 if (length == 127)
                 {
