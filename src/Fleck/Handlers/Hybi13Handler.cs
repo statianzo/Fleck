@@ -68,6 +68,10 @@ namespace Fleck.Handlers
                 
                 var index = 2;
                 int payloadLength;
+
+                // control frame types may only have a maximum payload length of 125 (autobahn test case 2.5)
+                if ((int)frameType >= 0x08 && (int)frameType <= 0x0F && length > 125)
+                    throw new WebSocketException(WebSocketStatusCodes.ProtocolError);
                 
                 if (length == 127)
                 {
@@ -127,9 +131,6 @@ namespace Fleck.Handlers
             switch (frameType)
             {
             case FrameType.Close:
-                if (data.Length == 1 || data.Length>125)
-                    throw new WebSocketException(WebSocketStatusCodes.ProtocolError);
-                    
                 if (data.Length >= 2)
                 {
                     var closeCode = (ushort)data.Take(2).ToArray().ToLittleEndianInt();
