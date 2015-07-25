@@ -72,6 +72,10 @@ namespace Fleck.Handlers
                 // control frame types may only have a maximum payload length of 125 (autobahn test case 2.5)
                 if ((int)frameType >= 0x08 && (int)frameType <= 0x0F && length > 125)
                     throw new WebSocketException(WebSocketStatusCodes.ProtocolError);
+
+                // control frames must not be fragmented (autobahn test case 5.1)
+                if ((int)frameType >= 0x08 && (int)frameType <= 0x0F && !isFinal)
+                    throw new WebSocketException(WebSocketStatusCodes.ProtocolError);
                 
                 if (length == 127)
                 {
