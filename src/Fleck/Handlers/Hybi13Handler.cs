@@ -60,7 +60,6 @@ namespace Fleck.Handlers
                 var length = (data[1] & 127);
                 var isControlFrame = (data[0]&15) >= 0x08 && (data[0]&15) <= 0x0F;
                 
-                
                 if (!isMasked
                     || !Enum.IsDefined(typeof(FrameType), frameType)
                     || reservedBits != 0 //Must be zero per spec 5.2
@@ -125,8 +124,14 @@ namespace Fleck.Handlers
                     readState.Data.AddRange(payload);
                     data.RemoveRange(0, index + payloadLength);
 
-                    if (frameType != FrameType.Continuation)
+                    // frame types for multiple fragments are sent on the first frame, and the rest of the fragments must
+                    // have a frame type of continuation (autobahn test case 5.18)
+                    if (readState.FragmentNumber == 1)
                         readState.FrameType = frameType;
+                    else if(frameType != FrameType.Continuation)
+                        throw new WebSocketException(WebSocketStatusCodes.ProtocolError);
+
+                    readState.FragmentNumber++;
 
                     if (isFinal && readState.FrameType.HasValue)
                     {
