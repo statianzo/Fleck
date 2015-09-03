@@ -1,0 +1,85 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fleck", "Fleck\Fleck.csproj", "{8B12D929-AFA9-4307-BEFF-2ED0F1070FEE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{BDA01C02-E4AC-42BA-898A-ED4752F676EF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "Samples\ConsoleApp\ConsoleApp.csproj", "{3D7680B4-0224-4F0C-B1F6-74FB7586EBDC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fleck.Tests", "Fleck.Tests\Fleck.Tests.csproj", "{01AECC7B-C5FC-451C-8D3B-C400F0C9883C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{01AECC7B-C5FC-451C-8D3B-C400F0C9883C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01AECC7B-C5FC-451C-8D3B-C400F0C9883C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01AECC7B-C5FC-451C-8D3B-C400F0C9883C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{01AECC7B-C5FC-451C-8D3B-C400F0C9883C}.Debug|x86.Build.0 = Debug|Any CPU
+		{01AECC7B-C5FC-451C-8D3B-C400F0C9883C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01AECC7B-C5FC-451C-8D3B-C400F0C9883C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01AECC7B-C5FC-451C-8D3B-C400F0C9883C}.Release|x86.ActiveCfg = Release|Any CPU
+		{01AECC7B-C5FC-451C-8D3B-C400F0C9883C}.Release|x86.Build.0 = Release|Any CPU
+		{3D7680B4-0224-4F0C-B1F6-74FB7586EBDC}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{3D7680B4-0224-4F0C-B1F6-74FB7586EBDC}.Debug|Any CPU.Build.0 = Debug|x86
+		{3D7680B4-0224-4F0C-B1F6-74FB7586EBDC}.Debug|x86.ActiveCfg = Debug|x86
+		{3D7680B4-0224-4F0C-B1F6-74FB7586EBDC}.Debug|x86.Build.0 = Debug|x86
+		{3D7680B4-0224-4F0C-B1F6-74FB7586EBDC}.Release|Any CPU.ActiveCfg = Release|x86
+		{3D7680B4-0224-4F0C-B1F6-74FB7586EBDC}.Release|Any CPU.Build.0 = Release|x86
+		{3D7680B4-0224-4F0C-B1F6-74FB7586EBDC}.Release|x86.ActiveCfg = Release|x86
+		{3D7680B4-0224-4F0C-B1F6-74FB7586EBDC}.Release|x86.Build.0 = Release|x86
+		{8B12D929-AFA9-4307-BEFF-2ED0F1070FEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B12D929-AFA9-4307-BEFF-2ED0F1070FEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B12D929-AFA9-4307-BEFF-2ED0F1070FEE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8B12D929-AFA9-4307-BEFF-2ED0F1070FEE}.Debug|x86.Build.0 = Debug|Any CPU
+		{8B12D929-AFA9-4307-BEFF-2ED0F1070FEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B12D929-AFA9-4307-BEFF-2ED0F1070FEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B12D929-AFA9-4307-BEFF-2ED0F1070FEE}.Release|x86.ActiveCfg = Release|Any CPU
+		{8B12D929-AFA9-4307-BEFF-2ED0F1070FEE}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3D7680B4-0224-4F0C-B1F6-74FB7586EBDC} = {BDA01C02-E4AC-42BA-898A-ED4752F676EF}
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Samples\ConsoleApp\ConsoleApp.csproj
+		Policies = $0
+		$0.TextStylePolicy = $1
+		$1.FileWidth = 120
+		$1.TabWidth = 2
+		$1.IndentWidth = 2
+		$1.NoTabsAfterNonTabs = True
+		$1.EolMarker = Windows
+		$1.inheritsSet = VisualStudio
+		$1.inheritsScope = text/plain
+		$1.scope = text/x-csharp
+		$0.CSharpFormattingPolicy = $2
+		$2.BeforeMethodDeclarationParentheses = False
+		$2.BeforeMethodCallParentheses = False
+		$2.BeforeConstructorDeclarationParentheses = False
+		$2.BeforeIndexerDeclarationBracket = False
+		$2.BeforeDelegateDeclarationParentheses = False
+		$2.AfterDelegateDeclarationParameterComma = True
+		$2.NewParentheses = False
+		$2.SpacesBeforeBrackets = False
+		$2.inheritsSet = Mono
+		$2.inheritsScope = text/x-csharp
+		$2.scope = text/x-csharp
+		$0.DotNetNamingPolicy = $3
+		$3.DirectoryNamespaceAssociation = PrefixedHierarchical
+		$3.ResourceNamePolicy = FileFormatDefault
+		$0.TextStylePolicy = $4
+		$4.FileWidth = 120
+		$4.TabWidth = 4
+		$4.inheritsSet = Mono
+		$4.inheritsScope = text/plain
+		$4.scope = text/plain
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

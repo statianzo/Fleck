@@ -3,14 +3,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{8B12D929-AFA9-4307-BEFF-2ED0F1070FEE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Fleck</RootNamespace>
     <AssemblyName>Fleck</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -32,12 +29,13 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile />
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
+    <DebugSymbols>True</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
+    <Optimize>False</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -46,7 +44,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>True</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -55,21 +53,46 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Core">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
+    <Reference Include="System.Core" />
   </ItemGroup>
+  <Choose>
+    <When Condition="Exists('$(SolutionDir)\CommonAssemblyInfo.cs')">
+      <ItemGroup>
+        <Compile Include="$(SolutionDir)\CommonAssemblyInfo.cs">
+          <Link>Properties\CommonAssemblyInfo.cs</Link>
+        </Compile>
+      </ItemGroup>
+    </When>
+  </Choose>
   <ItemGroup>
-    <Compile Include="DataFrame.cs" />
-    <Compile Include="HandshakeHandler.cs" />
-    <Compile Include="ClientHandshake.cs" />
-    <Compile Include="Log.cs" />
-    <Compile Include="Receiver.cs" />
-    <Compile Include="Sender.cs" />
-    <Compile Include="ServerHandshake.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WebSocketConnection.cs" />
+    <Compile Include="ConnectionNotAvailableException.cs" />
+    <Compile Include="Handlers\ComposableHandler.cs" />
+    <Compile Include="Handlers\Draft76Handler.cs" />
+    <Compile Include="Handlers\FlashSocketPolicyRequestHandler.cs" />
+    <Compile Include="Handlers\Hybi13Handler.cs" />
+    <Compile Include="Interfaces\ISocket.cs" />
+    <Compile Include="Interfaces\IWebSocketConnection.cs" />
+    <Compile Include="FleckLog.cs" />
+    <Compile Include="Interfaces\IWebSocketServer.cs" />
+    <Compile Include="Interfaces\IWebSocketConnectionInfo.cs" />
+    <Compile Include="SocketWrapper.cs" />
+    <Compile Include="WebSocketConnectionInfo.cs" />
     <Compile Include="WebSocketServer.cs" />
+    <Compile Include="WebSocketHttpRequest.cs" />
+    <Compile Include="RequestParser.cs" />
+    <Compile Include="HandlerFactory.cs" />
+    <Compile Include="WebSocketConnection.cs" />
+    <Compile Include="WebSocketException.cs" />
+    <Compile Include="IntExtensions.cs" />
+    <Compile Include="HandshakeException.cs" />
+    <Compile Include="FrameType.cs" />
+    <Compile Include="ReadState.cs" />
+    <Compile Include="Interfaces\IHandler.cs" />
+    <Compile Include="WebSocketStatusCodes.cs" />
+    <Compile Include="SubProtocolNegotiator.cs" />
+    <Compile Include="SubProtocolNegotiationFailureException.cs" />
+    <Compile Include="QueuedStream.cs" />
+    <Compile Include="Helpers\MonoHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -96,4 +119,8 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Helpers\" />
+  </ItemGroup>
 </Project>

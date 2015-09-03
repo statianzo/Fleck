@@ -5,5 +5,13 @@ _ReSharper.*
 *.csproj.user
 *.resharper.user
 *.ReSharper.user
+*.ReSharper
 *.suo
-
+*.userprefs
+test-results
+*.pidb
+TestResult.xml
+artifacts
+src/CommonAssemblyInfo.cs
+*.dotCover
+*mm_cache.bin
