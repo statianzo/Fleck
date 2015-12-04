@@ -15,7 +15,7 @@ namespace Fleck
         int RemotePort { get; }
         Stream Stream { get; }
         bool NoDelay { get; set; }
-        Socket Socket { get; }
+        EndPoint LocalEndPoint { get; }
 
         Task<ISocket> Accept(Action<ISocket> callback, Action<Exception> error);
         Task Send(byte[] buffer, Action callback, Action<Exception> error);
