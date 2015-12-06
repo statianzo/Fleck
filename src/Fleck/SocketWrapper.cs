@@ -13,9 +13,9 @@ namespace Fleck
     public class SocketWrapper : ISocket
     {
         private readonly Socket _socket;
+        private readonly CancellationTokenSource _tokenSource;
+        private readonly TaskFactory _taskFactory;
         private Stream _stream;
-        private CancellationTokenSource _tokenSource;
-        private TaskFactory _taskFactory;
         
         public string RemoteIpAddress
         {
@@ -45,7 +45,7 @@ namespace Fleck
                 _stream = new NetworkStream(_socket);
         }
 
-        public Task Authenticate(X509Certificate2 certificate, SslProtocols enabledSslProtocols, Action callback, Action<Exception> error)
+        public Task AuthenticateAsync(X509Certificate2 certificate, SslProtocols enabledSslProtocols, Action callback, Action<Exception> error)
         {
             var ssl = new SslStream(_stream, false);
             _stream = new QueuedStream(ssl);
@@ -86,7 +86,7 @@ namespace Fleck
             set { _socket.NoDelay = value; }
         }
 
-        public Task<int> Receive(byte[] buffer, Action<int> callback, Action<Exception> error, int offset)
+        public Task<int> ReceiveAsync(byte[] buffer, Action<int> callback, Action<Exception> error, int offset)
         {
             try
             {
@@ -106,7 +106,7 @@ namespace Fleck
             }
         }
 
-        public Task<ISocket> Accept(Action<ISocket> callback, Action<Exception> error)
+        public Task<ISocket> AcceptAsync(Action<ISocket> callback, Action<Exception> error)
         {
             Func<IAsyncResult, ISocket> end = r => _tokenSource.Token.IsCancellationRequested ? null : new SocketWrapper(_socket.EndAccept(r));
             var task = _taskFactory.FromAsync(_socket.BeginAccept, end, null);
@@ -136,7 +136,7 @@ namespace Fleck
             return 0;
         }
 
-        public Task Send(byte[] buffer, Action callback, Action<Exception> error)
+        public Task SendAsync(byte[] buffer, Action callback, Action<Exception> error)
         {
             if (_tokenSource.IsCancellationRequested)
                 return null;
@@ -158,6 +158,26 @@ namespace Fleck
                 error(e);
                 return null;
             }
+        }
+
+        Task<ISocket> ISocket.Accept(Action<ISocket> callback, Action<Exception> error)
+        {
+            return AcceptAsync(callback, error);
+        }
+
+        Task ISocket.Send(byte[] buffer, Action callback, Action<Exception> error)
+        {
+            return SendAsync(buffer, callback, error);
+        }
+
+        Task<int> ISocket.Receive(byte[] buffer, Action<int> callback, Action<Exception> error, int offset)
+        {
+            return ReceiveAsync(buffer, callback, error, offset);
+        }
+
+        Task ISocket.Authenticate(X509Certificate2 certificate, SslProtocols enabledSslProtocols, Action callback, Action<Exception> error)
+        {
+            return AuthenticateAsync(certificate, enabledSslProtocols, callback, error);
         }
     }
 }

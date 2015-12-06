@@ -42,7 +42,7 @@ namespace Fleck.Tests
             _server.Start(connection => { });
 
             socketMock.Verify(s => s.Bind(It.Is<IPEndPoint>(i => i.Port == 8000)));
-            socketMock.Verify(s => s.Accept(It.IsAny<Action<ISocket>>(), It.IsAny<Action<Exception>>()));
+            socketMock.Verify(s => s.AcceptAsync(It.IsAny<Action<ISocket>>(), It.IsAny<Action<Exception>>()));
         }
 
         [Test]

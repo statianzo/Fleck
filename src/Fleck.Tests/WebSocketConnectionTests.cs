@@ -40,8 +40,8 @@ namespace Fleck.Tests
             _connection.Handler = _handlerMock.Object;
             SetupReadLengths(0);
             _connection.StartReceiving();
-            _connection.Send("Zing");
-            _socketMock.Verify(x => x.Send(It.IsAny<byte[]>(), It.IsAny<Action>(), It.IsAny<Action<Exception>>()), Times.Never());
+            _connection.SendAsync("Zing");
+            _socketMock.Verify(x => x.SendAsync(It.IsAny<byte[]>(), It.IsAny<Action>(), It.IsAny<Action<Exception>>()), Times.Never());
         }
 
         [Test]
@@ -49,8 +49,8 @@ namespace Fleck.Tests
         {
             _connection.Handler = _handlerMock.Object;
             _socketMock.SetupGet(x => x.Connected).Returns(false);
-            _connection.Send("Zing");
-            _socketMock.Verify(x => x.Send(It.IsAny<byte[]>(), It.IsAny<Action>(), It.IsAny<Action<Exception>>()), Times.Never());
+            _connection.SendAsync("Zing");
+            _socketMock.Verify(x => x.SendAsync(It.IsAny<byte[]>(), It.IsAny<Action>(), It.IsAny<Action<Exception>>()), Times.Never());
         }
 
         [Test]
@@ -58,7 +58,7 @@ namespace Fleck.Tests
         {
             _socketMock.SetupGet(x => x.Connected).Returns(false);
             _connection.StartReceiving();
-            _socketMock.Verify(x => x.Receive(It.IsAny<byte[]>(), It.IsAny<Action<int>>(), It.IsAny<Action<Exception>>(), 0), Times.Never());
+            _socketMock.Verify(x => x.ReceiveAsync(It.IsAny<byte[]>(), It.IsAny<Action<int>>(), It.IsAny<Action<Exception>>(), 0), Times.Never());
         }
 
         [Test]
@@ -117,7 +117,7 @@ namespace Fleck.Tests
         {
             _socketMock.Setup(
                 x =>
-                x.Receive(It.IsAny<byte[]>(), It.IsAny<Action<int>>(), It.IsAny<Action<Exception>>(), It.IsAny<int>()))
+                x.ReceiveAsync(It.IsAny<byte[]>(), It.IsAny<Action<int>>(), It.IsAny<Action<Exception>>(), It.IsAny<int>()))
                 .Callback<byte[], Action<int>, Action<Exception>, int>((buffer, success, error, offset) =>
                 {
                     error(new Exception());
@@ -137,7 +137,7 @@ namespace Fleck.Tests
         {
             _socketMock.Setup(
                 x =>
-                x.Receive(It.IsAny<byte[]>(), It.IsAny<Action<int>>(), It.IsAny<Action<Exception>>(), It.IsAny<int>()))
+                x.ReceiveAsync(It.IsAny<byte[]>(), It.IsAny<Action<int>>(), It.IsAny<Action<Exception>>(), It.IsAny<int>()))
                 .Callback<byte[], Action<int>, Action<Exception>, int>((buffer, success, error, offset) =>
                 {
                     error(new ObjectDisposedException("socket"));
@@ -157,7 +157,7 @@ namespace Fleck.Tests
             var index = 0;
             _socketMock.Setup(
                 x =>
-                x.Receive(It.IsAny<byte[]>(), It.IsAny<Action<int>>(), It.IsAny<Action<Exception>>(), It.IsAny<int>()))
+                x.ReceiveAsync(It.IsAny<byte[]>(), It.IsAny<Action<int>>(), It.IsAny<Action<Exception>>(), It.IsAny<int>()))
                 .Callback<byte[], Action<int>, Action<Exception>, int>((buffer, success, error, offset) =>
                 {
                     if (args.Length > index)

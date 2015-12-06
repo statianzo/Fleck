@@ -12,12 +12,21 @@ namespace Fleck
         Action<byte[]> OnPing { get; set; }
         Action<byte[]> OnPong { get; set; }
         Action<Exception> OnError { get; set; }
-        Task Send(string message);
-        Task Send(byte[] message);
-        Task SendPing(byte[] message);
-        Task SendPong(byte[] message);
+        Task SendAsync(string message);
+        Task SendAsync(byte[] message);
+        Task SendPingAsync(byte[] message);
+        Task SendPongAsync(byte[] message);
         void Close();
         IWebSocketConnectionInfo ConnectionInfo { get; }
         bool IsAvailable { get; }
+
+        [Obsolete]
+        Task Send(string message);
+        [Obsolete]
+        Task Send(byte[] message);
+        [Obsolete]
+        Task SendPing(byte[] message);
+        [Obsolete]
+        Task SendPong(byte[] message);
     }
 }
