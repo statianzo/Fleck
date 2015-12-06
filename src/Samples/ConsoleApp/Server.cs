@@ -27,7 +27,7 @@ namespace Fleck.Samples.ConsoleApp
                     socket.OnMessage = message =>
                         {
                             Console.WriteLine(message);
-                            allSockets.ToList().ForEach(s => s.Send("Echo: " + message));
+                            allSockets.ToList().ForEach(s => s.SendAsync("Echo: " + message));
                         };
                 });
 
@@ -37,7 +37,7 @@ namespace Fleck.Samples.ConsoleApp
             {
                 foreach (var socket in allSockets.ToList())
                 {
-                    socket.Send(input);
+                    socket.SendAsync(input);
                 }
                 input = Console.ReadLine();
             }

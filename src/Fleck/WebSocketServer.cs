@@ -96,7 +96,7 @@ namespace Fleck
 
         private void ListenForClients()
         {
-            ListenerSocket.Accept(OnClientConnect, e => FleckLog.Error("Listener socket is closed", e));
+            ListenerSocket.AcceptAsync(OnClientConnect, e => FleckLog.Error("Listener socket is closed", e));
         }
 
         private void OnClientConnect(ISocket clientSocket)
@@ -124,7 +124,7 @@ namespace Fleck
             {
                 FleckLog.Debug("Authenticating Secure Connection");
                 clientSocket
-                    .Authenticate(Certificate,
+                    .AuthenticateAsync(Certificate,
                                   EnabledSslProtocols,
                                   connection.StartReceiving,
                                   e => FleckLog.Warn("Failed to Authenticate", e));

@@ -15,7 +15,7 @@ namespace Fleck
       OnClose = () => { };
       OnMessage = x => { };
       OnBinary = x => { };
-      OnPing = x => SendPong(x);
+      OnPing = x => SendPongAsync(x);
       OnPong = x => { };
       OnError = x => { };
       _initialize = initialize;
@@ -57,22 +57,42 @@ namespace Fleck
       get { return !_closing && !_closed && Socket.Connected; }
     }
 
-    public Task Send(string message)
+    public Task SendAsync(string message)
     {
       return Send(message, Handler.FrameText);
     }
 
-    public Task Send(byte[] message)
+    public Task SendAsync(byte[] message)
     {
         return Send(message, Handler.FrameBinary);
     }
 
-    public Task SendPing(byte[] message)
+    public Task SendPingAsync(byte[] message)
     {
         return Send(message, Handler.FramePing);
     }
 
-    public Task SendPong(byte[] message)
+    public Task SendPongAsync(byte[] message)
+    {
+        return Send(message, Handler.FramePong);
+    }
+
+    Task IWebSocketConnection.Send(string message)
+    {
+        return Send(message, Handler.FrameText);
+    }
+
+    Task IWebSocketConnection.Send(byte[] message)
+    {
+        return Send(message, Handler.FrameBinary);
+    }
+
+    Task IWebSocketConnection.SendPing(byte[] message)
+    {
+        return Send(message, Handler.FramePing);
+    }
+
+    Task IWebSocketConnection.SendPong(byte[] message)
     {
         return Send(message, Handler.FramePong);
     }
@@ -149,7 +169,7 @@ namespace Fleck
       if (!IsAvailable)
         return;
 
-      Socket.Receive(buffer, r =>
+      Socket.ReceiveAsync(buffer, r =>
       {
         if (r <= 0) {
           FleckLog.Debug("0 bytes read. Closing.");
@@ -204,7 +224,7 @@ namespace Fleck
 
     private Task SendBytes(byte[] bytes, Action callback = null)
     {
-      return Socket.Send(bytes, () =>
+      return Socket.SendAsync(bytes, () =>
       {
         FleckLog.Debug("Sent " + bytes.Length + " bytes");
         if (callback != null)

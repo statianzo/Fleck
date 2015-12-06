@@ -29,7 +29,7 @@ namespace Fleck.Tests
         [Test]
         public void ShouldCompleteAcceptTaskOnDispose()
         {
-            Task task = _wrapper.Accept(socket => { }, exception => { });
+            Task task = _wrapper.AcceptAsync(socket => { }, exception => { });
             _wrapper.Dispose();
 
             Assert.DoesNotThrow(task.Wait);
@@ -79,7 +79,7 @@ namespace Fleck.Tests
             Exception ex = null;
             _wrapper.Dispose();
             
-            var task = _wrapper.Send(new byte[1], () => {}, e => {ex = e;});
+            var task = _wrapper.SendAsync(new byte[1], () => {}, e => {ex = e;});
             
             Assert.IsNull(task);
             Assert.IsNull(ex);
@@ -89,7 +89,7 @@ namespace Fleck.Tests
         {
             Exception ex = null;
             _wrapper.Dispose();
-            _wrapper.Receive(new byte[1], i => {}, e => {ex = e;}, 0);
+            _wrapper.ReceiveAsync(new byte[1], i => {}, e => {ex = e;}, 0);
             Assert.IsInstanceOf<ObjectDisposedException>(ex);
         }
     }
