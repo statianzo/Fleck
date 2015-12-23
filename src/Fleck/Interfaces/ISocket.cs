@@ -1,9 +1,10 @@
 using System;
+using System.IO;
 using System.Net;
+using System.Net.Sockets;
+using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
-using System.IO;
-using System.Security.Authentication;
 
 namespace Fleck
 {
@@ -14,6 +15,7 @@ namespace Fleck
         int RemotePort { get; }
         Stream Stream { get; }
         bool NoDelay { get; set; }
+        EndPoint LocalEndPoint { get; }
 
         Task<ISocket> Accept(Action<ISocket> callback, Action<Exception> error);
         Task Send(byte[] buffer, Action callback, Action<Exception> error);

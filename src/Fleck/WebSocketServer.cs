@@ -75,7 +75,8 @@ namespace Fleck
             var ipLocal = new IPEndPoint(_locationIP, Port);
             ListenerSocket.Bind(ipLocal);
             ListenerSocket.Listen(100);
-            FleckLog.Info("Server started at " + Location);
+            Port = ((IPEndPoint)ListenerSocket.LocalEndPoint).Port;
+            FleckLog.Info(string.Format("Server started at {0} (actual port {1})", Location, Port));
             if (_scheme == "wss")
             {
                 if (Certificate == null)
