@@ -49,10 +49,9 @@ namespace Fleck
         {
             var ssl = new SslStream(_stream, false);
             _stream = new QueuedStream(ssl);
-            Func<AsyncCallback, object, IAsyncResult> begin =
-                (cb, s) => ssl.BeginAuthenticateAsServer(certificate, false, enabledSslProtocols, false, cb, s);
-                
-            Task task = Task.Factory.FromAsync(begin, ssl.EndAuthenticateAsServer, null);
+
+            Task task = ssl.AuthenticateAsServerAsync(certificate, false, enabledSslProtocols, false);
+
             task.ContinueWith(t => callback(), TaskContinuationOptions.NotOnFaulted)
                 .ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
             task.ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
@@ -95,13 +94,12 @@ namespace Fleck
         {
             try
             {
-                Func<AsyncCallback, object, IAsyncResult> begin =
-               (cb, s) => _stream.BeginRead(buffer, offset, buffer.Length, cb, s);
+                Task<int> task = _stream.ReadAsync(buffer, offset, buffer.Length);
 
-                Task<int> task = Task.Factory.FromAsync<int>(begin, _stream.EndRead, null);
                 task.ContinueWith(t => callback(t.Result), TaskContinuationOptions.NotOnFaulted)
                     .ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
                 task.ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
+
                 return task;
             }
             catch (Exception e)
@@ -131,14 +129,8 @@ namespace Fleck
         public void Close()
         {
             _tokenSource.Cancel();
-            if (_stream != null) _stream.Close();
-            if (_socket != null) _socket.Close();
-        }
-
-        public int EndSend(IAsyncResult asyncResult)
-        {
-            _stream.EndWrite(asyncResult);
-            return 0;
+            if (_stream != null) _stream.Dispose();
+            if (_socket != null) _socket.Dispose();
         }
 
         public Task Send(byte[] buffer, Action callback, Action<Exception> error)
@@ -148,10 +140,8 @@ namespace Fleck
 
             try
             {
-                Func<AsyncCallback, object, IAsyncResult> begin =
-                    (cb, s) => _stream.BeginWrite(buffer, 0, buffer.Length, cb, s);
+                Task task = _stream.WriteAsync(buffer, 0, buffer.Length);
 
-                Task task = Task.Factory.FromAsync(begin, _stream.EndWrite, null);
                 task.ContinueWith(t => callback(), TaskContinuationOptions.NotOnFaulted)
                     .ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
                 task.ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
