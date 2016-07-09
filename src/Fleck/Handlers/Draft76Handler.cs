@@ -40,7 +40,7 @@ namespace Fleck.Handlers
                 
                 data.RemoveRange(0, endIndex + 1);
 
-                var message = Encoding.UTF8.GetString(bytes, 0, 0);
+                var message = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
                 
                 onMessage(message);
             }
