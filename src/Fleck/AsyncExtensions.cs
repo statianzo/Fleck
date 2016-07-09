@@ -47,6 +47,16 @@ namespace Fleck
 
             return task;
         }
+
+        public static Task<Socket> AcceptAsync(this Socket socket)
+        {
+            Func<AsyncCallback, object, IAsyncResult> begin =
+                (cb, s) => stream.BeginAccept(cb, s);
+
+            Task<Socket> task = Task.Factory.FromAsync(begin, stream.EndAccept, null);
+
+            return task;
+        }
     }
 
 #endif
