@@ -2,13 +2,6 @@
   "title": "Fleck",
   "version": "1.0.0-*",
   "frameworks": {
-    "net40": {
-      "buildOptions": {
-        "define": [
-          "NET40"
-        ]
-      }
-    },
     "netstandard1.3": {
       "buildOptions": {
         "define": [
