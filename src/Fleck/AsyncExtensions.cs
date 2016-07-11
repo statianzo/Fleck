@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Net.Security;
+using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
@@ -51,9 +52,9 @@ namespace Fleck
         public static Task<Socket> AcceptAsync(this Socket socket)
         {
             Func<AsyncCallback, object, IAsyncResult> begin =
-                (cb, s) => stream.BeginAccept(cb, s);
+                (cb, s) => socket.BeginAccept(cb, s);
 
-            Task<Socket> task = Task.Factory.FromAsync(begin, stream.EndAccept, null);
+            Task<Socket> task = Task.Factory.FromAsync(begin, socket.EndAccept, null);
 
             return task;
         }
