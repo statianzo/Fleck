@@ -58,7 +58,9 @@ namespace Fleck
         {
             string ipStr = uri.Host;
 
-            if (ipStr == "0.0.0.0" || ipStr == "[0000:0000:0000:0000:0000:0000:0000:0000]")
+            if (ipStr == "0.0.0.0" ){
+                return IPAddress.Any;
+            }else if(ipStr == "[0000:0000:0000:0000:0000:0000:0000:0000]")
             {
                 return IPAddress.IPv6Any;
             } else {
