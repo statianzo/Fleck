@@ -22,7 +22,7 @@ namespace Fleck
         public static WebSocketHttpRequest Parse(byte[] bytes, string scheme)
         {
             // Check for websocket request header
-            var body = Encoding.UTF8.GetString(bytes);
+            var body = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
             Match match = _regex.Match(body);
 
             if (!match.Success)

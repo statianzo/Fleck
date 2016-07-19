@@ -2,9 +2,127 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Fleck
 {
+#if NETCORE
+    // TODO: Is this hack needed for .NET Core? If so, implement it.
+    public class QueuedStream : Stream
+    {
+        readonly Stream _stream;
+
+        public QueuedStream(Stream stream)
+        {
+            _stream = stream;
+        }
+
+        public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
+        {
+            return _stream.CopyToAsync(destination, bufferSize, cancellationToken);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            _stream.Dispose();
+        }
+
+        public override void Flush()
+        {
+            _stream.Flush();
+        }
+
+        public override Task FlushAsync(CancellationToken cancellationToken)
+        {
+            return _stream.FlushAsync(cancellationToken);
+        }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            return _stream.Read(buffer, offset, count);
+        }
+
+        public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            return _stream.ReadAsync(buffer, offset, count, cancellationToken);
+        }
+
+        public override int ReadByte()
+        {
+            return _stream.ReadByte();
+        }
+
+        public override long Seek(long offset, SeekOrigin origin)
+        {
+            return _stream.Seek(offset, origin);
+        }
+
+        public override void SetLength(long value)
+        {
+            _stream.SetLength(value);
+        }
+
+        public override void Write(byte[] buffer, int offset, int count)
+        {
+            _stream.Write(buffer, offset, count);
+        }
+
+        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            return _stream.WriteAsync(buffer, offset, count, cancellationToken);
+        }
+
+        public override void WriteByte(byte value)
+        {
+            _stream.WriteByte(value);
+        }
+
+        public override bool CanRead
+        {
+            get { return _stream.CanRead; }
+        }
+
+        public override bool CanSeek
+        {
+            get { return _stream.CanSeek; }
+        }
+
+        public override bool CanTimeout
+        {
+            get { return _stream.CanTimeout; }
+        }
+
+        public override bool CanWrite
+        {
+            get { return _stream.CanWrite; }
+        }
+
+        public override long Length
+        {
+            get { return _stream.Length; }
+        }
+
+        public override long Position
+        {
+            get { return _stream.Position; }
+            set { _stream.Position = value; }
+        }
+
+        public override int ReadTimeout
+        {
+            get { return _stream.ReadTimeout; }
+            set { _stream.ReadTimeout = value; }
+        }
+
+        public override int WriteTimeout
+        {
+            get { return _stream.WriteTimeout; }
+            set { _stream.WriteTimeout = value; }
+        }
+    }
+
+#else
     /// <summary>
     /// Wraps a stream and queues multiple write operations.
     /// Useful for wrapping SslStream as it does not support multiple simultaneous write operations.
@@ -111,27 +229,9 @@ namespace Fleck
             }
         }
 
-        public override void Flush()
-        {
-            _stream.Flush();
-        }
-
         public override void Close()
         {
             _stream.Close();
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                if (disposing)
-                {
-                    _stream.Dispose();
-                }
-                _disposed = true;
-            }
-            base.Dispose(disposing);
         }
 
         IAsyncResult BeginWriteInternal(byte[] buffer, int offset, int count, AsyncCallback callback, object state, WriteData queued)
@@ -180,7 +280,25 @@ namespace Fleck
             return queued.AsyncResult;
         }
 
-        #region Nested type: WriteData
+        public override void Flush()
+        {
+            _stream.Flush();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    _stream.Dispose();
+                }
+                _disposed = true;
+            }
+            base.Dispose(disposing);
+        }
+
+#region Nested type: WriteData
 
         class WriteData
         {
@@ -202,9 +320,9 @@ namespace Fleck
             }
         }
 
-        #endregion
+#endregion
 
-        #region Nested type: QueuedWriteResult
+#region Nested type: QueuedWriteResult
 
         class QueuedWriteResult : IAsyncResult
         {
@@ -239,7 +357,8 @@ namespace Fleck
                 get { return ActualResult != null && ActualResult.IsCompleted; }
             }
         }
-
-        #endregion
     }
+
+#endregion
+#endif
 }

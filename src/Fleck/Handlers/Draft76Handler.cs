@@ -39,8 +39,8 @@ namespace Fleck.Handlers
                 var bytes = data.Skip(1).Take(endIndex - 1).ToArray();
                 
                 data.RemoveRange(0, endIndex + 1);
-                
-                var message = Encoding.UTF8.GetString(bytes);
+
+                var message = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
                 
                 onMessage(message);
             }

@@ -21,7 +21,7 @@ namespace Fleck
                                ClientIpAddress = clientIp,
                                ClientPort = clientPort,
                                NegotiatedSubProtocol = negotiatedSubprotocol,
-                               Headers = new Dictionary<string, string>(request.Headers, System.StringComparer.InvariantCultureIgnoreCase)
+                               Headers = new Dictionary<string, string>(request.Headers, System.StringComparer.OrdinalIgnoreCase)
                            };
             var cookieHeader = request["Cookie"];
 
