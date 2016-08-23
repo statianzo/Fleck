@@ -99,7 +99,24 @@ namespace Fleck
 
         private void ListenForClients()
         {
-            ListenerSocket.Accept(OnClientConnect, e => FleckLog.Error("Listener socket is closed", e));
+            ListenerSocket.Accept(OnClientConnect, e => {
+                FleckLog.Error("Listener socket is closed", e);
+                if(ListenerSocket.RestartAfterListenError){
+                    FleckLog.Info("Listener socket restarting");
+                    try
+                    {
+                        ListenerSocket.Dispose();
+                        var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
+                        ListenerSocket = new SocketWrapper(socket);
+                        Start(_config);
+                        FleckLog.Info("Listener socket restarted");
+                    }
+                    catch (Exception ex)
+                    {
+                        FleckLog.Error("Listener could not be restarted", ex);
+                    }
+                }
+            });
         }
 
         private void OnClientConnect(ISocket clientSocket)
