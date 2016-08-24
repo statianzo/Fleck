@@ -16,7 +16,6 @@ namespace Fleck
         private Stream _stream;
         private CancellationTokenSource _tokenSource;
         private TaskFactory _taskFactory;
-        private bool _restartAfterListenError;
 
         public string RemoteIpAddress
         {
@@ -85,12 +84,6 @@ namespace Fleck
         {
             get { return _socket.NoDelay; }
             set { _socket.NoDelay = value; }
-        }
-
-        public bool RestartAfterListenError
-        {
-            get { return _restartAfterListenError; }
-            set { _restartAfterListenError = value; }
         }
 
         public EndPoint LocalEndPoint
