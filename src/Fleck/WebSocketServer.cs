@@ -58,7 +58,9 @@ namespace Fleck
         {
             string ipStr = uri.Host;
 
-            if (ipStr == "0.0.0.0" || ipStr == "[0000:0000:0000:0000:0000:0000:0000:0000]")
+            if (ipStr == "0.0.0.0" ){
+                return IPAddress.Any;
+            }else if(ipStr == "[0000:0000:0000:0000:0000:0000:0000:0000]")
             {
                 return IPAddress.IPv6Any;
             } else {
@@ -75,7 +77,8 @@ namespace Fleck
             var ipLocal = new IPEndPoint(_locationIP, Port);
             ListenerSocket.Bind(ipLocal);
             ListenerSocket.Listen(100);
-            FleckLog.Info("Server started at " + Location);
+            Port = ((IPEndPoint)ListenerSocket.LocalEndPoint).Port;
+            FleckLog.Info(string.Format("Server started at {0} (actual port {1})", Location, Port));
             if (_scheme == "wss")
             {
                 if (Certificate == null)

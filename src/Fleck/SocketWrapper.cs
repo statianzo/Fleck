@@ -86,6 +86,11 @@ namespace Fleck
             set { _socket.NoDelay = value; }
         }
 
+        public EndPoint LocalEndPoint
+        {
+            get { return _socket.LocalEndPoint; }
+        }
+
         public Task<int> Receive(byte[] buffer, Action<int> callback, Action<Exception> error, int offset)
         {
             try

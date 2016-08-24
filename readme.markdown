@@ -1,4 +1,4 @@
-Fleck ![project-status](http://stillmaintained.com/statianzo/Fleck.png?1)
+Fleck
 ===
 
 Fleck is a WebSocket server implementation in C#. Branched from the
@@ -94,12 +94,26 @@ FleckLog.LogAction = (level, message, ex) => {
 
 ```
 
+Disable Nagle's Algorithm
+---
+
+Set `NoDelay` to `true` on the `WebSocketConnection.ListenerSocket`
+
+```cs
+var server = new WebSocketServer("ws://0.0.0.0:8181");
+server.ListenerSocket.NoDelay = true;
+server.Start(socket =>
+{
+  //Child connections will not use Nagle's Algorithm
+});
+```
+
 License
 ---
 
 The MIT License
 
-Copyright (c) 2010-2014 Jason Staten
+Copyright (c) 2010-2016 Jason Staten
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
