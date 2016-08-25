@@ -108,6 +108,20 @@ server.Start(socket =>
 });
 ```
 
+Auto Restart After Listen Error
+---
+
+Set `RestartAfterListenError` to `true` on the `WebSocketConnection`
+
+```cs
+var server = new WebSocketServer("ws://0.0.0.0:8181");
+server.RestartAfterListenError = true;
+server.Start(socket =>
+{
+  //...use as normal
+});
+```
+
 License
 ---
 
