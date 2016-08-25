@@ -16,7 +16,7 @@ namespace Fleck
         private Stream _stream;
         private CancellationTokenSource _tokenSource;
         private TaskFactory _taskFactory;
-        
+
         public string RemoteIpAddress
         {
             get
@@ -51,7 +51,7 @@ namespace Fleck
             _stream = new QueuedStream(ssl);
             Func<AsyncCallback, object, IAsyncResult> begin =
                 (cb, s) => ssl.BeginAuthenticateAsServer(certificate, false, enabledSslProtocols, false, cb, s);
-                
+
             Task task = Task.Factory.FromAsync(begin, ssl.EndAuthenticateAsServer, null);
             task.ContinueWith(t => callback(), TaskContinuationOptions.NotOnFaulted)
                 .ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
@@ -74,7 +74,7 @@ namespace Fleck
         {
             get { return _socket.Connected; }
         }
-        
+
         public Stream Stream
         {
             get { return _stream; }
