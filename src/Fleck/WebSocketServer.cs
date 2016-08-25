@@ -43,7 +43,6 @@ namespace Fleck
         public X509Certificate2 Certificate { get; set; }
         public SslProtocols EnabledSslProtocols { get; set; }
         public IEnumerable<string> SupportedSubProtocols { get; set; }
-        public bool RestartAfterListenError { get; set; }
 
         public bool IsSecure
         {
@@ -100,24 +99,7 @@ namespace Fleck
 
         private void ListenForClients()
         {
-            ListenerSocket.Accept(OnClientConnect, e => {
- +                FleckLog.Error("Listener socket is closed", e);
- +                if(RestartAfterListenError){
- +                    FleckLog.Info("Listener socket restarting");
- +                    try
- +                    {
- +                        ListenerSocket.Dispose();
- +                        var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
- +                        ListenerSocket = new SocketWrapper(socket);
- +                        Start(_config);
- +                        FleckLog.Info("Listener socket restarted");
- +                    }
- +                    catch (Exception ex)
- +                    {
- +                        FleckLog.Error("Listener could not be restarted", ex);
- +                    }
- +                }
- +            });
+            ListenerSocket.Accept(OnClientConnect, e => FleckLog.Error("Listener socket is closed", e));
         }
 
         private void OnClientConnect(ISocket clientSocket)
