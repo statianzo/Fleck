@@ -77,6 +77,7 @@
     <Compile Include="Interfaces\IWebSocketConnectionInfo.cs" />
     <Compile Include="SocketWrapper.cs" />
     <Compile Include="WebSocketConnectionInfo.cs" />
+    <Compile Include="WebSocketRelay.cs" />
     <Compile Include="WebSocketServer.cs" />
     <Compile Include="WebSocketHttpRequest.cs" />
     <Compile Include="RequestParser.cs" />
@@ -120,7 +121,5 @@
   </Target>
   -->
   <ItemGroup />
-  <ItemGroup>
-    <Folder Include="Helpers\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>

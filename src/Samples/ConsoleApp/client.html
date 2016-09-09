@@ -28,10 +28,15 @@
             ws.onclose = function () {
                 inc.innerHTML += '.. connection closed<br/>';
             }
+
+            ws.onerror = function (err, obj) {
+                console.log(err, obj);
+            }
             
 			form.addEventListener('submit', function(e){
 				e.preventDefault();
 				var val = input.value;
+				console.log(val);
 				ws.send(val);
 				input.value = "";
 			});
