@@ -107,7 +107,7 @@ namespace Fleck
                     try
                     {
                         ListenerSocket.Dispose();
-                        var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
+                        var socket = new Socket(_locationIP.AddressFamily, SocketType.Stream, ProtocolType.IP);
                         ListenerSocket = new SocketWrapper(socket);
                         Start(_config);
                         FleckLog.Info("Listener socket restarted");
