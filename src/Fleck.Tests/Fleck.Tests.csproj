@@ -65,6 +65,7 @@
     <Compile Include="QueuedStreamTests.cs" />
     <Compile Include="WebSocketConnectionInfoTests.cs" />
     <Compile Include="WebSocketConnectionTests.cs" />
+    <Compile Include="WebSocketRelayTests.cs" />
     <Compile Include="WebSocketServerTests.cs" />
     <Compile Include="RequestParserTests.cs" />
     <Compile Include="Hybi14DataFrameTests.cs" />
