@@ -7,7 +7,8 @@ namespace Fleck
         Debug,
         Info,
         Warn,
-        Error
+        Error,
+        Disabled
     }
 
     public class FleckLog
