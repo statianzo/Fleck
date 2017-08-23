@@ -22,7 +22,7 @@ namespace Fleck
         public WebSocketServer(int port, string location)
         {
             var uri = new Uri(location);
-            Port = uri.Port > 0 ? uri.Port : port;
+            Port = port;
             Location = location;
             _locationIP = ParseIPAddress(uri);
             _scheme = uri.Scheme;
