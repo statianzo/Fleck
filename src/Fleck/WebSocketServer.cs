@@ -15,14 +15,9 @@ namespace Fleck
         private Action<IWebSocketConnection> _config;
 
         public WebSocketServer(string location)
-            : this(8181, location)
-        {
-        }
-
-        public WebSocketServer(int port, string location)
         {
             var uri = new Uri(location);
-            Port = uri.Port > 0 ? uri.Port : port;
+            Port = uri.Port;
             Location = location;
             _locationIP = ParseIPAddress(uri);
             _scheme = uri.Scheme;
