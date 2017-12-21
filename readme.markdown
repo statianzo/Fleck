@@ -5,10 +5,6 @@ Fleck is a WebSocket server implementation in C#. Branched from the
 [Nugget][nugget] project, Fleck requires no inheritance, container, or
 additional references.
 
-<a target='_blank' rel='nofollow' href='https://app.codesponsor.io/link/AitzkUqcdsSnujfFtmVhTLXR/statianzo/Fleck'>
-  <img alt='Sponsor' width='888' height='68' src='https://app.codesponsor.io/embed/AitzkUqcdsSnujfFtmVhTLXR/statianzo/Fleck.svg' />
-</a>
-
 Example
 ---
 
