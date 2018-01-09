@@ -146,6 +146,9 @@ namespace Fleck.Tests
                 watch.Stop();
                 totalTime += watch.ElapsedMilliseconds;
             }
+            //_requestiWithLargeCookie1 takes 1213 Milliseconds
+            //_requestiWithLargeCookie1 takes 2444 Milliseconds
+            //_requestiWithLargeCookie1 takes 3655 Milliseconds
             Assert.Less(totalTime, 100 * largeHeaders.Length);
         }
 
