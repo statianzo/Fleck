@@ -133,7 +133,6 @@ namespace Fleck.Tests
         [Test]
         public void RunTimeOfParseRequestWithLargeCookie()
         {
-            var totalTime = 0L;
             var watch = new Stopwatch();
             var largeHeaders = LargeHeaders();
             for (int i = 0; i < largeHeaders.Length; i++)
@@ -144,12 +143,8 @@ namespace Fleck.Tests
                 watch.Start();
                 var conn = RequestParser.Parse(bytes);
                 watch.Stop();
-                totalTime += watch.ElapsedMilliseconds;
+                Assert.Less(watch.ElapsedMilliseconds, 100);
             }
-            //_requestWithLargeCookie1 takes 1213 Milliseconds
-            //_requestWithLargeCookie1 takes 2444 Milliseconds
-            //_requestWithLargeCookie1 takes 3655 Milliseconds
-            Assert.Less(totalTime, 100 * largeHeaders.Length);
         }
 
         public byte[] ValidRequestArray()
