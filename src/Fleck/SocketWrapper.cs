@@ -61,7 +61,7 @@ namespace Fleck
                 
             // The tcp keepalive default values on most systems
             // are huge (~7200s). Set them to something more reasonable.
-            SetKeepAlive(socket, KeepAliveInterval,RetryInterval);
+            SetKeepAlive(socket, KeepAliveInterval, RetryInterval);
         }
 
         public Task Authenticate(X509Certificate2 certificate, SslProtocols enabledSslProtocols, Action callback, Action<Exception> error)
