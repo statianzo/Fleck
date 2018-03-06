@@ -12,6 +12,10 @@ namespace Fleck
 {
     public class SocketWrapper : ISocket
     {
+    
+        public const UInt32 KeepAliveInterval = 60000;
+        public const UInt32 RetryInterval = 10000;
+    
         private readonly Socket _socket;
         private Stream _stream;
         private CancellationTokenSource _tokenSource;
@@ -35,6 +39,17 @@ namespace Fleck
             }
         }
 
+        public void SetKeepAlive(Socket socket, UInt32 keepAliveInterval, UInt32 retryInterval)
+        {
+            int size = sizeof(UInt32);
+            UInt32 on = 1;
+
+            byte[] inArray = new byte[size * 3];
+            Array.Copy(BitConverter.GetBytes(on), 0, inArray, 0, size);
+            Array.Copy(BitConverter.GetBytes(keepAliveInterval), 0, inArray, size, size);
+            Array.Copy(BitConverter.GetBytes(retryInterval), 0, inArray, size * 2, size);
+            socket.IOControl(IOControlCode.KeepAliveValues, inArray, null);
+        }
 
         public SocketWrapper(Socket socket)
         {
@@ -43,6 +58,10 @@ namespace Fleck
             _socket = socket;
             if (_socket.Connected)
                 _stream = new NetworkStream(_socket);
+                
+            // The tcp keepalive default values on most systems
+            // are huge (~7200s). Set them to something more reasonable.
+            SetKeepAlive(socket, KeepAliveInterval, RetryInterval);
         }
 
         public Task Authenticate(X509Certificate2 certificate, SslProtocols enabledSslProtocols, Action callback, Action<Exception> error)
