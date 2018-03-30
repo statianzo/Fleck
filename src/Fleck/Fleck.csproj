@@ -3,7 +3,7 @@
     <Title>Fleck</Title>
     <Authors>statenjason</Authors>
     <Copyright>Copyright 2018</Copyright>
-    <PackageLicenseUrl>https://github.com/Silvenga/EdiWeave/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseUrl>http://www.opensource.org/licenses/mit-license.php</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/statianzo/Fleck</PackageProjectUrl>
     <RepositoryUrl>https://github.com/statianzo/Fleck</RepositoryUrl>
     <PackageTags>websockets server html5 events</PackageTags>
