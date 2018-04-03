@@ -6,7 +6,7 @@ namespace Fleck.Tests
     [SetUpFixture]
     public class AssemblyTests
     {
-        [SetUp]
+        [OneTimeSetUp]
         public void SetUp()
         {
             FleckLog.LogAction = (level, message, ex) => Debug.WriteLine("[{0}]{1}: {2}", level, message, ex);
