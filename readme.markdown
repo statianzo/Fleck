@@ -1,6 +1,8 @@
 Fleck
 ===
 
+[![Build status](https://ci.appveyor.com/api/projects/status/k0s8hq5y4emak5j3/branch/master?svg=true)](https://ci.appveyor.com/project/statianzo/fleck/branch/master)
+
 Fleck is a WebSocket server implementation in C#. Branched from the
 [Nugget][nugget] project, Fleck requires no inheritance, container, or
 additional references.
