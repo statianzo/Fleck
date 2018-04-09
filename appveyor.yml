@@ -7,6 +7,7 @@ init:
         $tag = $env:appveyor_repo_tag_name
         Update-AppveyorBuild -Version "$tag"
     }
+
 dotnet_csproj:
   patch: true
   file: src\Fleck\Fleck.csproj
@@ -15,6 +16,7 @@ dotnet_csproj:
   assembly_version: '{version}'
   file_version: '{version}'
   informational_version: '{version}'
+
 build_script:
 - pwsh: >-
     cd .\src\
@@ -24,3 +26,13 @@ build_script:
     dotnet pack Fleck -c Release
 artifacts:
 - path: .\src\Fleck\bin\Release\*.nupkg
+
+nuget:
+  project_feed: true
+  disable_publish_on_pr: true
+
+notifications:
+- provider: GitHubPullRequest
+  on_build_success: true
+  on_build_failure: true
+  on_build_status_changed: true
