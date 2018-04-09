@@ -2,7 +2,7 @@ version: 0.0.{build}-ci
 image: Visual Studio 2017
 configuration: Release
 init:
-- pwsh: >-
+- ps: >-
     if ($env:appveyor_repo_tag -eq 'true') {
         $tag = $env:appveyor_repo_tag_name
         Update-AppveyorBuild -Version "$tag"
@@ -18,7 +18,7 @@ dotnet_csproj:
   informational_version: '{version}'
 
 build_script:
-- pwsh: >-
+- ps: >-
     cd .\src\
 
     dotnet build -c Release
