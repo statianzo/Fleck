@@ -1,4 +1,0 @@
-#!/bin/sh
-
-FILEDIR="$( cd "$( dirname "$0" )" && pwd )"
-exec mono --runtime=4.0.30319.17020 "$FILEDIR/NuGet.exe" "$@"
