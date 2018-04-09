@@ -1,0 +1,26 @@
+version: 0.0.{build}-ci
+image: Visual Studio 2017
+configuration: Release
+init:
+- pwsh: >-
+    if ($env:appveyor_repo_tag -eq 'true') {
+        $tag = $env:appveyor_repo_tag_name
+        Update-AppveyorBuild -Version "$tag"
+    }
+dotnet_csproj:
+  patch: true
+  file: src\Fleck\Fleck.csproj
+  version: '{version}'
+  package_version: '{version}'
+  assembly_version: '{version}'
+  file_version: '{version}'
+  informational_version: '{version}'
+build_script:
+- pwsh: >-
+    cd .\src\
+
+    dotnet build -c Release
+
+    dotnet pack Fleck -c Release
+artifacts:
+- path: .\src\Fleck\bin\Release\*.nupkg
