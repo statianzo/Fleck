@@ -1,0 +1,16 @@
+#!/bin/bash  
+
+echo ""
+echo "This is a simple helper to compile the project on Linux with msbuild."
+echo "You should install the latest mono version (including msbuild) from"
+echo "http://www.mono-project.com/download/stable/"
+echo ""
+echo "At least version 4.8.0 of mono is required. Your version is"
+mono --version | grep version
+echo ""
+echo "Your msbuild version is"
+msbuild /version | grep version
+echo ""
+
+read -p "Press enter to continue"
+msbuild Fleck.sln

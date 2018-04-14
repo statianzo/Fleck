@@ -40,7 +40,6 @@
     <Compile Include="HandlerFactory.cs" />
     <Compile Include="HandshakeException.cs" />
     <Compile Include="IntExtensions.cs" />
-    <Compile Include="MyClass.cs" />
     <Compile Include="QueuedStream.cs" />
     <Compile Include="ReadState.cs" />
     <Compile Include="RequestParser.cs" />
