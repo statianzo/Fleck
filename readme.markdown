@@ -1,3 +1,5 @@
+Simplified FLECK for fiddling (use with MonoDevelop). Original README follows:
+
 Fleck
 ===
 
