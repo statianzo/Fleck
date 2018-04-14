@@ -24,6 +24,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <Externalconsole>true</Externalconsole>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -47,12 +48,6 @@
   <ItemGroup>
     <Content Include="client.html" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Fleck\Fleck.csproj">
-      <Project>{8B12D929-AFA9-4307-BEFF-2ED0F1070FEE}</Project>
-      <Name>Fleck</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -61,4 +56,10 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\Fleck\Fleck.csproj">
+      <Project>{8FF04EF9-FE3C-4918-A4DC-48F9E8423C2D}</Project>
+      <Name>Fleck</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>
