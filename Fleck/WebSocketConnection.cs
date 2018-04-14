@@ -8,6 +8,9 @@ namespace Fleck
 {
   public class WebSocketConnection : IWebSocketConnection
   {
+
+    public const int HandshakeTimeout = 30;
+
     public WebSocketConnection(ISocket socket, Action<IWebSocketConnection> initialize, Func<byte[], WebSocketHttpRequest> parseRequest, Func<WebSocketHttpRequest, IHandler> handlerFactory, Func<IEnumerable<string>, string> negotiateSubProtocol)
     {
       Socket = socket;
@@ -35,6 +38,7 @@ namespace Fleck
 
     private bool _closing;
     private bool _closed;
+    private bool _opened;
     private const int ReadSize = 1024 * 4;
 
     public Action OnOpen { get; set; }
@@ -101,6 +105,16 @@ namespace Fleck
       var data = new List<byte>(ReadSize);
       var buffer = new byte[ReadSize];
       Read(data, buffer);
+
+      Task.Run(async delegate {
+          await Task.Delay(TimeSpan.FromSeconds(HandshakeTimeout));
+
+          if (!_closed && !_opened)  {
+            FleckLog.Warn("Closing WebSocketConnection. Not able to perform handshake within WebSocketConnection.HandshakeTimeout");
+            CloseSocket ();
+          }
+
+      }); 
     }
 
     public void Close()
@@ -141,7 +155,7 @@ namespace Fleck
       _initialize(this);
 
       var handshake = Handler.CreateHandshake(subProtocol);
-      SendBytes(handshake, OnOpen);
+      SendBytes(handshake, () => { OnOpen(); _opened = true; });
     }
 
     private void Read(List<byte> data, byte[] buffer)
