@@ -126,7 +126,7 @@ namespace Fleck
             if (clientSocket == null) return; // socket closed
 
             FleckLog.Debug(String.Format("Client connected from {0}:{1}", clientSocket.RemoteIpAddress, clientSocket.RemotePort.ToString()));
-            ListenForClients();
+            //ListenForClients();
 
             WebSocketConnection connection = null;
 
