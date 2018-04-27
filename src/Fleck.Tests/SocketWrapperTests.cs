@@ -29,7 +29,7 @@ namespace Fleck.Tests
         [Test]
         public void ShouldCompleteAcceptTaskOnDispose()
         {
-            Task task = _wrapper.Accept(socket => { }, exception => { });
+            Task task = _wrapper.Accept(socket => { }, () => { }, exception => { });
             _wrapper.Dispose();
 
             Assert.DoesNotThrow(task.Wait);
