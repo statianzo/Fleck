@@ -130,11 +130,11 @@ namespace Fleck
             }
         }
 
-        public Task<ISocket> Accept(Action<ISocket> callback, Action<Exception> error)
+        public Task<ISocket> Accept(Action<ISocket> callback, Action setHandle,  Action<Exception> error)
         {
             Func<IAsyncResult, ISocket> end = r => _tokenSource.Token.IsCancellationRequested ? null : new SocketWrapper(_socket.EndAccept(r));
             var task = _taskFactory.FromAsync(_socket.BeginAccept, end, null);
-            task.ContinueWith(t => callback(t.Result), TaskContinuationOptions.OnlyOnRanToCompletion)
+            task.ContinueWith(t => { setHandle(); callback(t.Result); }, TaskContinuationOptions.OnlyOnRanToCompletion)
                 .ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
             task.ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
             return task;

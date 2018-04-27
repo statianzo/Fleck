@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Collections.Generic;
 using System.Security.Authentication;
+using System.Threading.Tasks;
 using Fleck.Helpers;
 
 namespace Fleck
@@ -13,6 +14,7 @@ namespace Fleck
         private readonly string _scheme;
         private readonly IPAddress _locationIP;
         private Action<IWebSocketConnection> _config;
+        private bool _running;
 
         public WebSocketServer(string location)
         {
@@ -38,7 +40,6 @@ namespace Fleck
         public X509Certificate2 Certificate { get; set; }
         public SslProtocols EnabledSslProtocols { get; set; }
         public IEnumerable<string> SupportedSubProtocols { get; set; }
-        public bool RestartAfterListenError {get; set; }
 
         public bool IsSecure
         {
@@ -47,6 +48,7 @@ namespace Fleck
 
         public void Dispose()
         {
+	    Stop();
             ListenerSocket.Dispose();
         }
 
@@ -89,30 +91,34 @@ namespace Fleck
                     FleckLog.Debug("Using default TLS 1.0 security protocol.");
                 }
             }
+            
+            _running = true;
             ListenForClients();
             _config = config;
         }
+        
+         public void Stop() 
+         {
+             _running = false;
+         }
 
         private void ListenForClients()
         {
-            ListenerSocket.Accept(OnClientConnect, e => {
-                FleckLog.Error("Listener socket is closed", e);
-                if(RestartAfterListenError){
-                    FleckLog.Info("Listener socket restarting");
-                    try
-                    {
-                        ListenerSocket.Dispose();
-                        var socket = new Socket(_locationIP.AddressFamily, SocketType.Stream, ProtocolType.IP);
-                        ListenerSocket = new SocketWrapper(socket);
-                        Start(_config);
-                        FleckLog.Info("Listener socket restarted");
-                    }
-                    catch (Exception ex)
-                    {
-                        FleckLog.Error("Listener could not be restarted", ex);
-                    }
-                }
+	    System.Threading.ManualResetEvent acceptDone = new System.Threading.ManualResetEvent (false);
+        
+            Task.Run( () => {
+
+                while (_running) {
+                    acceptDone.Reset ();
+
+                    ListenerSocket.Accept( OnClientConnect, () => acceptDone.Set(),
+                        e =>  FleckLog.Error ("An error occurred while accepting a client connection", e)  );
+
+                    acceptDone.WaitOne ();
+               }
+
             });
+
         }
 
         private void OnClientConnect(ISocket clientSocket)
@@ -120,7 +126,7 @@ namespace Fleck
             if (clientSocket == null) return; // socket closed
 
             FleckLog.Debug(String.Format("Client connected from {0}:{1}", clientSocket.RemoteIpAddress, clientSocket.RemotePort.ToString()));
-            ListenForClients();
+            //ListenForClients();
 
             WebSocketConnection connection = null;
 
