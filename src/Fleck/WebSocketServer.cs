@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Collections.Generic;
 using System.Security.Authentication;
+using System.Threading.Tasks;
 using Fleck.Helpers;
 
 namespace Fleck
@@ -95,7 +96,7 @@ namespace Fleck
 
         private void ListenForClients()
         {
-            ListenerSocket.Accept(OnClientConnect, e => {
+                var task = ListenerSocket.Accept(OnClientConnect, e => {
                 FleckLog.Error("Listener socket is closed", e);
                 if(RestartAfterListenError){
                     FleckLog.Info("Listener socket restarting");
@@ -113,14 +114,17 @@ namespace Fleck
                     }
                 }
             });
+
+            task.ContinueWith (t => FleckLog.Warn ("Client could not connect", t.Exception), TaskContinuationOptions.OnlyOnFaulted);
         }
 
         private void OnClientConnect(ISocket clientSocket)
         {
             if (clientSocket == null) return; // socket closed
 
+            ListenForClients ();
+
             FleckLog.Debug(String.Format("Client connected from {0}:{1}", clientSocket.RemoteIpAddress, clientSocket.RemotePort.ToString()));
-            ListenForClients();
 
             WebSocketConnection connection = null;
 
