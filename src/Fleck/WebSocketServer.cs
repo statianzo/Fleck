@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Collections.Generic;
 using System.Security.Authentication;
+using System.Threading;
 using System.Threading.Tasks;
 using Fleck.Helpers;
 
@@ -94,36 +95,50 @@ namespace Fleck
             _config = config;
         }
 
-        private void ListenForClients()
+        private void TryRestart ()
         {
-                var task = ListenerSocket.Accept(OnClientConnect, e => {
-                FleckLog.Error("Listener socket is closed", e);
-                if(RestartAfterListenError){
-                    FleckLog.Info("Listener socket restarting");
-                    try
-                    {
-                        ListenerSocket.Dispose();
-                        var socket = new Socket(_locationIP.AddressFamily, SocketType.Stream, ProtocolType.IP);
-                        ListenerSocket = new SocketWrapper(socket);
-                        Start(_config);
-                        FleckLog.Info("Listener socket restarted");
-                    }
-                    catch (Exception ex)
-                    {
-                        FleckLog.Error("Listener could not be restarted", ex);
-                    }
-                }
-            });
+            FleckLog.Info ("Listener socket restarting");
+            try {
+                ListenerSocket.Dispose ();
+                var socket = new Socket (_locationIP.AddressFamily, SocketType.Stream, ProtocolType.IP);
+                ListenerSocket = new SocketWrapper (socket);
+                Start (_config);
+                FleckLog.Info ("Listener socket restarted");
+            } catch (Exception ex) {
+                FleckLog.Error ("Listener socket could not be restarted", ex);
+            }
+        }
 
-            task.ContinueWith (t => FleckLog.Warn ("Client could not connect", t.Exception), TaskContinuationOptions.OnlyOnFaulted);
+
+        private void ListenForClients ()
+        {
+          ManualResetEvent acceptDone = new ManualResetEvent (false);
+
+          Task.Run (() => {
+        
+            while (true) {
+          
+            acceptDone.Reset ();
+
+            var task = ListenerSocket.Accept (
+              s => { OnClientConnect (s); acceptDone.Set (); },
+              e => { FleckLog.Error ("Error while listening for new clients", e);
+                      if (RestartAfterListenError) TryRestart (); 
+                      acceptDone.Set (); }
+            );
+
+              if (task == null) break;
+
+              task.ContinueWith((t) => FleckLog.Warn ("Error during client connect", t.Exception),
+                                TaskContinuationOptions.OnlyOnFaulted);
+
+              acceptDone.WaitOne ();
+            }
+          });
         }
 
         private void OnClientConnect(ISocket clientSocket)
         {
-            if (clientSocket == null) return; // socket closed
-
-            ListenForClients ();
-
             FleckLog.Debug(String.Format("Client connected from {0}:{1}", clientSocket.RemoteIpAddress, clientSocket.RemotePort.ToString()));
 
             WebSocketConnection connection = null;
