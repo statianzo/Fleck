@@ -109,32 +109,32 @@ namespace Fleck
             }
         }
 
-
         private void ListenForClients ()
         {
-          ManualResetEvent acceptDone = new ManualResetEvent (false);
+            ManualResetEvent acceptDone = new ManualResetEvent (false);
+            bool running = true;
 
-          Task.Run (() => {
-        
-            while (true) {
+            Task.Run (() => {
           
-            acceptDone.Reset ();
+            while (running) {
+            
+                acceptDone.Reset ();
 
-            var task = ListenerSocket.Accept (
-              s => { OnClientConnect (s); acceptDone.Set (); },
-              e => { FleckLog.Error ("Error while listening for new clients", e);
-                      if (RestartAfterListenError) TryRestart (); 
-                      acceptDone.Set (); }
-            );
+                var task = ListenerSocket.Accept(
+                  s => { acceptDone.Set (); OnClientConnect (s); },
+                  e => { FleckLog.Error ("Error while listening for new clients", e);
+                         if (RestartAfterListenError) TryRestart (); 
+                         running = false; acceptDone.Set (); }
+                  );
 
-              if (task == null) break;
+                 if(task == null) break;
 
-              task.ContinueWith((t) => FleckLog.Warn ("Error during client connect", t.Exception),
-                                TaskContinuationOptions.OnlyOnFaulted);
+                 task.ContinueWith((t) => FleckLog.Warn ("Error during client connect", t.Exception),
+                                    TaskContinuationOptions.OnlyOnFaulted);
 
-              acceptDone.WaitOne ();
-            }
-          });
+                 acceptDone.WaitOne ();
+              }
+            });
         }
 
         private void OnClientConnect(ISocket clientSocket)
