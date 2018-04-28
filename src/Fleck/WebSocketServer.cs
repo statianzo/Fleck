@@ -111,34 +111,37 @@ namespace Fleck
 
         private void ListenForClients ()
         {
-            ManualResetEvent acceptDone = new ManualResetEvent (false);
-            bool running = true;
+          ManualResetEvent acceptDone = new ManualResetEvent (false);
+          bool running = true;
 
-            Task.Run (() => {
+          Task.Run (() => {
+        
+          while (running) {
           
-            while (running) {
-            
-                acceptDone.Reset ();
+              acceptDone.Reset ();
 
-                var task = ListenerSocket.Accept(
-                  s => { acceptDone.Set (); OnClientConnect (s); },
-                  e => { FleckLog.Error ("Error while listening for new clients", e);
-                         if (RestartAfterListenError) TryRestart (); 
-                         running = false; acceptDone.Set (); }
-                  );
+              var task = ListenerSocket.Accept(
+                s => {
+                       running = (s != null);
+                       acceptDone.Set (); 
+                       OnClientConnect (s); },
+                e => { FleckLog.Error ("Error while listening for new clients", e);
+                       if (RestartAfterListenError) TryRestart (); 
+                       running = false; acceptDone.Set ();  }
+                );
 
-                 if(task == null) break;
+               task.ContinueWith((t) => FleckLog.Warn ("Error during client connect", t.Exception),
+                                  TaskContinuationOptions.OnlyOnFaulted);
 
-                 task.ContinueWith((t) => FleckLog.Warn ("Error during client connect", t.Exception),
-                                    TaskContinuationOptions.OnlyOnFaulted);
-
-                 acceptDone.WaitOne ();
-              }
-            });
+               acceptDone.WaitOne ();
+            }
+          });
         }
 
         private void OnClientConnect(ISocket clientSocket)
         {
+            if (clientSocket == null) return; // socket closed
+
             FleckLog.Debug(String.Format("Client connected from {0}:{1}", clientSocket.RemoteIpAddress, clientSocket.RemotePort.ToString()));
 
             WebSocketConnection connection = null;

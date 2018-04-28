@@ -132,10 +132,8 @@ namespace Fleck
 
         public Task Accept(Action<ISocket> callback, Action<Exception> error)
         {
-            Func<IAsyncResult, ISocket> end = r => new SocketWrapper(_socket.EndAccept(r));
+            Func<IAsyncResult, ISocket> end = r => _tokenSource.Token.IsCancellationRequested ? null : new SocketWrapper (_socket.EndAccept (r));
             var task = _taskFactory.FromAsync(_socket.BeginAccept, end, null);
-            
-            if (_tokenSource.IsCancellationRequested) return null;
 
             task.ContinueWith(t => error(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
 
