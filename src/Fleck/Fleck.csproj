@@ -11,7 +11,4 @@
     <PackageTags>websockets server html5 events</PackageTags>
     <TargetFrameworks>net45;netstandard2.0;netcoreapp2.0</TargetFrameworks>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Remove="HandshakeException.cs" />
-  </ItemGroup>
 </Project>
