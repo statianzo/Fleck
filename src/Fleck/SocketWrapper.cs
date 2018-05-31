@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
@@ -58,10 +59,18 @@ namespace Fleck
             _socket = socket;
             if (_socket.Connected)
                 _stream = new NetworkStream(_socket);
-                
+
             // The tcp keepalive default values on most systems
             // are huge (~7200s). Set them to something more reasonable.
+#if NET45
             SetKeepAlive(socket, KeepAliveInterval, RetryInterval);
+#else
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                SetKeepAlive(socket, KeepAliveInterval, RetryInterval);
+            }
+#endif
+
         }
 
         public Task Authenticate(X509Certificate2 certificate, SslProtocols enabledSslProtocols, Action callback, Action<Exception> error)
