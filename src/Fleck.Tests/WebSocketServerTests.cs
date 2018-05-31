@@ -87,8 +87,8 @@ namespace Fleck.Tests
         }
 
         [Test]
-        [Ignore("Fails for an unknown release, does the test host need IPv6?")]
-        public void ShouldSupportDualStackListenWhenServerV4All()
+		[Ignore("Fails for an unknown release, does the test host need IPv6?")]
+		public void ShouldSupportDualStackListenWhenServerV4All()
         {
             _server = new WebSocketServer("ws://0.0.0.0:8000");
             _server.Start(connection => { });
@@ -101,7 +101,8 @@ namespace Fleck.Tests
 #else
 
         [Test]
-        public void ShouldSupportDualStackListenWhenServerV6All()
+		[Ignore("Fails for an unknown release, does the test host need IPv6?")]
+		public void ShouldSupportDualStackListenWhenServerV6All()
         {
             _server = new WebSocketServer("ws://[::]:8000");
             _server.Start(connection => { });
