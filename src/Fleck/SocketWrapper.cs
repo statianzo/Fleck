@@ -7,9 +7,7 @@ using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using System.Threading;
-#if !NET45
 using System.Runtime.InteropServices;
-#endif
 
 namespace Fleck
 {

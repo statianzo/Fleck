@@ -5,9 +5,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Collections.Generic;
 using System.Security.Authentication;
 using Fleck.Helpers;
-#if !NET45
 using System.Runtime.InteropServices;
-#endif
 
 namespace Fleck
 {
@@ -28,7 +26,7 @@ namespace Fleck
 			if (!MonoHelper.IsRunningOnMono())
 			{
 #if __MonoCS__
-#else
+#elif !NET45
 				if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 					socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
 #endif
