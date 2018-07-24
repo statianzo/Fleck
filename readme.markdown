@@ -32,7 +32,7 @@ Fleck supports several WebSocket versions of modern web browsers
 - Hixie-Draft-76/Hybi-00 (Safari 5, Chrome < 14, Firefox 4 (when enabled))
 - Hybi-07 (Firefox 6)
 - Hybi-10 (Chrome 14-16, Firefox 7)
-- Hybi-13 (Chrome 17+)
+- Hybi-13 (Chrome 17+, Firefox 11+, Safari 6+, Edge 13+(?))
 
 Secure WebSockets (wss://)
 ---
