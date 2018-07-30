@@ -14,14 +14,9 @@ namespace Fleck
         private readonly string _scheme;
         private readonly IPAddress _locationIP;
         private Action<IWebSocketConnection> _config;
-
-        public WebSocketServer(string location)
+        
+        private void StartWebSocketListener()
         {
-            var uri = new Uri(location);
-            Port = uri.Port;
-            Location = location;
-            _locationIP = ParseIPAddress(uri);
-            _scheme = uri.Scheme;
             var socket = new Socket(_locationIP.AddressFamily, SocketType.Stream, ProtocolType.IP);
             if(!MonoHelper.IsRunningOnMono()){
 #if __MonoCS__
@@ -36,6 +31,32 @@ namespace Fleck
             }
             ListenerSocket = new SocketWrapper(socket);
             SupportedSubProtocols = new string[0];
+        }
+        
+        //TODO: turn scheme into an enum and not a string
+
+        ///<summary>
+        ///Start a WebSocketServer on the specified IPEndPoint with the desired scheme
+        ///</summary>
+        ///<param name="scheme">The scheme to use - "ws" or "wss".</param>
+        ///<param name="IPEndPoint">The IPEndPoint to use</param>
+        public WebSocketServer(string scheme, IPEndPoint location)
+        {
+            Port = location.Port;
+            Location = location.Address.ToString();
+            _locationIP = location.Address;
+            _scheme = scheme;
+            StartWebSocketListener();
+        }
+
+        public WebSocketServer(string location)
+        {
+            var uri = new Uri(location);
+            Port = uri.Port;
+            Location = location;
+            _locationIP = ParseIPAddress(uri);
+            _scheme = uri.Scheme;
+            StartWebSocketListener();
         }
 
         public ISocket ListenerSocket { get; set; }
