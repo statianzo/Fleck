@@ -32,6 +32,12 @@ namespace Fleck
                 {
                     socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
                 }
+#if !NET45
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, 1);
+                }
+#endif
 #endif
             }
             ListenerSocket = new SocketWrapper(socket);
