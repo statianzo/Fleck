@@ -11,6 +11,7 @@ namespace Fleck
     public WebSocketConnection(ISocket socket, Action<IWebSocketConnection> initialize, Func<byte[], WebSocketHttpRequest> parseRequest, Func<WebSocketHttpRequest, IHandler> handlerFactory, Func<IEnumerable<string>, string> negotiateSubProtocol)
     {
       Socket = socket;
+      OnValidate = () => { return true; };  
       OnOpen = () => { };
       OnClose = () => { };
       OnMessage = x => { };
@@ -36,6 +37,8 @@ namespace Fleck
     private bool _closing;
     private bool _closed;
     private const int ReadSize = 1024 * 4;
+
+    public Func<bool> OnValidate { get; set; }
 
     public Action OnOpen { get; set; }
 
@@ -139,6 +142,14 @@ namespace Fleck
       ConnectionInfo = WebSocketConnectionInfo.Create(request, Socket.RemoteIpAddress, Socket.RemotePort, subProtocol);
 
       _initialize(this);
+
+      var isValid = OnValidate.Invoke();
+      
+      if (!isValid)
+      {
+          CloseSocket();
+          return;
+      }
 
       var handshake = Handler.CreateHandshake(subProtocol);
       SendBytes(handshake, OnOpen);

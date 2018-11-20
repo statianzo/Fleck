@@ -152,6 +152,16 @@ namespace Fleck.Tests
             Assert.IsFalse(hit);
         }
 
+        [Test]
+        public void ShouldCloseSocketWhenOnValideReturnsFalse()
+        {
+            _connection.OnValidate = () => { return false; };
+
+            _connection.CreateHandler(new byte[0]);
+
+            _socketMock.Verify(e => e.Close(), Times.Once());
+        }
+
         private void SetupReadLengths(params int[] args)
         {
             var index = 0;

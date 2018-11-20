@@ -5,6 +5,7 @@ namespace Fleck
 {
     public interface IWebSocketConnection
     {
+        Func<bool> OnValidate { get; set; }
         Action OnOpen { get; set; }
         Action OnClose { get; set; }
         Action<string> OnMessage { get; set; }
