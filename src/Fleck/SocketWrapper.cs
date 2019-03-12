@@ -64,7 +64,7 @@ namespace Fleck
             // are huge (~7200s). Set them to something more reasonable.
 #if NET45
             SetKeepAlive(socket, KeepAliveInterval, RetryInterval);
-#else
+#elif !NET40
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 SetKeepAlive(socket, KeepAliveInterval, RetryInterval);

@@ -23,6 +23,7 @@ namespace Fleck
             _locationIP = ParseIPAddress(uri);
             _scheme = uri.Scheme;
             var socket = new Socket(_locationIP.AddressFamily, SocketType.Stream, ProtocolType.IP);
+#if !NET40
             if(!MonoHelper.IsRunningOnMono()){
 #if __MonoCS__
 #else
@@ -40,6 +41,7 @@ namespace Fleck
 #endif
 #endif
             }
+#endif
             ListenerSocket = new SocketWrapper(socket);
             SupportedSubProtocols = new string[0];
         }
