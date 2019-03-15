@@ -99,13 +99,11 @@ namespace Fleck.Handlers
                 if (data.Count < index + payloadLength) 
                     return; //Not complete
                 
-                var payload = data
-                                .Skip(index)
-                                .Take(payloadLength)
-                                .Select((x, i) => (byte)(x ^ maskBytes[i % 4]));
-                 
-                 
-                readState.Data.AddRange(payload);
+                byte[] payloadData = new byte[payloadLength];
+                for (int i = 0; i < payloadLength; i++)
+                    payloadData[i] = (byte)(data[index+i] ^ maskBytes[i % 4]);
+
+                readState.Data.AddRange(payloadData);
                 data.RemoveRange(0, index + payloadLength);
                 
                 if (frameType != FrameType.Continuation)
