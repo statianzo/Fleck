@@ -8,6 +8,7 @@ using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using System.Threading;
+using Fleck.Helpers;
 
 namespace Fleck
 {
@@ -62,15 +63,10 @@ namespace Fleck
 
             // The tcp keepalive default values on most systems
             // are huge (~7200s). Set them to something more reasonable.
-#if NET45
-            SetKeepAlive(socket, KeepAliveInterval, RetryInterval);
-#else
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (FleckRuntime.IsRunningOnWindows())
             {
                 SetKeepAlive(socket, KeepAliveInterval, RetryInterval);
             }
-#endif
-
         }
 
         public Task Authenticate(X509Certificate2 certificate, SslProtocols enabledSslProtocols, Action callback, Action<Exception> error)

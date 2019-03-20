@@ -15,37 +15,34 @@ namespace Fleck
         private readonly IPAddress _locationIP;
         private Action<IWebSocketConnection> _config;
 
-        public WebSocketServer(string location)
+        public WebSocketServer(string location, bool supportDualStack = true)
         {
             var uri = new Uri(location);
+
             Port = uri.Port;
             Location = location;
+            SupportDualStack = supportDualStack;
+
             _locationIP = ParseIPAddress(uri);
             _scheme = uri.Scheme;
             var socket = new Socket(_locationIP.AddressFamily, SocketType.Stream, ProtocolType.IP);
-            if(!MonoHelper.IsRunningOnMono()){
-#if __MonoCS__
-#else
-#if !NET45
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-#endif
+
+            if (SupportDualStack)
+            {
+                if (!FleckRuntime.IsRunningOnMono() && FleckRuntime.IsRunningOnWindows())
                 {
                     socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
-                }
-#if !NET45
-                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
                     socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, 1);
                 }
-#endif
-#endif
             }
+
             ListenerSocket = new SocketWrapper(socket);
             SupportedSubProtocols = new string[0];
         }
 
         public ISocket ListenerSocket { get; set; }
         public string Location { get; private set; }
+        public bool SupportDualStack { get; }
         public int Port { get; private set; }
         public X509Certificate2 Certificate { get; set; }
         public SslProtocols EnabledSslProtocols { get; set; }

@@ -9,6 +9,6 @@
     <PackageProjectUrl>https://github.com/statianzo/Fleck</PackageProjectUrl>
     <RepositoryUrl>https://github.com/statianzo/Fleck</RepositoryUrl>
     <PackageTags>websockets server html5 events</PackageTags>
-    <TargetFrameworks>net45;netstandard2.0;netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>net40;net45;netstandard2.0;netcoreapp2.0</TargetFrameworks>
   </PropertyGroup>
 </Project>
