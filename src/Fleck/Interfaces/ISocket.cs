@@ -16,11 +16,12 @@ namespace Fleck
         Stream Stream { get; }
         bool NoDelay { get; set; }
         EndPoint LocalEndPoint { get; }
+        int? OutgoingQueueSizeLimit { get; set; }
 
         Task<ISocket> Accept(Action<ISocket> callback, Action<Exception> error);
         Task Send(byte[] buffer, Action callback, Action<Exception> error);
         Task<int> Receive(byte[] buffer, Action<int> callback, Action<Exception> error, int offset = 0);
-        Task Authenticate(X509Certificate2 certificate, SslProtocols enabledSslProtocols, Action callback, Action<Exception> error);
+        Task Authenticate(X509Certificate2 certificate, SslProtocols enabledSslProtocols, Action callback, Action<Exception> error, int? queueSizeLimit);
 
         void Dispose();
         void Close();

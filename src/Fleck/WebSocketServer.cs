@@ -47,7 +47,11 @@ namespace Fleck
         public X509Certificate2 Certificate { get; set; }
         public SslProtocols EnabledSslProtocols { get; set; }
         public IEnumerable<string> SupportedSubProtocols { get; set; }
-        public bool RestartAfterListenError {get; set; }
+        public bool RestartAfterListenError { get; set; }
+        /// <summary>
+        /// Defines the limit (in bytes) of the outgoing queue of a connection (queuing is only used for secure connections). If reached, the connection is closed
+        /// </summary>
+        public int? OutgoingQueueSizeLimit { get; set; }
 
         public bool IsSecure
         {
@@ -152,7 +156,8 @@ namespace Fleck
                     .Authenticate(Certificate,
                                   EnabledSslProtocols,
                                   connection.StartReceiving,
-                                  e => FleckLog.Warn("Failed to Authenticate", e));
+                                  e => FleckLog.Warn("Failed to Authenticate", e),
+                                  OutgoingQueueSizeLimit);
             }
             else
             {
