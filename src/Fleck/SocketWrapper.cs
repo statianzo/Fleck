@@ -68,7 +68,7 @@ namespace Fleck
             }
         }
 
-        public Task Authenticate(X509Certificate2 certificate, SslProtocols enabledSslProtocols, Action callback, Action<Exception> error, int? queueSizeLimit)
+        public Task Authenticate(X509Certificate2 certificate, SslProtocols enabledSslProtocols, Action callback, Action<Exception> error, int queueSizeLimit)
         {
             var ssl = new SslStream(_stream, false);
             _stream = new QueuedStream(ssl, queueSizeLimit);

@@ -38,6 +38,8 @@ namespace Fleck
 
             ListenerSocket = new SocketWrapper(socket);
             SupportedSubProtocols = new string[0];
+
+            OutgoingQueueSizeLimit = 1024 * 1024 * 5; // 5 MB
         }
 
         public ISocket ListenerSocket { get; set; }
@@ -51,7 +53,7 @@ namespace Fleck
         /// <summary>
         /// Defines the limit (in bytes) of the outgoing queue of a connection (queuing is only used for secure connections). If reached, the connection is closed
         /// </summary>
-        public int? OutgoingQueueSizeLimit { get; set; }
+        public int OutgoingQueueSizeLimit { get; set; }
 
         public bool IsSecure
         {
