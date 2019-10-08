@@ -50,6 +50,10 @@ server.Start(socket =>
 });
 ```
 
+Having issues making a certificate? See this
+[guide to creating an x509](https://github.com/statianzo/Fleck/issues/214#issuecomment-364413879)
+by [@AdrianBathurst](https://github.com/AdrianBathurst)
+
 SubProtocol Negotiation
 ---
 
