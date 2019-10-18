@@ -7,6 +7,9 @@ Fleck is a WebSocket server implementation in C#. Branched from the
 [Nugget][nugget] project, Fleck requires no inheritance, container, or
 additional references.
 
+Fleck has no dependency on `HttpListener` or `HTTP.sys` meaning that it
+will work on Windows 7 and Server 2008 hosts. [WebSocket Remarks - Microsoft Docs](https://docs.microsoft.com/en-us/dotnet/api/system.net.websockets.websocket?redirectedfrom=MSDN&view=netframework-4.5#remarks)
+
 Example
 ---
 
