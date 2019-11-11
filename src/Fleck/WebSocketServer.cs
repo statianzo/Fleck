@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using Fleck.Helpers;
+using System.Net.NetworkInformation;
+using System.Linq;
 
 namespace Fleck
 {
@@ -79,29 +81,48 @@ namespace Fleck
 
         public void Start(Action<IWebSocketConnection> config)
         {
-            var ipLocal = new IPEndPoint(_locationIP, Port);
-            ListenerSocket.Bind(ipLocal);
-            ListenerSocket.Listen(100);
-            Port = ((IPEndPoint)ListenerSocket.LocalEndPoint).Port;
-            FleckLog.Info(string.Format("Server started at {0} (actual port {1})", Location, Port));
-            if (_scheme == "wss")
+            if (CheckIfPortAvailable(Port))
             {
-                if (Certificate == null)
+                var ipLocal = new IPEndPoint(_locationIP, Port);
+                ListenerSocket.Bind(ipLocal);
+                ListenerSocket.Listen(100);
+                Port = ((IPEndPoint)ListenerSocket.LocalEndPoint).Port;
+                FleckLog.Info(string.Format("Server started at {0} (actual port {1})", Location, Port));
+                if (_scheme == "wss")
                 {
-                    FleckLog.Error("Scheme cannot be 'wss' without a Certificate");
-                    return;
-                }
+                    if (Certificate == null)
+                    {
+                        FleckLog.Error("Scheme cannot be 'wss' without a Certificate");
+                        return;
+                    }
 
-                if (EnabledSslProtocols == SslProtocols.None)
-                {
-                    EnabledSslProtocols = SslProtocols.Tls;
-                    FleckLog.Debug("Using default TLS 1.0 security protocol.");
+                    if (EnabledSslProtocols == SslProtocols.None)
+                    {
+                        EnabledSslProtocols = SslProtocols.Tls;
+                        FleckLog.Debug("Using default TLS 1.0 security protocol.");
+                    }
                 }
+                ListenForClients();
+                _config = config;
             }
-            ListenForClients();
-            _config = config;
-        }
+            else
+            {
 
+                FleckLog.Error(string.Format("Server cannot start port {0}, port already in use", Port));
+                throw new Exception("Error: listen EADDRINUSE: address already in use :::" + Port);
+            }
+        }
+        public bool CheckIfPortAvailable(int port)
+        {
+            IPGlobalProperties properties = IPGlobalProperties.GetIPGlobalProperties();
+            IPEndPoint[] end_point = properties.GetActiveTcpListeners();
+            var ports = end_point.Select(p => p.Port).ToList<int>();
+            if (!ports.Contains(port))
+            {
+                return true;
+            }
+            return false;
+        }
         private void ListenForClients()
         {
             ListenerSocket.Accept(OnClientConnect, e => {
