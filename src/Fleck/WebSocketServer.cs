@@ -27,12 +27,13 @@ namespace Fleck
             _scheme = uri.Scheme;
             var socket = new Socket(_locationIP.AddressFamily, SocketType.Stream, ProtocolType.IP);
 
+            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, 1);
+
             if (SupportDualStack)
             {
                 if (!FleckRuntime.IsRunningOnMono() && FleckRuntime.IsRunningOnWindows())
                 {
                     socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
-                    socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, 1);
                 }
             }
 
