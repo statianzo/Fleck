@@ -24,6 +24,42 @@ namespace Fleck
             InvalidFramePayloadData, PolicyViolation, MessageTooBig,
             MandatoryExt, InternalServerError
         };
+
+        public static string ConvertStatusCodeToString(ushort statusCode)
+        {
+            switch (statusCode)
+            {
+                case 1000:
+                    return nameof(NormalClosure);
+                case 1001:
+                    return nameof(GoingAway);
+                case 1002:
+                    return nameof(ProtocolError);
+                case 1003:
+                    return nameof(UnsupportedDataType);
+                case 1005:
+                    return nameof(NoStatusReceived);
+                case 1006:
+                    return nameof(AbnormalClosure);
+                case 1007:
+                    return nameof(InvalidFramePayloadData);
+                case 1008:
+                    return nameof(PolicyViolation);
+                case 1009:
+                    return nameof(MessageTooBig);
+                case 1010:
+                    return nameof(MandatoryExt);
+                case 1011:
+                    return nameof(InternalServerError);
+                case 1015:
+                    return nameof(TLSHandshake);
+                case 3000:
+                    return nameof(ApplicationError);
+
+                default:
+                    throw new ArgumentException($"Unexpected status status code: {statusCode}", nameof(statusCode));
+            }
+        }
     }
 }
 
