@@ -1,0 +1,17 @@
+#include<stdio.h>
+int main()
+{
+   int *p;
+   int var = 10;
+   //Assign the address of variable var to the pointer p.
+   //The p can hold the address of var is an integer type variable.
+   p=&var;
+   
+   printf("Value of variable var is : %d",var);
+   printf("\nValue of variable var is : %d",*p);
+   printf("\nAddress of variable var is : %p",&var);
+   printf("\nAddress of variable var is : %p",p);
+   printf("\nAddress of Pointer p is : %p",&p);
+   
+   return 0; 
+  }
