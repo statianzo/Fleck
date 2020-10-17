@@ -1,0 +1,15 @@
+#include<stdio.h>
+
+int *fun()
+{
+	const static int x=5;   // by using static we print our output.
+	return &x;
+}
+int main()
+{
+    int *p = fun();
+    fflush(stdin);
+    printf("%d",*p);
+    
+	return 0;
+}
