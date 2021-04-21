@@ -17,6 +17,7 @@ namespace Fleck
         Task SendPing(byte[] message);
         Task SendPong(byte[] message);
         void Close();
+        void Close(int code);
         IWebSocketConnectionInfo ConnectionInfo { get; }
         bool IsAvailable { get; }
     }
