@@ -15,10 +15,15 @@ namespace Fleck
         readonly Queue<WriteData> _queue = new Queue<WriteData>();
         int _pendingWrite;
         bool _disposed;
+        int _queueSize = 0;
+        int? _queueSizeLimit;
 
-        public QueuedStream(Stream stream)
+        public int? QueueSizeLimit { get { return _queueSizeLimit; } set { _queueSizeLimit = value; } }
+
+        public QueuedStream(Stream stream, int? queueSizeLimit)
         {
             _stream = stream;
+            _queueSizeLimit = queueSizeLimit;
         }
 
         public override bool CanRead
@@ -80,6 +85,13 @@ namespace Fleck
                 if (_pendingWrite > 0)
                 {
                     _queue.Enqueue(data);
+                    _queueSize += count;
+
+                    if (_queueSizeLimit.HasValue && _queueSize > _queueSizeLimit.Value)
+                    {
+                        throw new Exception(string.Format("Queue size exceeded. {0} added", count));
+                    }
+
                     return data.AsyncResult;
                 }
                 return BeginWriteInternal(buffer, offset, count, callback, state, data);
@@ -158,6 +170,7 @@ namespace Fleck
                     while (_queue.Count > 0)
                     {
                         var data = _queue.Dequeue();
+                        _queueSize -= data.Count;
                         try
                         {
                             data.AsyncResult.ActualResult = BeginWriteInternal(data.Buffer, data.Offset, data.Count, data.Callback, data.State, data);

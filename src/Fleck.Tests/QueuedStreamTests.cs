@@ -14,7 +14,7 @@ namespace Fleck.Tests
         public void Length()
         {
             var m = new Mock<Stream>();
-            var q = new QueuedStream(m.Object);
+            var q = new QueuedStream(m.Object, null);
 
             m.SetupGet(x => x.Length).Returns(100);
 
@@ -27,7 +27,7 @@ namespace Fleck.Tests
         public void CanWrite(bool expected)
         {
             var m = new Mock<Stream>();
-            var q = new QueuedStream(m.Object);
+            var q = new QueuedStream(m.Object, null);
 
             m.SetupGet(x => x.CanWrite).Returns(expected);
 
@@ -40,7 +40,7 @@ namespace Fleck.Tests
         public void CanRead(bool expected)
         {
             var m = new Mock<Stream>();
-            var q = new QueuedStream(m.Object);
+            var q = new QueuedStream(m.Object, null);
 
             m.SetupGet(x => x.CanRead).Returns(expected);
 
@@ -53,7 +53,7 @@ namespace Fleck.Tests
         public void CanSeek(bool expected)
         {
             var m = new Mock<Stream>();
-            var q = new QueuedStream(m.Object);
+            var q = new QueuedStream(m.Object, null);
 
             m.SetupGet(x => x.CanSeek).Returns(expected);
 
@@ -64,7 +64,7 @@ namespace Fleck.Tests
         public void Position()
         {
             var m = new Mock<Stream>();
-            var q = new QueuedStream(m.Object);
+            var q = new QueuedStream(m.Object, null);
 
             m.SetupGet(x => x.Position).Returns(1234);
 
@@ -75,7 +75,7 @@ namespace Fleck.Tests
         public void Read()
         {
             var m = new Mock<Stream>();
-            var q = new QueuedStream(m.Object);
+            var q = new QueuedStream(m.Object, null);
             var b = new byte[] { 0x1, 0x2, 0x3, 0x4 };
 
             m.Setup(x => x.Read(b, 100, 2000)).Returns(1800);
@@ -87,7 +87,7 @@ namespace Fleck.Tests
         public void Seek()
         {
             var m = new Mock<Stream>();
-            var q = new QueuedStream(m.Object);
+            var q = new QueuedStream(m.Object, null);
 
             m.Setup(x => x.Seek(100L, SeekOrigin.End)).Returns(1800);
 
@@ -98,7 +98,7 @@ namespace Fleck.Tests
         public void SetLength()
         {
             var m = new Mock<Stream>();
-            var q = new QueuedStream(m.Object);
+            var q = new QueuedStream(m.Object, null);
 
             q.SetLength(100L);
 
@@ -108,7 +108,7 @@ namespace Fleck.Tests
         [Test]
         public void Write()
         {
-            var q = new QueuedStream(new MemoryStream());
+            var q = new QueuedStream(new MemoryStream(), null);
 
             Assert.Throws<NotSupportedException>(() => q.Write(new byte[] { 1, 2, 3 }, 0, 3));
         }
@@ -117,7 +117,7 @@ namespace Fleck.Tests
         public void BeginRead()
         {
             var m = new Mock<Stream>();
-            var q = new QueuedStream(m.Object);
+            var q = new QueuedStream(m.Object, null);
             var d = new byte[] { 1, 2, 3 };
             var a = new MockAsyncResult("A");
 
@@ -133,7 +133,7 @@ namespace Fleck.Tests
         public void EndRead()
         {
             var m = new Mock<Stream>();
-            var q = new QueuedStream(m.Object);
+            var q = new QueuedStream(m.Object, null);
             var a = new MockAsyncResult("A");
 
             m.Setup(x => x.EndRead(a));
@@ -146,7 +146,7 @@ namespace Fleck.Tests
         [Test]
         public void EndWrite()
         {
-            var q = new QueuedStream(new MemoryStream());
+            var q = new QueuedStream(new MemoryStream(), null);
             var a = new MockAsyncResult("A");
 
             Assert.Throws<ArgumentException>(() => q.EndWrite(a));
@@ -156,7 +156,7 @@ namespace Fleck.Tests
         public void Flush()
         {
             var m = new Mock<Stream>();
-            var q = new QueuedStream(m.Object);
+            var q = new QueuedStream(m.Object, null);
 
             m.Setup(x => x.Flush());
 
@@ -169,7 +169,7 @@ namespace Fleck.Tests
         public void Close()
         {
             var m = new Mock<Stream>();
-            var q = new QueuedStream(m.Object);
+            var q = new QueuedStream(m.Object, null);
 
             m.Setup(x => x.Close());
 
@@ -183,7 +183,7 @@ namespace Fleck.Tests
         {
             // GIVEN: a QueuedStream
             var m = new Mock<Stream>();
-            var q = new QueuedStream(m.Object);
+            var q = new QueuedStream(m.Object, null);
             var a = new MockAsyncResult("A");
             var b = new MockAsyncResult("B");
             var trace = new StringBuilder();
@@ -209,7 +209,7 @@ namespace Fleck.Tests
         {
             // GIVEN: a QueuedStream
             var m = new Mock<Stream>(MockBehavior.Strict);
-            var q = new QueuedStream(m.Object);
+            var q = new QueuedStream(m.Object, null);
             var a = new MockAsyncResult("A");
             var b = new MockAsyncResult("B");
             var trace = new StringBuilder();
@@ -237,7 +237,7 @@ namespace Fleck.Tests
         {
             // GIVEN: a QueuedStream
             var m = new Mock<Stream>(MockBehavior.Strict);
-            var q = new QueuedStream(m.Object);
+            var q = new QueuedStream(m.Object, null);
             var a = new MockAsyncResult("A");
             var b = new MockAsyncResult("B");
             var trace = new StringBuilder();
@@ -265,7 +265,7 @@ namespace Fleck.Tests
         {
             // GIVEN: a QueuedStream
             var m = new Mock<Stream>(MockBehavior.Strict);
-            var q = new QueuedStream(m.Object);
+            var q = new QueuedStream(m.Object, null);
             var a = new MockAsyncResult("A");
             var b = new MockAsyncResult("B");
             var c = new MockAsyncResult("C");

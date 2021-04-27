@@ -14,7 +14,6 @@ namespace Fleck
 {
     public class SocketWrapper : ISocket
     {
-    
         public const UInt32 KeepAliveInterval = 60000;
         public const UInt32 RetryInterval = 10000;
     
@@ -69,10 +68,11 @@ namespace Fleck
             }
         }
 
-        public Task Authenticate(X509Certificate2 certificate, SslProtocols enabledSslProtocols, Action callback, Action<Exception> error)
+        public Task Authenticate(X509Certificate2 certificate, SslProtocols enabledSslProtocols, Action callback, Action<Exception> error, int queueSizeLimit)
         {
             var ssl = new SslStream(_stream, false);
-            _stream = new QueuedStream(ssl);
+            _stream = new QueuedStream(ssl, queueSizeLimit);
+            
             Func<AsyncCallback, object, IAsyncResult> begin =
                 (cb, s) => ssl.BeginAuthenticateAsServer(certificate, false, enabledSslProtocols, false, cb, s);
 
@@ -113,6 +113,12 @@ namespace Fleck
         public EndPoint LocalEndPoint
         {
             get { return _socket.LocalEndPoint; }
+        }
+
+        public int? OutgoingQueueSizeLimit
+        {
+            get { if (Stream is QueuedStream) { return (Stream as QueuedStream).QueueSizeLimit; } else return null; }
+            set { if (Stream is QueuedStream) { (Stream as QueuedStream).QueueSizeLimit = value; } else throw new Exception("Cannot set limit for unsecured connections"); }
         }
 
         public Task<int> Receive(byte[] buffer, Action<int> callback, Action<Exception> error, int offset)
