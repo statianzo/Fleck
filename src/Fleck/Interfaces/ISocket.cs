@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Fleck
 {
-    public interface ISocket
+    public interface ISocket : IDisposable
     {
         bool Connected { get; }
         string RemoteIpAddress { get; }

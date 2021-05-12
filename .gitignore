@@ -219,3 +219,4 @@ artifacts
 src/CommonAssemblyInfo.cs
 *.dotCover
 *mm_cache.bin
+src/.vs/Fleck/v15/sqlite3/storage.ide

@@ -44,7 +44,9 @@ namespace Fleck.Handlers
             }
             
             memoryStream.Write(payload, 0, payload.Length);
-            
+
+            memoryStream.Dispose();
+
             return memoryStream.ToArray();
         }
         
