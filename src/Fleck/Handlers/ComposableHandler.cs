@@ -8,6 +8,7 @@ namespace Fleck.Handlers
         public Func<string, byte[]> Handshake = s => new byte[0];
         public Func<string, byte[]> TextFrame = x => new byte[0];
         public Func<byte[], byte[]> BinaryFrame = x => new byte[0];
+        public Func<ArraySegment<byte>, byte[]> BinarySegmentFrame = x => new byte[0];
         public Action<List<byte>> ReceiveData = delegate { };
         public Func<byte[], byte[]> PingFrame = i => new byte[0];
         public Func<byte[], byte[]> PongFrame = i => new byte[0];
@@ -36,7 +37,12 @@ namespace Fleck.Handlers
         {
             return BinaryFrame(bytes);
         }
-        
+
+        public byte[] FrameBinary(ArraySegment<byte> bytes)
+        {
+            return BinarySegmentFrame(bytes);
+        }
+
         public byte[] FramePing(byte[] bytes)
         {
             return PingFrame(bytes);

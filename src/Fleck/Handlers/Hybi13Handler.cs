@@ -17,6 +17,7 @@ namespace Fleck.Handlers
                 Handshake = sub => Hybi13Handler.BuildHandshake(request, sub),
                 TextFrame = s => Hybi13Handler.FrameData(Encoding.UTF8.GetBytes(s), FrameType.Text),
                 BinaryFrame = s => Hybi13Handler.FrameData(s, FrameType.Binary),
+                BinarySegmentFrame = s => Hybi13Handler.FrameData(s, FrameType.Binary),
                 PingFrame = s => Hybi13Handler.FrameData(s, FrameType.Ping),
                 PongFrame = s => Hybi13Handler.FrameData(s, FrameType.Pong),
                 CloseFrame = i => Hybi13Handler.FrameData(i.ToBigEndianBytes<ushort>(), FrameType.Close),
@@ -47,7 +48,36 @@ namespace Fleck.Handlers
             
             return memoryStream.ToArray();
         }
-        
+
+        public static byte[] FrameData(ArraySegment<byte> payload, FrameType frameType)
+        {
+            var memoryStream = new MemoryStream();
+            byte op = (byte)((byte)frameType + 128);
+
+            memoryStream.WriteByte(op);
+
+            if (payload.Count > UInt16.MaxValue)
+            {
+                memoryStream.WriteByte(127);
+                var lengthBytes = payload.Count.ToBigEndianBytes<ulong>();
+                memoryStream.Write(lengthBytes, 0, lengthBytes.Length);
+            }
+            else if (payload.Count > 125)
+            {
+                memoryStream.WriteByte(126);
+                var lengthBytes = payload.Count.ToBigEndianBytes<ushort>();
+                memoryStream.Write(lengthBytes, 0, lengthBytes.Length);
+            }
+            else
+            {
+                memoryStream.WriteByte((byte)payload.Count);
+            }
+
+            memoryStream.Write(payload.Array, 0, payload.Count);
+
+            return memoryStream.ToArray();
+        }
+
         public static void ReceiveData(List<byte> data, ReadState readState, Action<FrameType, byte[]> processFrame)
         {
             
