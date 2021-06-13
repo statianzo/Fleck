@@ -73,7 +73,7 @@ namespace Fleck.Handlers
                 memoryStream.WriteByte((byte)payload.Count);
             }
 
-            memoryStream.Write(payload.Array, 0, payload.Count);
+            memoryStream.Write(payload.Array, payload.Offset, payload.Count);
 
             return memoryStream.ToArray();
         }
