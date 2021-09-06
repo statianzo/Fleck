@@ -104,6 +104,11 @@ namespace Fleck
             get { return _stream; }
         }
 
+        public Socket Socket
+        {
+            get { return _socket; }
+        }
+
         public bool NoDelay
         {
             get { return _socket.NoDelay; }
