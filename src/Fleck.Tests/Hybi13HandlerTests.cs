@@ -27,7 +27,7 @@ namespace Fleck.Tests
             _onPing = delegate { };
             _onPong = delegate { };
 
-            _handler = Hybi13Handler.Create(_request, s => _onMessage(s), () => _onClose(), b => _onBinary(b), b => _onPing(b), b => _onPong(b));
+            _handler = Hybi13Handler.Create(_request, HandlerSettings.Default, s => _onMessage(s), () => _onClose(), b => _onBinary(b), b => _onPing(b), b => _onPong(b));
         }
 
         [Test]

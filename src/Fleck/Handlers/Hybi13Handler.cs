@@ -9,7 +9,7 @@ namespace Fleck.Handlers
 {
     public static class Hybi13Handler
     {
-        public static IHandler Create(WebSocketHttpRequest request, Action<string> onMessage, Action onClose, Action<byte[]> onBinary, Action<byte[]> onPing, Action<byte[]> onPong)
+        public static IHandler Create(WebSocketHttpRequest request, HandlerSettings settings, Action<string> onMessage, Action onClose, Action<byte[]> onBinary, Action<byte[]> onPing, Action<byte[]> onPong)
         {
             var readState = new ReadState();
             return new ComposableHandler
@@ -20,7 +20,7 @@ namespace Fleck.Handlers
                 PingFrame = s => Hybi13Handler.FrameData(s, FrameType.Ping),
                 PongFrame = s => Hybi13Handler.FrameData(s, FrameType.Pong),
                 CloseFrame = i => Hybi13Handler.FrameData(i.ToBigEndianBytes<ushort>(), FrameType.Close),
-                ReceiveData = d => Hybi13Handler.ReceiveData(d, readState, (op, data) => Hybi13Handler.ProcessFrame(op, data, onMessage, onClose, onBinary, onPing, onPong))
+                ReceiveData = d => Hybi13Handler.ReceiveData(d, settings, readState, (op, data) => Hybi13Handler.ProcessFrame(op, data, onMessage, onClose, onBinary, onPing, onPong))
             };
         }
         
@@ -48,9 +48,8 @@ namespace Fleck.Handlers
             return memoryStream.ToArray();
         }
         
-        public static void ReceiveData(List<byte> data, ReadState readState, Action<FrameType, byte[]> processFrame)
+        public static void ReceiveData(List<byte> data, HandlerSettings settings, ReadState readState, Action<FrameType, byte[]> processFrame)
         {
-            
             while (data.Count >= 2)
             {
                 var isFinal = (data[0] & 128) != 0;
@@ -58,8 +57,7 @@ namespace Fleck.Handlers
                 var frameType = (FrameType)(data[0] & 15);
                 var isMasked = (data[1] & 128) != 0;
                 var length = (data[1] & 127);
-                
-                
+
                 if (!isMasked
                     || !Enum.IsDefined(typeof(FrameType), frameType)
                     || reservedBits != 0 //Must be zero per spec 5.2
@@ -87,15 +85,17 @@ namespace Fleck.Handlers
                 {
                     payloadLength = length;
                 }
-                
+
+                if (payloadLength > settings.Hybi13MaxMessageSize)
+                    throw new WebSocketException(WebSocketStatusCodes.MessageTooBig);
+
                 if (data.Count < index + 4) 
                     return; //Not complete
-               
+
                 var maskBytes = data.Skip(index).Take(4).ToArray();
                 
                 index += 4;
-                
-                
+
                 if (data.Count < index + payloadLength) 
                     return; //Not complete
                 

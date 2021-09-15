@@ -15,7 +15,9 @@ namespace Fleck
         private readonly IPAddress _locationIP;
         private Action<IWebSocketConnection> _config;
 
-        public WebSocketServer(string location, bool supportDualStack = true)
+        private HandlerSettings _settings;
+        
+        public WebSocketServer(string location, HandlerSettings settings, bool supportDualStack = true)
         {
             var uri = new Uri(location);
 
@@ -27,6 +29,8 @@ namespace Fleck
             _scheme = uri.Scheme;
             var socket = new Socket(_locationIP.AddressFamily, SocketType.Stream, ProtocolType.IP);
 
+            _settings = settings;
+            
             socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, 1);
 
             if (SupportDualStack)
@@ -39,6 +43,10 @@ namespace Fleck
 
             ListenerSocket = new SocketWrapper(socket);
             SupportedSubProtocols = new string[0];
+        }
+
+        public WebSocketServer(string location, bool supportDualStack = true) : this(location, HandlerSettings.Default, supportDualStack)
+        {
         }
 
         public ISocket ListenerSocket { get; set; }
@@ -139,6 +147,7 @@ namespace Fleck
                 _config,
                 bytes => RequestParser.Parse(bytes, _scheme),
                 r => HandlerFactory.BuildHandler(r,
+                                                 _settings,
                                                  s => connection.OnMessage(s),
                                                  connection.Close,
                                                  b => connection.OnBinary(b),

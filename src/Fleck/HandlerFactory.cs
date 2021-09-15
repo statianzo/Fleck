@@ -5,7 +5,7 @@ namespace Fleck
 {
     public class HandlerFactory
     {
-        public static IHandler BuildHandler(WebSocketHttpRequest request, Action<string> onMessage, Action onClose, Action<byte[]> onBinary, Action<byte[]> onPing, Action<byte[]> onPong)
+        public static IHandler BuildHandler(WebSocketHttpRequest request, HandlerSettings settings, Action<string> onMessage, Action onClose, Action<byte[]> onBinary, Action<byte[]> onPing, Action<byte[]> onPong)
         {
             var version = GetVersion(request);
             
@@ -16,7 +16,7 @@ namespace Fleck
                 case "7":
                 case "8":
                 case "13":
-                    return Hybi13Handler.Create(request, onMessage, onClose, onBinary, onPing, onPong);
+                    return Hybi13Handler.Create(request, settings, onMessage, onClose, onBinary, onPing, onPong);
                 case "policy-file-request":
                     return FlashSocketPolicyRequestHandler.Create(request);
             }
