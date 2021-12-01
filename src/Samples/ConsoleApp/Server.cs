@@ -38,7 +38,7 @@ namespace Fleck.Samples.ConsoleApp
                 foreach (var socket in allSockets.ToList())
                 {
                     socket.Send(input);
-                }
+                }//my change
                 input = Console.ReadLine();
             }
 
