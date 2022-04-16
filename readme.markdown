@@ -1,6 +1,19 @@
 Fleck
 ===
 
+åˆ†æ”¯åŠŸèƒ½:
+---
+å¢åŠ è‡ªåŠ¨è¿æ¥è„šæœ¬åŠŸèƒ½ï¼Œå®ç°é‡‡ç”¨httpè®¿é—®æ—¶å¯è‡ªåŠ¨è¿æ¥æœ¬æœåŠ¡å™¨ï¼Œæ— é¡»è‡ªå·±æ„å»ºå®¢æˆ·ç«¯è„šæœ¬
+
+åˆ†æ”¯ç¤ºä¾‹
+---
+æœåŠ¡ç«¯ä»£ç è¯¦è§ç¤ºä¾‹,ç¼–è¯‘å¹¶è¿è¡Œåï¼Œåœ¨æµè§ˆå™¨ä¸­è¾“å…¥ã€http://localhost:8000/auto ã€‘å³å¯è®¿é—®æœ¬æœåŠ¡å™¨
+åç¼€/autoä¸å¯å°‘
+```cs
+var server = new WebSocketServer("ws://0.0.0.0:8000");
+...
+```
+
 [![Build status](https://ci.appveyor.com/api/projects/status/k0s8hq5y4emak5j3/branch/master?svg=true)](https://ci.appveyor.com/project/statianzo/fleck/branch/master) [![NuGet](https://img.shields.io/nuget/v/Fleck.svg)](https://www.nuget.org/packages/Fleck/)
 
 Fleck is a WebSocket server implementation in C#. Branched from the
@@ -129,18 +142,6 @@ server.Start(socket =>
 {
   //...use as normal
 });
-```
-·ÖÖ§¹¦ÄÜ:
----
-Ôö¼Ó×Ô¶¯Á¬½Ó½Å±¾¹¦ÄÜ£¬ÊµÏÖ²ÉÓÃhttp·ÃÎÊÊ±¿É×Ô¶¯Á¬½Ó±¾·şÎñÆ÷£¬ÎŞĞë×Ô¼º¹¹½¨¿Í»§¶Ë½Å±¾
-
-·ÖÖ§Ê¾Àı
----
-·şÎñ¶Ë´úÂëÏê¼ûÊ¾Àı,±àÒë²¢ÔËĞĞºó£¬ÔÚä¯ÀÀÆ÷ÖĞÊäÈë¡¾http://localhost:8000/auto ¡¿¼´¿É·ÃÎÊ±¾·şÎñÆ÷
-ºó×º/auto²»¿ÉÉÙ
-```cs
-var server = new WebSocketServer("ws://0.0.0.0:8000");
-...
 ```
 
 [nugget]: http://nugget.codeplex.com/ 
