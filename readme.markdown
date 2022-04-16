@@ -10,7 +10,24 @@ Fleck
 服务端代码详见示例,编译并运行后，在浏览器中输入【http://localhost:8000/auto 】即可访问本服务器
 后缀/auto不可少
 ```cs
+private string GetAutoScript(string host, string path,string encode)
+{
+   const string LocalHost = "127.0.0.1:8000";//脚本中的服务器地址
+   //加载自动连接脚本模板，根据路径选择不同模板
+   var fileClient = (string.IsNullOrEmpty(path) 
+      || !path.EndsWith("/debug",StringComparison.OrdinalIgnoreCase))
+       ? Path.Combine(nvr.ModelsDir, "client.html")
+       : Path.Combine(nvr.ModelsDir, "debug.html");
+   if (!File.Exists(fileClient))
+       return string.Empty;
+   var script = File.ReadAllText(fileClient, Encoding.ASCII);     
+   if(!string.IsNullOrEmpty(script))
+       script= script.Replace(LocalHost, host);//用host替换脚本中的服务器地址
+   return script;
+}
+        
 var server = new WebSocketServer("ws://0.0.0.0:8000");
+ server.GetAutoScript += GetAutoScript;
 ...
 ```
 
