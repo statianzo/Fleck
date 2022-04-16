@@ -14,6 +14,11 @@ namespace Fleck
         private readonly string _scheme;
         private readonly IPAddress _locationIP;
         private Action<IWebSocketConnection> _config;
+        private string DoGetAutScript(string host, string path,string encode)
+        {            
+            return GetAutoScript?.Invoke(host,path, encode);
+        }
+        public event GetAutoScriptHandler GetAutoScript;
 
         public WebSocketServer(string location, bool supportDualStack = true)
         {
@@ -84,6 +89,7 @@ namespace Fleck
             ListenerSocket.Bind(ipLocal);
             ListenerSocket.Listen(100);
             Port = ((IPEndPoint)ListenerSocket.LocalEndPoint).Port;
+            _config = config;
             FleckLog.Info(string.Format("Server started at {0} (actual port {1})", Location, Port));
             if (_scheme == "wss")
             {
@@ -100,7 +106,6 @@ namespace Fleck
                 }
             }
             ListenForClients();
-            _config = config;
         }
 
         private void ListenForClients()
@@ -145,6 +150,8 @@ namespace Fleck
                                                  b => connection.OnPing(b),
                                                  b => connection.OnPong(b)),
                 s => SubProtocolNegotiator.Negotiate(SupportedSubProtocols, s));
+
+            connection.GetAutoScript += DoGetAutScript;
 
             if (IsSecure)
             {

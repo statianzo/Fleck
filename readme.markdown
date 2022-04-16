@@ -130,5 +130,17 @@ server.Start(socket =>
   //...use as normal
 });
 ```
+分支功能:
+---
+增加自动连接脚本功能，实现采用http访问时可自动连接本服务器，无须自己构建客户端脚本
+
+分支示例
+---
+服务端代码详见示例,编译并运行后，在浏览器中输入【http://localhost:8000/auto 】即可访问本服务器
+后缀/auto不可少
+```cs
+var server = new WebSocketServer("ws://0.0.0.0:8000");
+...
+```
 
 [nugget]: http://nugget.codeplex.com/ 

@@ -8,7 +8,37 @@ namespace Fleck
 {
   public class WebSocketConnection : IWebSocketConnection
   {
-    public WebSocketConnection(ISocket socket, Action<IWebSocketConnection> initialize, Func<byte[], WebSocketHttpRequest> parseRequest, Func<WebSocketHttpRequest, IHandler> handlerFactory, Func<IEnumerable<string>, string> negotiateSubProtocol)
+     private string DefaultScript(string host)=>"<!DOCTYPE HTML PUBLIC \" -//W3C//DTD HTML 4.0 Transitional//EN\">\r\n"
+            + "<html><head><title> websocket client </title>\r\n"
+            + "\t<script type = \"text/javascript\"> \r\n"
+            + "\t var ws = {};\r\n"
+            + "\t function init(){\r\n"
+            + "\t   undefined \r\n"
+            + "\t   msg = document.getElementById('msg'); \r\n"
+            + "\t   log = document.getElementById('log'); \r\n"
+            + $"\t   ws = new WebSocket(\"ws://{host}\"); \r\n"
+            + "\t   ws.onopen = function(){ undefined \r\n"
+            + "\t    log.innerHTML += 'server connected <br/>';\r\n"
+            + "\t   };\r\n"
+            + "\t   ws.onmessage = function(evt){ \r\n"
+            + "\t    undefined \r\n"
+            + "\t    msg.innerHTML = evt.data;\r\n"
+            + "\t   };\r\n"
+            + "\t   var form = document.getElementById('sendForm');\r\n"
+            + "\t   var input = document.getElementById('sendText');\r\n"
+            + "\t   form.addEventListener('submit', function(e){\r\n"
+            + "\t   e.preventDefault();\r\n"
+            + "\t   var val = input.value;\r\n"
+            + "\t   ws.send(val);\r\n"
+            + "\t   input.value = \"\";});\r\n"			
+            + "\t  } \r\n"
+            + "\t  window.onload = init;\r\n"
+            + "\t</script></head> \r\n"
+            + "<body><form id=\"sendForm\"><input id=\"sendText\" placeholder=\"Text to send\" /></form>\r\n"
+            + "<label>Receive:<div id = \"msg\"></div></label><label>Log:<div id = \"log\" ></div></label></body>\r\n"
+            + "</html>\r\n";
+    public WebSocketConnection(ISocket socket, Action<IWebSocketConnection> initialize, Func<byte[], 
+        WebSocketHttpRequest> parseRequest, Func<WebSocketHttpRequest, IHandler> handlerFactory, Func<IEnumerable<string>, string> negotiateSubProtocol)
     {
       Socket = socket;
       OnOpen = () => { };
@@ -127,21 +157,59 @@ namespace Fleck
         SendBytes(bytes, CloseSocket);
     }
 
+    private string DoGetAutScript(string host,string path,string encode)
+    {
+        var result = GetAutoScript?.Invoke(host, path, encode);
+        if(string.IsNullOrEmpty(result))
+            result= DefaultScript(host);
+        return result;
+    }
+    public event GetAutoScriptHandler GetAutoScript;
+
+    private void SendScript(WebSocketHttpRequest request,string path)
+    {
+        var CultureInfo = "zh-CN";
+        if(request.Headers.ContainsKey("Accept-Language"))
+        {
+            CultureInfo = request.Headers["Accept-Language"].Split(',')[0];
+        }
+        request.Headers["Accept-Language"].Split(',');
+        var msg = System.Text.Encoding.UTF8.GetBytes(DoGetAutScript(request.Headers["Host"], path, CultureInfo));
+        var head = System.Text.Encoding.UTF8.GetBytes("HTTP/1.1 200 OK\r\n"
+                + "Connection: Keep-Alive\r\n"
+                + $"Content-Length: {msg.Length}\r\n"
+                + "Content-Type: text/html\r\n"
+                + $"Date: {DateTime.UtcNow.ToString("r", System.Globalization.CultureInfo.GetCultureInfo(CultureInfo))}\r\n"
+                + "\r\n");
+        var frame = head.Concat(msg).ToArray();
+        var task=SendBytes(frame, null);
+        task.Wait(3000);
+        Close();
+    }
     public void CreateHandler(IEnumerable<byte> data)
     {
       var request = _parseRequest(data.ToArray());
       if (request == null)
         return;
-      Handler = _handlerFactory(request);
-      if (Handler == null)
-        return;
-      var subProtocol = _negotiateSubProtocol(request.SubProtocols);
-      ConnectionInfo = WebSocketConnectionInfo.Create(request, Socket.RemoteIpAddress, Socket.RemotePort, subProtocol);
+      if(string.Equals(request.Headers["Connection"],
+          "keep-alive", StringComparison.OrdinalIgnoreCase))
+       {
+           if(request.Path.StartsWith("/Auto", StringComparison.OrdinalIgnoreCase))
+            SendScript(request,request.Path.Substring(5));
+           else 
+            Close(WebSocketStatusCodes.ProtocolError);
+           return;
+       }
+        Handler = _handlerFactory(request);
+        if (Handler == null)
+            return;
+        var subProtocol = _negotiateSubProtocol(request.SubProtocols);
+        ConnectionInfo = WebSocketConnectionInfo.Create(request, Socket.RemoteIpAddress, Socket.RemotePort, subProtocol);
 
-      _initialize(this);
+        _initialize(this);
 
-      var handshake = Handler.CreateHandshake(subProtocol);
-      SendBytes(handshake, OnOpen);
+        var handshake = Handler.CreateHandshake(subProtocol);
+        SendBytes(handshake, OnOpen);
     }
 
     private void Read(List<byte> data, byte[] buffer)
