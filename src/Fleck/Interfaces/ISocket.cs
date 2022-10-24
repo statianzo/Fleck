@@ -14,6 +14,7 @@ namespace Fleck
         string RemoteIpAddress { get; }
         int RemotePort { get; }
         Stream Stream { get; }
+        Socket Socket { get; }
         bool NoDelay { get; set; }
         EndPoint LocalEndPoint { get; }
 
