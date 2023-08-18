@@ -202,20 +202,28 @@ namespace Fleck
 
     private Task SendBytes(byte[] bytes, Action callback = null)
     {
-      return Socket.Send(bytes, () =>
-      {
-        FleckLog.Debug("Sent " + bytes.Length + " bytes");
-        if (callback != null)
-          callback();
-      },
-                        e =>
-      {
-        if (e is IOException)
-          FleckLog.Debug("Failed to send. Disconnecting.", e);
-        else
-          FleckLog.Info("Failed to send. Disconnecting.", e);
-        CloseSocket();
-      });
+      var tcs = new TaskCompletionSource<object>();
+
+      Socket.Send(bytes,
+        () =>
+        {
+          FleckLog.Debug("Sent " + bytes.Length + " bytes");
+          if (callback != null)
+            callback();
+          tcs.SetResult(null);
+        },
+        e =>
+        {
+          if (e is IOException)
+            FleckLog.Debug("Failed to send. Disconnecting.", e);
+          else
+            FleckLog.Info("Failed to send. Disconnecting.", e);
+          CloseSocket();
+          tcs.SetException(e);
+        }
+      );
+
+      return tcs.Task;
     }
 
     private void CloseSocket()
