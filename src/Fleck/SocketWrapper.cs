@@ -14,10 +14,10 @@ namespace Fleck
 {
     public class SocketWrapper : ISocket
     {
-    
+
         public const UInt32 KeepAliveInterval = 60000;
         public const UInt32 RetryInterval = 10000;
-    
+
         private readonly Socket _socket;
         private Stream _stream;
         private CancellationTokenSource _tokenSource;
@@ -167,13 +167,17 @@ namespace Fleck
 
         public Task Send(byte[] buffer, Action callback, Action<Exception> error)
         {
+            return Send(buffer, 0, buffer.Length, callback, error);
+        }
+        public Task Send(byte[] buffer, int offset, int length, Action callback, Action<Exception> error)
+        {
             if (_tokenSource.IsCancellationRequested)
                 return null;
 
             try
             {
                 Func<AsyncCallback, object, IAsyncResult> begin =
-                    (cb, s) => _stream.BeginWrite(buffer, 0, buffer.Length, cb, s);
+                    (cb, s) => _stream.BeginWrite(buffer, offset, length, cb, s);
 
                 Task task = Task.Factory.FromAsync(begin, _stream.EndWrite, null);
                 task.ContinueWith(t => callback(), TaskContinuationOptions.NotOnFaulted)
