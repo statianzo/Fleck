@@ -223,8 +223,8 @@ namespace Fleck
       _closing = true;
       OnClose();
       _closed = true;
-      Socket.Close();
-      Socket.Dispose();
+      Socket?.Close();
+      Socket?.Dispose();
       _closing = false;
     }
 
