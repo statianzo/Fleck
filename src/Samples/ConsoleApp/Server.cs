@@ -1,6 +1,9 @@
-﻿using System;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace Fleck.Samples.ConsoleApp
@@ -10,7 +13,9 @@ namespace Fleck.Samples.ConsoleApp
         static void Main()
         {
             FleckLog.Level = LogLevel.Debug;
-            var allSockets = new List<IWebSocketConnection>();
+            //Using concurrent bag instead of list 
+            //This gives a thread - safe collection by adding locks when modifying allSockets
+            var allSockets = new ConcurrentBag<IWebSocketConnection>();
             var server = new WebSocketServer("ws://0.0.0.0:8181");
             server.Start(socket =>
                 {
@@ -22,7 +27,7 @@ namespace Fleck.Samples.ConsoleApp
                     socket.OnClose = () =>
                         {
                             Console.WriteLine("Close!");
-                            allSockets.Remove(socket);
+                            allSockets.TryTake(out socket);
                         };
                     socket.OnMessage = message =>
                         {
@@ -35,7 +40,7 @@ namespace Fleck.Samples.ConsoleApp
             var input = Console.ReadLine();
             while (input != "exit")
             {
-                foreach (var socket in allSockets.ToList())
+                foreach (var socket in allSockets)
                 {
                     socket.Send(input);
                 }
