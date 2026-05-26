@@ -137,47 +137,89 @@ namespace Fleck
         IAsyncResult BeginWriteInternal(byte[] buffer, int offset, int count, AsyncCallback callback, object state, WriteData queued)
         {
             _pendingWrite++;
+    
             var result = _stream.BeginWrite(buffer, offset, count, ar =>
             {
-                // callback can be executed even before return value of BeginWriteInternal is set to this property
-                queued.AsyncResult.ActualResult = ar;
-                try
+                // if the operation completes in async mode, the callback will manage it
+                if (!ar.CompletedSynchronously)
                 {
-                    // so that we can call BeginWrite again
-                    _stream.EndWrite(ar);
-                }
-                catch (Exception exc)
-                {
-                    queued.AsyncResult.Exception = exc;
-                }
-
-                // one down, another is good to go
-                lock (_queue)
-                {
-                    _pendingWrite--;
-                    while (_queue.Count > 0)
-                    {
-                        var data = _queue.Dequeue();
-                        try
-                        {
-                            data.AsyncResult.ActualResult = BeginWriteInternal(data.Buffer, data.Offset, data.Count, data.Callback, data.State, data);
-                            break;
-                        }
-                        catch (Exception exc)
-                        {
-                            _pendingWrite--;
-                            data.AsyncResult.Exception = exc;
-                            data.Callback(data.AsyncResult);
-                        }
-                    }
-                    callback(queued.AsyncResult);
+                    ProcessComplete(ar, queued, callback);
                 }
             }, state);
 
-            // always return the wrapped async result.
-            // this is especially important if the underlying stream completed the operation synchronously (hence "result.CompletedSynchronously" is true!)
             queued.AsyncResult.ActualResult = result;
+
+            // if it completes in not async mode, we could manage it on the current thread
+            if (result.CompletedSynchronously)
+            {
+                ProcessComplete(result, queued, callback);
+            }
+
             return queued.AsyncResult;
+        }
+
+        // this Method avoid the recursion of the stack
+        private void ProcessComplete(IAsyncResult ar, WriteData queued, AsyncCallback callback)
+        {
+            queued.AsyncResult.ActualResult = ar;
+            try
+            {
+                _stream.EndWrite(ar);
+            }
+            catch (Exception exc)
+            {
+                queued.AsyncResult.Exception = exc;
+            }
+
+            lock (_queue)
+            {
+                _pendingWrite--;
+        
+                while (_queue.Count > 0)
+                {
+                    var nextData = _queue.Dequeue();
+                    _pendingWrite++;
+
+                    try
+                    {
+                        var nextResult = _stream.BeginWrite(nextData.Buffer, nextData.Offset, nextData.Count, nextAr =>
+                        {
+                            if (!nextAr.CompletedSynchronously)
+                            {
+                                ProcessComplete(nextAr, nextData, nextData.Callback);
+                            }
+                        }, nextData.State);
+
+                        nextData.AsyncResult.ActualResult = nextResult;
+
+                        // if it is async, the runtine will exit from the loop
+                        if (!nextResult.CompletedSynchronously)
+                        {
+                            break;
+                        }
+                
+                        // if it is not async, not recursion
+                        try
+                        {
+                            _stream.EndWrite(nextResult);
+                        }
+                        catch (Exception exc)
+                        {
+                            nextData.AsyncResult.Exception = exc;
+                        }
+                        _pendingWrite--;
+                        nextData.Callback(nextData.AsyncResult);
+                    }
+                    catch (Exception exc)
+                    {
+                        _pendingWrite--;
+                        nextData.AsyncResult.Exception = exc;
+                        nextData.Callback(nextData.AsyncResult);
+                    }
+                }
+        
+                callback(queued.AsyncResult);
+            }
         }
 
         #region Nested type: WriteData
