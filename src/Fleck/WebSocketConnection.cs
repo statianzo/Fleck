@@ -13,6 +13,7 @@ namespace Fleck
         private const int HandshakePending = 0;
         private const int HandshakeComplete = 1;
         private const int HandshakeAborted = 2;
+        private static readonly byte[] HeadersEnd = { (byte)'\r', (byte)'\n', (byte)'\r', (byte)'\n' };
 
         public ISocket Socket { get; set; }
         public IHandler Handler { get; set; }
@@ -351,9 +352,21 @@ namespace Fleck
                 return 0;
             }
 
+            var searchFrom = Math.Max(0, _receiveOffset - (HeadersEnd.Length - 1));
             _receiveOffset += bytesRead;
-            var started = CreateHandler(new ArraySegment<byte>(_receiveBuffer, 0, _receiveOffset));
-            return started ? -1 : _receiveOffset;
+
+            var end = new ReadOnlySpan<byte>(_receiveBuffer, searchFrom, _receiveOffset - searchFrom).IndexOf(HeadersEnd);
+            if (end < 0)
+                return _receiveOffset;
+
+            if (!CreateHandler(new ArraySegment<byte>(_receiveBuffer, 0, searchFrom + end + HeadersEnd.Length)))
+            {
+                FleckLog.Debug("Invalid handshake request. Closing.");
+                CloseSocket();
+                ReleaseReceiveResources();
+            }
+
+            return -1;
         }
 
         private void HandleReadError(Exception e)

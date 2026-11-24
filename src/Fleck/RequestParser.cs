@@ -1,15 +1,12 @@
 using System;
+using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace Fleck
 {
     public class RequestParser
     {
-        private const string pattern =
-            @"^(?<method>[^\s]+)\s(?<path>[^\s]+)\sHTTP\/1\.1\r\n((?<field_name>[^:\r\n]+):[^\S\r\n]*(?<field_value>[^\r\n]*)\r\n)+";
-
-        private static readonly Regex _regex = new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
+        private static readonly char[] LineBreaks = { '\r', '\n' };
 
         public static WebSocketHttpRequest Parse(ArraySegment<byte> bytes)
         {
@@ -23,28 +20,35 @@ namespace Fleck
 
             // Check for websocket request header
             var body = Encoding.UTF8.GetString(bytes.Array, bytes.Offset, bytes.Count);
-            Match match = _regex.Match(body);
+            var lines = body.Split(new[] { "\r\n" }, StringSplitOptions.None);
 
-            if (!match.Success)
+            var requestParts = lines[0].Split(' ');
+            if (lines.Length < 2 || requestParts.Length != 3 || !IsToken(requestParts[0]) || !IsToken(requestParts[1]) || requestParts[2] != "HTTP/1.1")
                 return null;
 
             var request = new WebSocketHttpRequest
             {
-                Method = match.Groups["method"].Value,
-                Path = match.Groups["path"].Value,
+                Method = requestParts[0],
+                Path = requestParts[1],
                 Scheme = scheme
             };
 
-            var fields = match.Groups["field_name"].Captures;
-            var values = match.Groups["field_value"].Captures;
-            for (var i = 0; i < fields.Count; i++)
+            for (var i = 1; i < lines.Length - 1 && lines[i].Length > 0; i++)
             {
-                var name = fields[i].ToString();
-                var value = values[i].ToString();
-                request.Headers[name] = value;
+                var line = lines[i];
+                var colon = line.IndexOf(':');
+                if (colon <= 0 || line.IndexOfAny(LineBreaks) >= 0)
+                    return null;
+
+                request.Headers[line.Substring(0, colon)] = line.Substring(colon + 1).Trim();
             }
 
-            return request;
+            return request.Headers.Count > 0 ? request : null;
+        }
+
+        private static bool IsToken(string value)
+        {
+            return value.Length > 0 && !value.Any(char.IsWhiteSpace);
         }
     }
 }
